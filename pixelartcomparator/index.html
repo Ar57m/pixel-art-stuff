@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pixel Art Comparator</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-256x256.png">
+<style>
+  :root{
+    --bg: #0f1720;
+    --card-bg: #1a2634;
+    --text-main: #e6eef3;
+    --text-muted: #9aa7b2;
+    --accent: #3fdebd;
+    --accent-hover: #2bb89a;
+    --border: rgba(255,255,255,0.08);
+    --input-bg: #0b1219;
+    --radius: 12px;
+    --shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding-bottom: 80px;
+  }
+
+  /* --- HEADER & CONTROLS --- */
+  header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Control Groups */
+  .controls-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+    width: 100%;
+    padding-top: 10px;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  /* Inputs Styling */
+  input[type="number"], input[type="text"] {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  
+  input[type="number"]:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 4px;
+    background: #2b3b46;
+    border-radius: 4px;
+    appearance: none;
+  }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: var(--input-bg);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    /* Added Safari support */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+  }
+
+  /* File Input Styling */
+  .file-input-wrapper {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .filelbl {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: 0.2s;
+    background: rgba(255,255,255,0.02);
+  }
+  .filelbl:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  input[type="file"] { display: none; }
+
+  /* --- MAIN GRID --- */
+  main {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 16px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-title strong { display: block; font-size: 15px; }
+  .card-title span { font-size: 12px; color: var(--text-muted); }
+
+  .canvas-container {
+    padding: 10px;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+
+  canvas {
+    width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+    display: block;
+  }
+
+  .meta {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.1);
+  }
+
+  /* Buttons */
+  .btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn:hover { background: var(--accent); color: #000; }
+  
+  .btn-primary {
+    background: var(--accent);
+    color: #0f1720;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 50px;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(63, 222, 189, 0.3);
+  }
+  .btn-primary:active { transform: scale(0.96); }
+
+  /* --- MOBILE FLOATING ACTION BAR --- */
+  .mobile-fab-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26, 38, 52, 0.9);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 50px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 999;
+    width: 90%;
+    max-width: 400px;
+    justify-content: space-between;
+  }
+
+  @media (min-width: 769px) {
+    .mobile-fab-bar { display: none; }
+    .desktop-action { display: block; }
+    body { padding-bottom: 20px; }
+  }
+  
+  @media (max-width: 768px) {
+    .desktop-action { display: none; }
+    .controls-wrapper { display: none; }
+    .controls-wrapper.show { display: block; animation: slideDown 0.3s ease; }
+    
+    header { padding: 12px; }
+    
+    #settingsToggle {
+      display: flex;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px;
+      border-radius: 8px;
+    }
+  }
+
+  @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
+
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div class="brand">
+          <span style="font-size:24px">👾</span> Pixel Art Comparator
+        </div>
+        <button id="settingsToggle" class="desktop-action" style="display:none;" onclick="document.querySelector('.controls-wrapper').classList.toggle('show')">
+          ⚙️ Settings
+        </button>
+        <button id="processBtnDesktop" class="btn btn-primary desktop-action">Process Image</button>
+      </div>
+
+      <div class="controls-wrapper" id="controls">
+        
+        <div class="file-input-wrapper">
+           <label class="filelbl" id="fileLabel">
+            <span id="fileLabelText">📁 Click to Upload Image</span>
+            <input type="file" accept="image/*" id="fileInput">
+          </label>
+        </div>
+
+        <div class="settings-grid">
+          <div class="control-group">
+            <label for="size">Output Size (px)</label>
+            <input id="size" type="number" inputmode="numeric" min="8" max="1536" value="128">
+          </div>
+
+          <div class="control-group">
+            <label for="colors">Palette Colors</label>
+            <input id="colors" type="number" inputmode="numeric" min="2" max="256" value="16">
+          </div>
+
+          <div class="control-group">
+            <label for="seed">Seed (-1 = Rnd)</label>
+            <input id="seed" type="number" inputmode="numeric" value="8">
+          </div>
+
+          <div class="control-group">
+            <label for="cleanup" style="display:flex; justify-content:space-between;">
+              Cleanup Level <span id="cleanupVal">0</span>
+            </label>
+            <input id="cleanup" type="range" min="0" max="5" step="1" value="0">
+          </div>
+
+          <div class="control-group" style="justify-content:flex-end;">
+            <label class="toggle-label" for="auto">
+              <input type="checkbox" id="auto"> <span>Auto-Process</span>
+            </label>
+          </div>
+          
+          <div class="control-group">
+             <label for="upscaleScale">Upscale Save (x)</label>
+             <div style="display:flex; gap:4px;">
+                <input type="checkbox" id="upscaleTog" aria-label="Upscale Image" title="Upscale Image">
+                <input type="number" id="upscaleScale" value="4" min="1" max="16">
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><strong>Chunky</strong><span>Nearest + K-means</span></div>
+          <button class="btn small" data-download="chunky">Save</button>
+        </div>
+        <div class="canvas-container"><canvas id="c_chunky"></canvas></div>
+        <div class="meta" id="c_chunky_info">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><strong>Chunky + Dither</strong><span>Bayer 4x4</span></div>
+          <button class="btn small" data-download="chunky_ord">Save</button>
+        </div>
+        <div class="canvas-container"><canvas id="c_chunky_ord"></canvas></div>
+        <div class="meta" id="c_chunky_ord_info">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><strong>Detailed</strong><span>Smooth + K-means</span></div>
+          <button class="btn small" data-download="detailed">Save</button>
+        </div>
+        <div class="canvas-container"><canvas id="c_detailed"></canvas></div>
+        <div class="meta" id="c_detailed_info">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><strong>Detailed + FS</strong><span>Floyd-Steinberg</span></div>
+          <button class="btn small" data-download="detailed_fs">Save</button>
+        </div>
+        <div class="canvas-container"><canvas id="c_detailed_fs"></canvas></div>
+        <div class="meta" id="c_detailed_fs_info">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><strong>Atkinson</strong><span>High Contrast Dither</span></div>
+          <button class="btn small" data-download="atkinson">Save</button>
+        </div>
+        <div class="canvas-container"><canvas id="c_atkinson"></canvas></div>
+        <div class="meta" id="c_atkinson_info">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><strong>Cartoon Mode</strong><span>Cleanup + Saturation</span></div>
+          <button class="btn small" data-download="cartoon">Save</button>
+        </div>
+        <div class="canvas-container"><canvas id="c_cartoon"></canvas></div>
+        <div class="meta" id="c_cartoon_info">—</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="mobile-fab-bar">
+    <button class="btn" onclick="document.querySelector('.controls-wrapper').classList.toggle('show')" style="color:white;">⚙️ Options</button>
+    <button id="processBtn" class="btn btn-primary" style="padding: 8px 20px; font-size:14px;">⚡ Process</button>
+  </div>
+
+<script>
+  // Link Desktop button to Mobile button ID (since script uses processBtn)
+  document.getElementById('processBtnDesktop').addEventListener('click', () => {
+    document.getElementById('processBtn').click();
+  });
+  
+  // Toggle Settings Button Logic for Mobile
+  if(window.innerWidth <= 768) {
+     document.getElementById('settingsToggle').style.display = 'flex';
+  }
+
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+/* ---------------------
+  Utilities
+----------------------*/
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const dist2 = (a,b)=> {
+  const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2];
+  return dr*dr+dg*dg+db*db;
+};
+
+// --- Seeded Random Number Generator (Mulberry32) ---
+function mulberry32(a) {
+    return function() {
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+}
+
+// RGB/HSV Conversion
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, v = max;
+  const d = max - min;
+  s = max === 0 ? 0 : d / max;
+  if (max === min) h = 0; 
+  else {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [h, s, v];
+}
+
+function hsvToRgb(h, s, v) {
+  let r, g, b;
+  const i = Math.floor(h * 6);
+  const f = h * 6 - i;
+  const p = v * (1 - s);
+  const q = v * (1 - f * s);
+  const t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+    case 0: r = v; g = t; b = p; break;
+    case 1: r = q; g = v; b = p; break;
+    case 2: r = p; g = v; b = t; break;
+    case 3: r = p; g = q; b = v; break;
+    case 4: r = t; g = p; b = v; break;
+    case 5: r = v; g = p; b = q; break;
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function nearestColorIdx(palette, rgb){
+  let best=0, bd=Infinity;
+  for(let i=0;i<palette.length;i++){
+    const d = dist2(palette[i], rgb);
+    if(d<bd){bd=d;best=i;}
+  }
+  return best;
+}
+
+/* ---------------------
+   Upscale Utility
+----------------------*/
+function getUpscaledDataURL(sourceCanvas, scale) {
+  const w = sourceCanvas.width;
+  const h = sourceCanvas.height;
+  const targetW = w * scale;
+  const targetH = h * scale;
+
+  const tmp = document.createElement('canvas');
+  tmp.width = targetW;
+  tmp.height = targetH;
+  const ctx = tmp.getContext('2d');
+  ctx.imageSmoothingEnabled = false; 
+  ctx.drawImage(sourceCanvas, 0, 0, targetW, targetH);
+  return tmp.toDataURL('image/png');
+}
+
+
+/* ---------------------
+  K-means (Updated with Seed)
+----------------------*/
+async function kmeansPalette(pixels, k, sampleLimit=5000, iters=20, seed=-1){
+  // Setup RNG
+  let rng;
+  if(seed === -1) {
+    rng = Math.random;
+  } else {
+    // Re-seed: simple casting ensures integer seed
+    rng = mulberry32(seed >>> 0);
+  }
+
+  const N = pixels.length/4;
+  const sample = [];
+  const step = Math.max(1, Math.floor(N / sampleLimit));
+  for(let i=0;i<N;i+=step) sample.push(i);
+  
+  const centers = [];
+  for(let i=0;i<k;i++){
+    const idx = sample[Math.floor(rng()*sample.length)];
+    centers.push([pixels[idx*4],pixels[idx*4+1],pixels[idx*4+2]]);
+  }
+
+  const labels = new Int32Array(sample.length);
+  for(let iter=0; iter<iters; iter++){
+    for(let si=0; si<sample.length; si++){
+      const idx = sample[si];
+      let best=0, bd=Infinity;
+      const r=pixels[idx*4], g=pixels[idx*4+1], b=pixels[idx*4+2];
+      for(let c=0;c<k;c++){
+        const d = dist2(centers[c],[r,g,b]);
+        if(d<bd){bd=d;best=c;}
+      }
+      labels[si]=best;
+    }
+    const sums = Array.from({length:k}, ()=>[0,0,0,0]);
+    for(let si=0; si<sample.length; si++){
+      const idx = sample[si];
+      const lab = labels[si];
+      sums[lab][0]+=pixels[idx*4];
+      sums[lab][1]+=pixels[idx*4+1];
+      sums[lab][2]+=pixels[idx*4+2];
+      sums[lab][3]+=1;
+    }
+    let moved=false;
+    for(let c=0;c<k;c++){
+      const cnt = sums[c][3];
+      if(cnt>0){
+        const nr = sums[c][0]/cnt, ng = sums[c][1]/cnt, nb = sums[c][2]/cnt;
+        if(Math.abs(nr-centers[c][0])>1 || Math.abs(ng-centers[c][1])>1 || Math.abs(nb-centers[c][2])>1) moved=true;
+        centers[c]=[nr,ng,nb];
+      }
+    }
+    if(!moved) break;
+  }
+  return centers.map(c=>[Math.round(c[0]),Math.round(c[1]),Math.round(c[2])]);
+}
+
+/* ---------------------
+  Resize helpers
+----------------------*/
+function makeTempCanvas(w,h){
+  const c = document.createElement('canvas'); c.width=w; c.height=h; return c;
+}
+
+function drawImageScaledNearest(img, targetW, targetH){
+  const tmp = makeTempCanvas(targetW, targetH);
+  const ctx = tmp.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, 0,0, targetW, targetH);
+  return tmp;
+}
+function drawImageScaledSmooth(img, targetW, targetH){
+  const tmp = makeTempCanvas(targetW, targetH);
+  const ctx = tmp.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0,0, targetW, targetH);
+  return tmp;
+}
+
+/* ---------------------
+  Dithering / Quant Algorithms
+----------------------*/
+const BAYER4 = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+function orderedDitherImageData(imgData){
+  const w = imgData.width, h = imgData.height;
+  const out = new Uint8ClampedArray(imgData.data);
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i = (y*w + x)*4;
+      const b = BAYER4[y%4][x%4]/16.0;
+      const offset = b*32 - 16;
+      out[i] = clamp(out[i] + offset, 0, 255);
+      out[i+1] = clamp(out[i+1] + offset, 0, 255);
+      out[i+2] = clamp(out[i+2] + offset, 0, 255);
+    }
+  }
+  return new ImageData(out, w, h);
+}
+
+function floydSteinbergQuant(imgData, palette){
+  const w = imgData.width, h = imgData.height;
+  const data = new Float32Array(imgData.data);
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i = (y*w + x)*4;
+      const old = [data[i], data[i+1], data[i+2]];
+      const idx = nearestColorIdx(palette, old);
+      const nc = palette[idx];
+      data[i]=nc[0]; data[i+1]=nc[1]; data[i+2]=nc[2];
+      const err = [old[0]-nc[0], old[1]-nc[1], old[2]-nc[2]];
+      
+      if(x+1<w){ let j=(y*w + (x+1))*4; data[j]+=err[0]*7/16; data[j+1]+=err[1]*7/16; data[j+2]+=err[2]*7/16; }
+      if(x-1>=0 && y+1<h){ let j=((y+1)*w + (x-1))*4; data[j]+=err[0]*3/16; data[j+1]+=err[1]*3/16; data[j+2]+=err[2]*3/16; }
+      if(y+1<h){ let j=((y+1)*w + x)*4; data[j]+=err[0]*5/16; data[j+1]+=err[1]*5/16; data[j+2]+=err[2]*5/16; }
+      if(x+1<w && y+1<h){ let j=((y+1)*w + (x+1))*4; data[j]+=err[0]*1/16; data[j+1]+=err[1]*1/16; data[j+2]+=err[2]*1/16; }
+    }
+  }
+  const out = new Uint8ClampedArray(w*h*4);
+  for(let i=0;i<out.length;i++){
+    if((i+1)%4===0){ out[i]=255; } else { out[i]=clamp(Math.round(data[i]),0,255); }
+  }
+  return new ImageData(out, w, h);
+}
+
+function atkinsonQuant(imgData, palette){
+  const w = imgData.width, h = imgData.height;
+  const data = new Float32Array(imgData.data);
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i = (y*w + x)*4;
+      const old = [data[i], data[i+1], data[i+2]];
+      const idx = nearestColorIdx(palette, old);
+      const nc = palette[idx];
+      data[i] = nc[0]; data[i+1] = nc[1]; data[i+2] = nc[2];
+      const err = [old[0]-nc[0], old[1]-nc[1], old[2]-nc[2]];
+      const dist = (dx, dy) => {
+        if(x+dx >= 0 && x+dx < w && y+dy < h) {
+          let j = ((y+dy)*w + (x+dx))*4;
+          data[j] += err[0]/8; data[j+1] += err[1]/8; data[j+2] += err[2]/8;
+        }
+      };
+      dist(1,0); dist(2,0);
+      dist(-1,1); dist(0,1); dist(1,1); dist(0,2);
+    }
+  }
+  const out = new Uint8ClampedArray(w*h*4);
+  for(let i=0;i<out.length;i++){
+    if((i+1)%4===0) out[i]=255; else out[i]=clamp(Math.round(data[i]),0,255);
+  }
+  return new ImageData(out, w, h);
+}
+
+/* ---------------------
+  Cartoon Logic
+----------------------*/
+function cleanOrphanPixels(data, w, h) {
+  const copy = new Uint8ClampedArray(data);
+  const out = new Uint8ClampedArray(data);
+  const getK = (idx) => `${copy[idx]},${copy[idx+1]},${copy[idx+2]}`;
+
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const idx = (y * w + x) * 4;
+      const centerK = getK(idx);
+      const nIdx = [
+        ((y - 1) * w + x) * 4,
+        ((y + 1) * w + x) * 4,
+        (y * w + (x - 1)) * 4,
+        (y * w + (x + 1)) * 4
+      ];
+      const neighbors = nIdx.map(getK);
+      
+      if (!neighbors.includes(centerK)) {
+        const counts = {};
+        let maxCount = 0, bestK = neighbors[0];
+        neighbors.forEach(k => {
+          counts[k] = (counts[k] || 0) + 1;
+          if (counts[k] > maxCount) { maxCount = counts[k]; bestK = k; }
+        });
+        const bestNIdx = nIdx[neighbors.indexOf(bestK)];
+        out[idx] = copy[bestNIdx];
+        out[idx+1] = copy[bestNIdx+1];
+        out[idx+2] = copy[bestNIdx+2];
+      }
+    }
+  }
+  return out;
+}
+
+async function cartoonPipeline(smoothData, w, h, colors, cleanTimes, seed) {
+  const boostedData = new Uint8ClampedArray(smoothData.data);
+  for(let i=0; i<boostedData.length; i+=4) {
+    const r = boostedData[i], g = boostedData[i+1], b = boostedData[i+2];
+    const hsv = rgbToHsv(r, g, b);
+    hsv[1] = Math.min(1.0, hsv[1] * 1.2);
+    hsv[2] = Math.min(1.0, hsv[2] * 1.1);
+    const newRgb = hsvToRgb(hsv[0], hsv[1], hsv[2]);
+    boostedData[i] = newRgb[0]; boostedData[i+1] = newRgb[1]; boostedData[i+2] = newRgb[2];
+  }
+
+  // Pass SEED to kmeans here
+  const palette = await kmeansPalette(boostedData, colors, 6000, 20, seed);
+
+  let processedData = new Uint8ClampedArray(boostedData.length);
+  for(let i=0; i<w*h; i++) {
+    const idx = i*4;
+    const pi = nearestColorIdx(palette, [boostedData[idx], boostedData[idx+1], boostedData[idx+2]]);
+    const c = palette[pi];
+    processedData[idx] = c[0]; processedData[idx+1] = c[1]; processedData[idx+2] = c[2]; processedData[idx+3] = 255;
+  }
+
+  for(let i=0; i<cleanTimes; i++) {
+    processedData = cleanOrphanPixels(processedData, w, h);
+  }
+  return { img: new ImageData(processedData, w, h), pal: palette };
+}
+
+
+/* ---------------------
+  Pipeline
+----------------------*/
+async function pipeline(imgElement, size, colors, cleanTimes, seed){
+  const srcW = imgElement.naturalWidth, srcH = imgElement.naturalHeight;
+  const aspect = srcH / srcW;
+  const targetW = size;
+  const targetH = Math.max(1, Math.round(size * aspect));
+
+  const smallNearest = drawImageScaledNearest(imgElement, targetW, targetH);
+  const ctxN = smallNearest.getContext('2d');
+  const sdN = ctxN.getImageData(0,0,targetW,targetH);
+
+  const smallSmooth = drawImageScaledSmooth(imgElement, targetW,targetH);
+  const ctxS = smallSmooth.getContext('2d');
+  const sdS = ctxS.getImageData(0,0,targetW,targetH);
+
+  // PASS SEED
+  const paletteChunky = await kmeansPalette(sdN.data, colors, 4000, 30, seed);
+  const paletteDetailed = await kmeansPalette(sdS.data, colors, 6000, 30, seed);
+
+  // 1. Chunky
+  const chunkyData = new Uint8ClampedArray(sdN.data.length);
+  for(let i=0;i<targetW*targetH;i++){
+    const idx = i*4;
+    const pi = nearestColorIdx(paletteChunky, [sdN.data[idx],sdN.data[idx+1],sdN.data[idx+2]]);
+    const c = paletteChunky[pi];
+    chunkyData[idx]=c[0]; chunkyData[idx+1]=c[1]; chunkyData[idx+2]=c[2]; chunkyData[idx+3]=255;
+  }
+  const chunkyImageData = new ImageData(chunkyData, targetW,targetH);
+
+  // 2. Chunky + Ordered
+  const odImgData = orderedDitherImageData(sdN);
+  // PASS SEED
+  const paletteChunkyOrd = await kmeansPalette(odImgData.data, colors, 4000, 30, seed);
+  const chunkyOrdData = new Uint8ClampedArray(odImgData.data.length);
+  for(let i=0;i<targetW*targetH;i++){
+    const idx=i*4;
+    const pi = nearestColorIdx(paletteChunkyOrd, [odImgData.data[idx],odImgData.data[idx+1],odImgData.data[idx+2]]);
+    const c = paletteChunkyOrd[pi];
+    chunkyOrdData[idx]=c[0]; chunkyOrdData[idx+1]=c[1]; chunkyOrdData[idx+2]=c[2]; chunkyOrdData[idx+3]=255;
+  }
+  const chunkyOrdImageData = new ImageData(chunkyOrdData, targetW,targetH);
+
+  // 3. Detailed
+  const detailedData = new Uint8ClampedArray(sdS.data.length);
+  for(let i=0;i<targetW*targetH;i++){
+    const idx=i*4;
+    const pi = nearestColorIdx(paletteDetailed, [sdS.data[idx],sdS.data[idx+1],sdS.data[idx+2]]);
+    const c = paletteDetailed[pi];
+    detailedData[idx]=c[0]; detailedData[idx+1]=c[1]; detailedData[idx+2]=c[2]; detailedData[idx+3]=255;
+  }
+  const detailedImageData = new ImageData(detailedData, targetW,targetH);
+
+  // 4. Detailed + FS
+  const detailedFSImageData = floydSteinbergQuant(sdS, paletteDetailed);
+
+  // 5. Atkinson
+  const atkinsonImageData = atkinsonQuant(sdS, paletteDetailed);
+
+  // 6. CARTOON (Pass Seed)
+  const cartoonResult = await cartoonPipeline(sdS, targetW, targetH, colors, cleanTimes, seed);
+
+  return {
+    size, srcW, srcH,
+    chunky: {img:chunkyImageData, pal:paletteChunky},
+    chunky_ord: {img:chunkyOrdImageData, pal:paletteChunkyOrd},
+    detailed: {img:detailedImageData, pal:paletteDetailed},
+    detailed_fs: {img:detailedFSImageData, pal:paletteDetailed},
+    atkinson: {img:atkinsonImageData, pal:paletteDetailed},
+    cartoon: cartoonResult
+  };
+}
+
+/* ---------------------
+  Rendering helpers
+----------------------*/
+function drawResultToCanvas(targetCanvas, imageData, scaleUpTo = 512){
+  const w = imageData.width, h = imageData.height;
+  targetCanvas.width = w; targetCanvas.height = h;
+  const ctx = targetCanvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.putImageData(imageData, 0,0);
+  const cssW = Math.min(scaleUpTo, Math.max(128, w* (scaleUpTo/w)));
+  targetCanvas.style.width = cssW + 'px';
+  targetCanvas.style.height = Math.round(cssW * (h/w)) + 'px';
+}
+
+/* ---------------------
+  UI wiring
+----------------------*/
+const fileInput = document.getElementById('fileInput');
+const fileLabelText = document.getElementById('fileLabelText');
+const sizeSlider = document.getElementById('size');
+const colorsSlider = document.getElementById('colors');
+const seedInput = document.getElementById('seed'); // New
+const cleanupSlider = document.getElementById('cleanup');
+const cleanupVal = document.getElementById('cleanupVal');
+const processBtn = document.getElementById('processBtn');
+const autoCheckbox = document.getElementById('auto');
+
+cleanupSlider.oninput = () => {
+  cleanupVal.textContent = cleanupSlider.value;
+  if(autoCheckbox.checked) processFile();
+};
+
+sizeSlider.oninput = ()=>{ if(autoCheckbox.checked) processFile(); };
+colorsSlider.oninput = ()=>{ if(autoCheckbox.checked) processFile(); };
+seedInput.oninput = ()=>{ if(autoCheckbox.checked) processFile(); }; // New
+
+let currentImg = null;
+
+fileInput.addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  fileLabelText.textContent = f.name;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{ URL.revokeObjectURL(url); currentImg = img; if(autoCheckbox.checked) processFile(); };
+  img.src = url;
+});
+
+processBtn.addEventListener('click', ()=> processFile());
+
+async function processFile(){
+  if(!currentImg) return alert('Choose an image first');
+  processBtn.disabled = true; processBtn.textContent = 'Processing...';
+  
+  const size = parseInt(sizeSlider.value,10);
+  const colors = parseInt(colorsSlider.value,10);
+  const cleanTimes = parseInt(cleanupSlider.value, 10);
+  const seed = parseInt(seedInput.value, 10);
+  
+  const out = await pipeline(currentImg, size, colors, cleanTimes, seed);
+  
+  const ids = ['chunky','chunky_ord','detailed','detailed_fs','atkinson','cartoon'];
+  
+  ids.forEach(k => {
+    drawResultToCanvas(document.getElementById('c_'+k), out[k].img, 512);
+    document.getElementById('c_'+k+'_info').textContent = 
+      `size ${out[k].img.width}×${out[k].img.height} — ${out[k].pal.length} colors`;
+  });
+
+  document.querySelectorAll('button[data-download]').forEach(btn=>{
+    btn.onclick = () => {
+      const which = btn.getAttribute('data-download');
+      const canvasId = 'c_' + which;
+      const c = document.getElementById(canvasId);
+      
+      const doUpscale = document.getElementById('upscaleTog').checked;
+      const scaleFactor = parseInt(document.getElementById('upscaleScale').value, 10) || 1;
+
+      const a = document.createElement('a');
+      if (doUpscale && scaleFactor > 1) {
+        a.href = getUpscaledDataURL(c, scaleFactor);
+        a.download = `${which}_${scaleFactor}x.png`;
+      } else {
+        a.href = c.toDataURL('image/png');
+        a.download = `${which}.png`;
+      }
+      a.click();
+    };
+  });
+
+  processBtn.disabled = false; processBtn.textContent = 'Process';
+}
+
+window.addEventListener('dragover', e=>e.preventDefault());
+window.addEventListener('drop', e=>{
+  e.preventDefault();
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if(!f) return;
+  fileInput.files = e.dataTransfer.files;
+  const evt = new Event('change'); fileInput.dispatchEvent(evt);
+});
+
+</script>
+</body>
+</html>
