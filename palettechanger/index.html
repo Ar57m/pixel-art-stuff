@@ -708,40 +708,29 @@
 
         // Palette Expansion
         if (document.getElementById('expandPalette').checked && basePalette.length > 1) {
-            const expandSteps = parseInt(document.getElementById('expandSteps').value);
-            const newPalette = [];
-            
-            // Loop through base palette and interpolate
-            for (let i = 0; i < basePalette.length; i++) {
-                const c1 = basePalette[i];
-                // Wrap around to first color if it's the last one for circular effect
-                const c2 = basePalette[(i + 1) % basePalette.length]; 
-                
-                // Add current color
-                newPalette.push(c1);
+    const expandSteps = parseInt(document.getElementById('expandSteps').value);
+    const newPalette = [];
+    
+    for (let i = 0; i < basePalette.length; i++) {
+        const c1 = basePalette[i];
+        const c2 = basePalette[(i + 1) % basePalette.length];
 
-                // Don't interpolate after the last color unless we really want circular, 
-                // but usually linear expansion implies A->B->C. 
-                // Let's do linear A->B->C and interpolate between them.
-                if (i < basePalette.length - 1 || true) { // Always interpolate for circular feel logic
-                     if (i === basePalette.length - 1) continue; // Skip circular wrap for now to keep it simple linear
-                    
-                    for (let j = 1; j <= expandSteps; j++) {
-                        const t = j / (expandSteps + 1);
-                        newPalette.push({
-                            r: Math.round(c1.r + (c2.r - c1.r) * t),
-                            g: Math.round(c1.g + (c2.g - c1.g) * t),
-                            b: Math.round(c1.b + (c2.b - c1.b) * t)
-                        });
-                    }
-                }
-            }
-            // Add last color if not circular logic (simplified here)
-            if(basePalette.length > 0) newPalette.push(basePalette[basePalette.length-1]);
-            
-            // Remove duplicates loosely
-            return [...new Set(newPalette.map(JSON.stringify))].map(JSON.parse);
+        // add current color
+        newPalette.push(c1);
+
+        // interpolate ALWAYS (including last → first)
+        for (let j = 1; j <= expandSteps; j++) {
+            const t = j / (expandSteps + 1);
+            newPalette.push({
+                r: Math.round(c1.r + (c2.r - c1.r) * t),
+                g: Math.round(c1.g + (c2.g - c1.g) * t),
+                b: Math.round(c1.b + (c2.b - c1.b) * t)
+            });
         }
+    }
+
+    return [...new Set(newPalette.map(JSON.stringify))].map(JSON.parse);
+}
 
         return basePalette;
     }
