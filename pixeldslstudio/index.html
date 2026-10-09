@@ -1,0 +1,3568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelDSL Studio - Macro Pixel Art Engine</title>
+
+  <style>
+    
+    :root {
+      --bg: #090d16;
+      --panel: #0f172a;
+      --panel-header: #1e293b;
+      --border: #334155;
+      --border-dark: #1e293b;
+      --cyan: #06b6d4;
+      --cyan-hover: #0891b2;
+      --purple: #a855f7;
+      --purple-hover: #9333ea;
+      --pink: #ec4899;
+      --gold: #eab308;
+      --rose: #f43f5e;
+      --emerald: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dark: #64748b;
+      --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      overflow: hidden;
+    }
+
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+
+    /* Pixel Art Rendering settings */
+    canvas, img.pixelated {
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan);
+    }
+
+    /* Header Styling */
+    header {
+      height: 56px;
+      background-color: var(--panel);
+      border-bottom: 1px solid var(--border-dark);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-inner {
+      width: 100%;
+      height: 100%;
+      background-color: #020617;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-title {
+      font-size: 1rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #22d3ee, #c084fc);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .badge-tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #334155 !important;
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+      border: 1px solid #64748b;
+      margin-left: 6px;
+      font-family: var(--font-sans);
+    }
+
+    /* Toolbar Controls & Buttons */
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .select-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(2, 6, 23, 0.8);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+    }
+
+    .select-box span {
+      color: var(--text-muted);
+    }
+
+    .select-box select {
+      background: #0f172a;
+      border: none;
+      color: #f8fafc;
+      color-scheme: dark;
+      font-size: 0.75rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .select-box select option,
+    #mobilePresetSelect option {
+      background-color: #0f172a;
+      color: #f8fafc;
+      color-scheme: dark;
+    }
+
+    #mobilePresetSelect {
+      color-scheme: dark;
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-cyan {
+      background-color: var(--cyan);
+      color: #020617;
+    }
+    .btn-cyan:hover { background-color: var(--cyan-hover); }
+
+    .btn-purple {
+      background-color: var(--purple);
+      color: #ffffff;
+    }
+    .btn-purple:hover { background-color: var(--purple-hover); }
+
+    .btn-dark {
+      background-color: #1e293b;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-dark:hover { background-color: #334155; }
+
+    .btn-gradient {
+      background: linear-gradient(to right, #083344, #3b0764);
+      color: #67e8f9;
+      border: 1px solid #155e75;
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(to right, #0e7490, #581c87);
+      color: #ffffff;
+    }
+
+    /* Mobile Tabs */
+    .mobile-tabs {
+      display: none;
+      background-color: var(--panel);
+      border-bottom: 1px solid var(--border-dark);
+      font-size: 0.8rem;
+    }
+    .mobile-tab-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mobile-tab-btn.active {
+      color: var(--cyan);
+      border-bottom: 2px solid var(--cyan);
+      background-color: rgba(2, 6, 23, 0.5);
+    }
+
+    /* Workspace Layout */
+    main {
+      height: calc(100vh - 56px);
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pane {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Left Pane: Code Editor */
+    #editorPane {
+      background-color: var(--bg);
+      border-right: 1px solid var(--border-dark);
+      position: relative;
+
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Both editor toolbar rows stay fully visible */
+    .editor-toolbar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 40px;
+      height: 40px;
+      min-height: 40px;
+      padding: 0 8px;
+      overflow: hidden;
+    }
+
+    /* The actual editor gets whatever space remains */
+    .editor-body {
+      flex: 1 1 auto;
+      height: auto;
+      min-height: 0;
+      position: relative;
+      display: flex;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+    #lineNumbers {
+      width: 46px;
+      background-color: rgba(15, 23, 42, 0.5);
+      padding: 12px 8px 12px 0;
+      text-align: right;
+      color: var(--text-dark);
+      border-right: 1px solid var(--border-dark);
+      user-select: none;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      flex-shrink: 0;
+      overflow: hidden;
+      white-space: pre;
+    }
+
+    #codeEditor {
+      flex: 1;
+      height: 100%;
+      background: transparent;
+      padding: 12px;
+      color: #c7d2fe;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      white-space: pre;
+      overflow-y: auto;
+      overflow-x: auto;
+      tab-size: 2;
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS/Mobile */
+    }
+
+    .error-banner {
+      background-color: rgba(136, 19, 55, 0.9);
+      border-top: 1px solid var(--rose);
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      color: #fecdd3;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .error-banner.hidden { display: none; }
+
+    .drop-overlay {
+      position: absolute;
+      inset: 8px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed var(--cyan);
+      border-radius: 12px;
+      background: rgba(6, 182, 212, 0.10);
+      color: #a5f3fc;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      z-index: 30;
+      pointer-events: none;
+      backdrop-filter: blur(2px);
+    }
+
+    .drop-overlay.active { display: flex; }
+
+    #editorFileName {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Right Pane: Viewport */
+    #previewPane {
+      background-color: var(--panel);
+    }
+
+    #viewport {
+      flex: 1 1 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background-color: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+    }
+
+    #viewport:active {
+      cursor: grabbing;
+    }
+
+    /* CANVAS DISPLAY SIZE & GRID OVERLAY */
+    #canvasContainer {
+      position: relative;
+      width: 384px;
+      height: 384px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-dark);
+      border-radius: 4px;
+      transform-origin: center center;
+      flex: 0 0 auto;
+      background:
+        linear-gradient(45deg, #101827 25%, transparent 25%, transparent 75%, #101827 75%),
+        linear-gradient(45deg, #101827 25%, transparent 25%, transparent 75%, #101827 75%);
+      background-position: 0 0, 6px 6px;
+      background-size: 12px 12px;
+      background-color: #162033;
+    }
+
+    #pixelCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 3px;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      border-radius: 3px;
+      overflow: hidden;
+      shape-rendering: crispEdges;
+    }
+
+    .grid-overlay path {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.16);
+      stroke-linecap: butt;
+      shape-rendering: crispEdges;
+    }
+
+    .editor-file-name {
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 1px 4px;
+      margin-left: -4px;
+      min-width: 60px;
+      max-width: 240px;
+      outline: none;
+      cursor: text;
+    }
+
+    .editor-file-name:hover,
+    .editor-file-name:focus {
+      border-color: var(--border-dark);
+      background: var(--panel);
+    }
+
+    /* Inspector & Status Bar */
+    .inspector-badge {
+      position: absolute;
+      bottom: 26px;
+      left: 12px;
+      background-color: rgba(2, 6, 23, 0.9);
+      border: 1px solid var(--border-dark);
+      backdrop-filter: blur(4px);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    .color-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    footer {
+      height: 32px;
+      background-color: var(--bg);
+      border-top: 1px solid var(--border-dark);
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* Modal Windows */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.hidden { display: none; }
+
+    .modal-card {
+      background-color: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 768px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+    }
+
+    .cheat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .cheat-card {
+      background-color: var(--bg);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-dark);
+    }
+    .cheat-card code {
+      display: block;
+      margin-top: 6px;
+      color: #d8b4fe;
+      background-color: #020617;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .prompt-box {
+      background-color: var(--bg);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #67e8f9;
+      position: relative;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .zoom-controls {
+      position: static;
+    }
+
+    /* Preview toolbar defaults */
+    .preview-toolbar-controls > label {
+      padding-right: 0;
+    }
+    
+    
+    @media (max-width: 768px) {
+    
+      
+    
+      header {
+        height: 144px;
+        padding: 0 10px;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 48px 48px 48px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        overflow: hidden;
+      }
+    
+      .brand {
+        min-width: 0;
+        overflow: hidden;
+      }
+    
+    
+      .brand-title .badge-tag {
+        color: #fff !important;
+        -webkit-text-fill-color: #fff !important;
+        background: #334155 !important;
+      }
+    
+      header > .controls-group {
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        justify-content: flex-start;
+        gap: 6px;
+        white-space: nowrap;
+      }
+    
+      header > .controls-group:first-of-type {
+        display: flex !important;
+      }
+    
+      header > .controls-group:last-of-type {
+        display: flex;
+      }
+    
+      .desktop-only {
+        display: flex !important;
+      }
+    
+      header .select-box {
+        flex: 0 0 auto;
+        padding: 3px 7px;
+        gap: 5px;
+        font-size: 0.68rem;
+      }
+    
+      header .select-box select {
+        max-width: 130px;
+        font-size: 0.68rem;
+      }
+    
+      header .btn {
+        flex: 0 0 auto;
+        padding: 5px 8px;
+        font-size: 0.68rem;
+      }
+    
+    
+      
+    
+    .mobile-tabs {
+      display: flex !important;
+      position: fixed;
+      top: 144px;
+      left: 0;
+      right: 0;
+      height: 40px;
+      z-index: 35;
+    }
+    
+    
+      
+    
+        main {
+          position: fixed;
+          top: 184px;
+          left: 0;
+          right: 0;
+          bottom: 0;
+        
+          width: 100%;
+          height: auto;
+        
+          margin: 0;
+          overflow: hidden;
+        
+          display: flex;
+          min-height: 0;
+        }
+    
+      .pane {
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        height: 100%;
+      }
+    
+    
+      
+    
+        #editorPane {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          height: 100%;
+          min-height: 0;
+          overflow: hidden;
+        }
+    
+      /*
+         These two rows are UI chrome.
+         They NEVER shrink, move, or get consumed by the textarea.
+      */
+      .editor-toolbar-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    
+        flex: 0 0 40px;
+        width: 100%;
+        height: 40px;
+        min-height: 40px;
+    
+        padding: 0 8px;
+    
+        position: relative;
+        z-index: 5;
+    
+        overflow: visible;
+        background: var(--bg);
+      }
+    
+
+      .editor-body {
+        position: relative;
+        z-index: 1;
+    
+        flex: 1 1 0;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+    
+        overflow: hidden;
+      }
+    
+      #editorFileName {
+        max-width: 140px;
+      }
+    
+      #editorPane.mobile-hidden {
+        display: none !important;
+      }
+
+    
+      #previewPane {
+        display: none;
+      }
+    
+      #previewPane.mobile-active {
+        display: flex !important;
+      }
+
+    
+      .zoom-controls {
+        position: fixed !important;
+        top: 188px;
+        left: 50% !important;
+        right: auto !important;
+        transform: translate(-50%, 4px) !important;
+        z-index: 45;
+        display: none !important;
+      }
+    
+      body.mobile-preview-active .zoom-controls {
+        display: flex !important;
+      }
+    
+      #previewPane.mobile-active .zoom-controls {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      }
+    
+      .preview-toolbar-controls > label {
+        padding-right: 150px;
+      }
+    
+      #pcPreviewControls {
+        display: none !important;
+      }
+      
+    
+      #previewPane .inspector-badge {
+        position: fixed;
+    
+        left: 12px;
+        bottom: 44px;
+    
+        z-index: 45;
+      }
+      
+    
+      #previewPane footer {
+        position: fixed;
+    
+        left: 0;
+        right: 0;
+        bottom: 0;
+    
+        height: 32px;
+    
+        z-index: 44;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  
+  <header>
+    <div class="brand">
+      <div class="logo-icon">
+        <div class="logo-inner">
+          <svg width="18" height="18" fill="none" stroke="#22d3ee" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+        </div>
+      </div>
+      <div class="brand-title font-mono">
+        PixelDSL <span class="badge-tag">STUDIO</span>
+      </div>
+    </div>
+
+    
+    <div class="controls-group desktop-only">
+      <div class="select-box">
+        <span>Preset:</span>
+        <select id="presetSelect">
+          <option value="example1">Daytime Park Landscape</option>
+          <option value="example2">Ship at Sea</option>
+          <option value="example3">Fantasy Castle Scene</option>
+          <option value="example4">Cyberpunk Neon City</option>
+        </select>
+      </div>
+
+      <div class="select-box">
+        <span>Export Scale:</span>
+        <select id="exportScaleSelect">
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+          <option value="4" selected>4x</option>
+          <option value="8">8x</option>
+          <option value="16">16x</option>
+          <option value="32">32x</option>
+        </select>
+      </div>
+    </div>
+
+    
+    <div class="controls-group">
+      <button id="exportPngBtn" class="btn btn-cyan">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        PNG
+      </button>
+
+      <button id="exportSvgBtn" class="btn btn-purple">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        SVG
+      </button>
+
+      <button id="cheatSheetBtn" class="btn btn-dark desktop-only">
+        Syntax Reference
+      </button>
+
+      <button id="llmPromptBtn" class="btn btn-gradient">
+        LLM Guide
+      </button>
+    </div>
+  </header>
+
+  
+  <div class="mobile-tabs">
+    <button id="tabEditor" class="mobile-tab-btn active">Editor</button>
+    <button id="tabPreview" class="mobile-tab-btn">Live Preview</button>
+  </div>
+
+  
+  <main>
+
+    <div id="dropOverlay" class="drop-overlay">Drop a PixelDSL text file here</div>
+
+    
+    <section id="editorPane" class="pane">
+      
+      
+        <div class="editor-toolbar-row">
+          <span style="width:8px; height:8px; border-radius:50%; background-color:var(--cyan);"></span>
+          <span id="editorFileName" class="font-mono editor-file-name" contenteditable="true" spellcheck="false" role="textbox" aria-label="PixelDSL filename">script.pxd</span>
+          <span id="lineCount" style="color:var(--text-muted); font-size:0.7rem;">(0 lines)</span>
+        </div>
+
+        <div class="editor-toolbar-row">
+          
+          <select id="mobilePresetSelect" style="display:none;" class="select-box">
+            <option value="example1">Park Landscape</option>
+            <option value="example2">Sea Ship</option>
+            <option value="example3">Castle</option>
+            <option value="example4">Cyberpunk</option>
+          </select>
+
+          <input id="codeFileInput" type="file" accept=".pxd,.pxdsl,.pixeldsl,.txt,text/plain" style="display:none;">
+          <button id="openCodeBtn" class="btn btn-dark" style="padding:4px 8px; font-size:0.7rem;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            Open
+          </button>
+          <button id="downloadCodeBtn" class="btn btn-dark" style="padding:4px 8px; font-size:0.7rem;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+            Download
+          </button>
+          <button id="copyCodeBtn" class="btn btn-dark" style="padding:4px 8px; font-size:0.7rem;">Copy</button>
+          <button id="clearCodeBtn" class="btn btn-dark" style="padding:4px 8px; font-size:0.7rem; color:var(--rose);">Clear</button>
+        </div>
+
+
+      
+      <div class="editor-body">
+        <div id="lineNumbers">1</div>
+        <textarea id="codeEditor" spellcheck="false" placeholder="Write PixelDSL code here... or drop a .pxd/.txt file"></textarea>
+      </div>
+
+      
+      <div id="errorBanner" class="error-banner hidden">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div id="errorMessage" class="font-mono">No syntax errors.</div>
+      </div>
+
+    </section>
+
+    
+    <section id="previewPane" class="pane">
+      
+    
+    
+      <div id="zoomControls" class="zoom-controls"
+           style="display:flex; align-items:center; background:#1e293b; border-radius:6px; border:1px solid var(--border-dark); overflow:hidden;">
+    
+        
+        <span style="padding:0 8px 0 10px; font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">Preview</span>
+    
+        
+        <span id="canvasDimBadge" class="font-mono"
+              style="padding:2px 6px; background:#0f172a; color:var(--cyan); border-radius:4px; font-size:0.7rem; white-space:nowrap;">32x32</span>
+    
+        
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-muted); padding:0 10px; margin-left:8px; border-left:1px solid var(--border-dark); white-space:nowrap;">
+          <input type="checkbox" id="gridToggle" style="cursor:pointer;">
+          Grid Lines
+        </label>
+    
+        
+        <div id="pcPreviewControls"
+             style="display:flex; align-items:center; border-left:1px solid var(--border-dark); padding-left:8px; margin-left:2px;">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-muted); padding:0 8px; white-space:nowrap;">
+            <input type="checkbox" id="livePreviewToggle" checked style="cursor:pointer;">
+            Live
+          </label>
+          <button id="renderBtn" class="btn btn-cyan" style="padding:2px 9px;">Render</button>
+        </div>
+
+        
+        <div style="display:flex; align-items:center; border-left:1px solid var(--border-dark);">
+          <button id="zoomOutBtn" class="btn btn-dark" style="padding:2px 8px; border:none;">-</button>
+          <span id="zoomLabel" class="font-mono" style="padding:0 6px; font-size:0.7rem; color:var(--cyan);">100%</span>
+          <button id="zoomInBtn" class="btn btn-dark" style="padding:2px 8px; border:none;">+</button>
+          <button id="zoomResetBtn" class="btn btn-dark" style="padding:2px 8px; border:none; border-left:1px solid var(--border-dark);">Reset</button>
+        </div>
+      </div>
+
+
+      
+      <div id="viewport">
+        
+        
+        <div id="canvasContainer">
+          <canvas id="pixelCanvas" width="32" height="32"></canvas>
+          <svg id="gridOverlay" class="grid-overlay" style="display:none;" aria-hidden="true"></svg>
+        </div>
+
+        
+        <div id="inspectorBadge" class="inspector-badge">
+          <div>Pos: <span id="inspectCoords" style="color:var(--cyan); font-weight:600;">(0, 0)</span></div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            Color:
+            <span id="inspectSwatch" class="color-swatch"></span>
+            <span id="inspectColor" style="color:var(--purple); cursor:pointer;" title="Click to copy">#00000000</span>
+          </div>
+        </div>
+      </div>
+
+      
+      <footer>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="width:8px; height:8px; border-radius:50%; background-color:var(--emerald);"></span>
+            <span id="statusText" style="color:var(--emerald); font-weight:600;">Ready</span>
+          </div>
+          <div>Drawn Pixels: <span id="drawnPixelsCount" style="color:var(--text);">0</span></div>
+        </div>
+        <div>Render Time: <span id="renderTimeMs" style="color:var(--cyan);">0.0 ms</span></div>
+      </footer>
+
+    </section>
+  </main>
+
+  
+  <div id="cheatSheetModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>PixelDSL Language Reference</span>
+        <button id="closeCheatSheetBtn" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="margin:0 0 14px; color:var(--text-muted);">PixelDSL is intentionally compact: use short color symbols, reusable DEF blocks, STAMP/ROTATE/LOOP for repetition, arithmetic expressions for procedural placement, and higher-level primitives instead of manually drawing every pixel.</p>
+
+        <div class="cheat-grid">
+          <div class="cheat-card">
+            <strong>GRID width height</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Sets the pixel canvas size.</p>
+            <code>GRID 32 32</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>BG color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Sets the canvas background. Use <b>transparent</b> or <b>#RRGGBBAA</b> for transparency.</p>
+            <code>BG #0f172a</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>COLOR symbol color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Defines one reusable color name. Supports <b>#RRGGBB</b>, <b>#RRGGBBAA</b>, <b>#RGB/#RGBA</b>, rgb(), and rgba().</p>
+            <code>COLOR O rgba(255, 165, 0, 0.15)</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>COLORDEF / COLORS ... ENDCOLORDEF</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Compact palette block. <b>COLORDEF</b> and <b>COLORS</b> are equivalent. Use one symbol/value pair per line; <b>COLOREND</b> and <b>ENDCOLORS</b> are also accepted.</p>
+            <code>COLORDEF
+  K #161b22
+  S #8b949e
+ENDCOLORDEF</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>PIXEL x y color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Plots a single pixel.</p>
+            <code>PIXEL 12 8 R</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>RECT x y width height color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Solid filled rectangle.</p>
+            <code>RECT 4 4 10 6 #3b82f6</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>BOX x y width height color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">1-pixel hollow rectangle outline.</p>
+            <code>BOX 2 2 12 12 K</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>LINE x1 y1 x2 y2 color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Draws a pixel line.</p>
+            <code>LINE 0 0 15 15 R</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>CIRCLE x y radius color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Filled circle.</p>
+            <code>CIRCLE 16 16 6 Y</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>ELLIPSE x y radiusX radiusY color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Filled ellipse centered at x,y.</p>
+            <code>ELLIPSE 16 12 10 6 S</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>TRIANGLE x1 y1 x2 y2 x3 y3 color</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Filled triangle from any three vertices. Great for roofs, mountains, wings, fins, shards, sails, arrows, and irregular silhouettes.</p>
+            <code>TRIANGLE 4 24 16 4 28 24 R</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>ROTATE x y angle object [args...]</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Renders the object as a raster, rotates it around its center, and places the rotated object with its visible-bounds center at (x,y). Positive angles are clockwise; inverse sampling avoids rotation holes. Use ROTATE_TL to retain the legacy top-left anchor.</p>
+            <code>ROTATE 12 8 25 TREE G</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>MULTIPLY x y name [args...]</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Places an object centered at (x,y) using a Photoshop-style multiply blend. Existing pixels and the object's alpha are composited instead of simply replacing each other. Use MULTIPLY_TL for the legacy top-left anchor.</p>
+            <code>MULTIPLY 12 8 LIGHT O</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>Numeric expressions &amp; WIDTH / HEIGHT</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Use +, -, *, /, %, parentheses, loop variables, DEF parameters, and the current canvas constants <b>WIDTH</b> and <b>HEIGHT</b> anywhere a numeric argument is accepted. They are not color symbols.</p>
+            <code>LOOP x 0 WIDTH-1 4
+  RECT x HEIGHT/2 3 3 R
+ENDLOOP</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>GRADRECT x y w h color1 color2 [H|V]</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Filled two-color pixel gradient. Default direction is vertical.</p>
+            <code>GRADRECT 0 0 32 16 SKY1 SKY2 V</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>DITHERRECT x y w h color1 color2 [pattern]</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Two-color ordered dithering. Patterns: CHECKER, BAYER2, BAYER4.</p>
+            <code>DITHERRECT 4 4 24 8 K S BAYER4</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>DEF name [params...] ... ENDDEF</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">General reusable drawing block. Parameters can stand in for colors or other tokens.</p>
+            <code>DEF TREE leaf
+  CIRCLE 3 3 3 leaf
+ENDDEF</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>STAMP x y name [args...]</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Places an object with its visible-bounds center at (x,y). Arguments always come AFTER the object name and match the DEF parameter order.</p>
+            <code>STAMP 20 12 TREE G</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>LOOP var start end step ... ENDLOOP</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Repeats a block with an inclusive end value.</p>
+            <code>LOOP x 2 26 4
+  LINE x 20 x 24 S
+ENDLOOP</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>SYMMETRY_X / MIRROR_H / MIRROR_V (+ *_TL legacy variants)</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">MIRROR_H/V flips the raster and centers it at (x,y). SYMMETRY_X centers the original at (x,y) and reflects it around centerX. *_TL variants retain legacy top-left placement.</p>
+            <code>SYMMETRY_X 8 8 15.5 TREE G</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>MASK result A OP B</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Reusable raster composition. MINUS keeps A minus B; AND keeps only overlap; PLUS is a union with A winning overlap; OVER layers B over A, so B wins overlap. Operands keep their original local coordinates. MASK has no args of its own; args are supplied when the result is placed and are forwarded to both source objects.</p>
+            <code>MASK CUTOUT ARROW MINUS HOLE
+STAMP 31.5 22.5 CUTOUT R
+
+MASK UNION A PLUS B
+STAMP 69.5 22.5 UNION G
+
+MASK LAYER A OVER B
+ROTATE 50 24 25 LAYER O
+
+# - and + are also accepted
+MASK CUT A - B
+MASK ADD A + B</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong># comments</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Full-line comments begin with #. Inline comments are allowed after a space; hex colors stay intact.</p>
+            <code>BG #0f172a  # night sky</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div id="llmPromptModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>LLM Prompt System Template</span>
+        <button id="closeLlmModalBtn" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="margin-bottom:12px; color:var(--text-muted);">Copy this system prompt and paste it into ChatGPT, Claude, Gemini, or DeepSeek to generate PixelDSL artwork:</p>
+
+        <div style="position:relative;">
+          <button id="copyPromptTemplateBtn" class="btn btn-dark">Copy Prompt</button>
+          <pre id="promptTemplateText" class="prompt-box">You are an expert Pixel Art Architect and a strict PixelDSL generator.
+Output ONLY valid PixelDSL source code inside a code block. No SVG, JSON, Python, or prose.
+
+PIXELDSL GOAL
+Create deliberate pixel art with clear silhouettes, layered depth, coherent lighting, readable shapes, and a compact script. Prefer a few strong shapes over thousands of individual PIXEL lines.
+Exploit the full DSL instead of falling back to repetitive PIXEL commands. TRIANGLE is a real filled geometric primitive, arithmetic makes layouts procedural, and ROTATE creates variation from reusable raster objects.
+
+1. CANVAS
+GRID width height
+BG color
+Coordinates use a top-left canvas origin: (0,0) is the top-left pixel. Shapes may extend outside the canvas; clipped pixels are ignored.
+
+2. PALETTE
+Prefer one compact palette block:
+COLORDEF
+  K #161b22
+  S #8b949e
+  H #c9d1d9
+ENDCOLORDEF
+
+# COLORS is an alias for COLORDEF
+COLORS
+  K #161b22
+ENDCOLORS
+COLOREND and ENDCOLORS are also accepted. Direct COLOR symbol color is also valid. Colors may be #RRGGBB, #RRGGBBAA, #RGB/#RGBA, rgb(), rgba(), or transparent. rgba()/rgb() may contain spaces inside the parentheses and are kept as one color token.
+
+3. DRAWING COMMANDS
+PIXEL x y color
+RECT x y w h color
+BOX x y w h color
+LINE x1 y1 x2 y2 color
+CIRCLE x y radius color
+ELLIPSE x y radiusX radiusY color
+TRIANGLE x1 y1 x2 y2 x3 y3 color
+GRADRECT x y w h color1 color2 [H|V]
+DITHERRECT x y w h color1 color2 [CHECKER|BAYER2|BAYER4]
+MULTIPLY x y name [args...]
+MULTIPLY_TL x y name [args...] # legacy top-left placement
+
+4. NUMERIC EXPRESSIONS
+Numeric arguments may use numbers, +, -, *, /, %, parentheses, LOOP variables, DEF parameters, and the canvas constants WIDTH and HEIGHT.
+Expressions contain NO spaces. WIDTH and HEIGHT always refer to the current GRID dimensions and are numeric only; they are not color symbols. Example inside a loop:
+LOOP i 0 5 1
+  RECT 5+i*9 20+i%2 6 4 R
+ENDLOOP
+WIDTH and HEIGHT may be used directly in numeric expressions, for example RECT 0 0 WIDTH HEIGHT or LOOP x 0 WIDTH-1 1.
+The end value is inclusive. Expressions are evaluated separately for every loop iteration.
+There are NO implicit variables named x, y, centerX, or similar. WIDTH and HEIGHT are the two built-in numeric canvas constants. Use them, a literal number, a LOOP variable, or a DEF parameter for numeric expressions.
+Do not put arithmetic inside color literals.
+
+5. REUSABLE OBJECTS
+DEF name [params...]
+  drawing commands using those params
+ENDDEF
+
+Use named parameters directly (for example c) or as $c. Numbered positional references must use $1, $2, etc.; bare numbers are always numeric literals. This keeps coordinates such as 1 from being mistaken for arguments.
+A DEF is drawn in its own local coordinate system. Local (0,0) is the DEF's own coordinate origin; negative local coordinates are allowed. Its raster preserves the local positions used by its primitives, which matters for masks. Center-anchored placement ignores transparent outer padding and centers the visible content.
+
+STAMP x y name [args...]
+STAMP_TL x y name [args...]  # legacy top-left anchor
+ROTATE x y angle name [args...]
+ROTATE_TL x y angle name [args...]  # legacy top-left anchor
+MIRROR_H x y name [args...]
+MIRROR_H_TL x y name [args...]  # legacy top-left anchor
+MIRROR_V x y name [args...]
+MIRROR_V_TL x y name [args...]  # legacy top-left anchor
+MULTIPLY x y name [args...]
+MULTIPLY_TL x y name [args...]  # legacy top-left anchor
+SYMMETRY_X x y centerX name [args...]
+SYMMETRY_X_TL x y centerX name [args...]  # legacy top-left anchor
+
+IMPORTANT ARGUMENT ORDER
+Arguments ALWAYS come after the object name.
+The color argument for a one-parameter macro goes at the end of the command:
+STAMP 5 545 complex_step2 R
+ROTATE 10 620 0 combined_over O
+Do NOT write the color before the object name.
+For multiple parameters, keep the same parameter order as the DEF declaration. Inside the DEF, use parameter names or explicit positional references such as $1 and $2; bare numeric values remain coordinates/literals.
+Example:
+DEF stripe c w h
+  RECT 0 0 w h c
+ENDDEF
+STAMP 20 20 stripe Y 12 6
+
+PLACEMENT ANCHOR RULE: STAMP, ROTATE, MIRROR_H, MIRROR_V, MULTIPLY, and SYMMETRY_X use (x,y) as the center of the object's visible raster bounds. For ROTATE, this is the center of the rotated result; rotation itself is around the object center. Positive angles are clockwise. Inverse sampling avoids rotation holes. Transparent outer padding is ignored when centering. If a raster has an even width or height, its center falls between pixels; use a .5 coordinate when exact half-pixel centering matters.
+Legacy migration: append _TL to STAMP, ROTATE, MIRROR_H, MIRROR_V, MULTIPLY, or SYMMETRY_X to keep the old top-left anchor behavior (for example STAMP_TL 20 12 TREE G).
+
+6. RASTER MASKS
+MASK result A MINUS B
+MASK result A PLUS B
+MASK result A OVER B
+MASK result A AND B
+# MINUS also accepts SUBTRACT or -; PLUS also accepts ADD or +
+
+MASK creates a reusable raster recipe. A and B may be DEF objects or previous MASK results.
+The four operations are intentionally different:
+MINUS  = keep A where B is empty. B cuts holes out of A.
+AND    = keep only pixels where both A and B are occupied. The result keeps A's color.
+PLUS   = union of A and B. If both occupy the same pixel, A wins.
+OVER   = layer B over A. If both occupy the same pixel, B wins.
+
+This difference is important: PLUS and OVER are NOT the same operation.
+Use different source colors when visually testing overlap ownership.
+
+MASK coordinates use the original local coordinates of each source object. The two operands are NOT independently moved so that their bounding boxes start at the same local (0,0). This preserves meaningful positions such as a circle centered at (25,16) inside a 50x32 panel.
+
+A MASK has no parameter list of its own. When a mask result is finally placed with STAMP, ROTATE, MIRROR_H, MIRROR_V, MULTIPLY, or SYMMETRY_X, the supplied argument list is forwarded independently to both source objects. Placement coordinates refer to the visible center of the resulting raster.
+Example:
+DEF base c
+  RECT 0 0 40 30 c
+ENDDEF
+DEF hole
+  CIRCLE 20 15 8 W
+ENDDEF
+MASK cut base MINUS hole
+STAMP 29.5 64.5 cut R
+
+For parameterized sources, the same argument positions are passed to both sides. Therefore source parameter layouts should normally be compatible.
+Example:
+DEF base c
+  RECT 0 0 40 30 c
+ENDDEF
+DEF add c
+  CIRCLE 20 15 8 c
+ENDDEF
+MASK union base PLUS add
+STAMP 29.5 64.5 union G
+
+To test PLUS versus OVER with visibly different overlap colors, prefer source DEFs with literal colors or otherwise make the operands produce different colors; a single final argument is forwarded to both parameterized sides.
+
+7. REPETITION
+LOOP variable start end step
+  ...
+ENDLOOP
+The end value is inclusive. Positive step increases; negative step decreases.
+
+8. COMMENTS
+Full-line comments begin with #. Inline comments are allowed after whitespace. Hex colors beginning with # remain valid color literals.
+
+9. ARTWORK STRATEGY
+- Draw back-to-front: background, sky, distant forms, midground, foreground, details, highlights.
+- Prefer strong silhouettes and a few meaningful shapes over huge numbers of individual PIXEL commands.
+- Every large RECT must have a clear semantic purpose (building, ground band, water, road, wall, etc.). Never scatter rectangular filler into the sky or empty space.
+- Do not place a full-width RECT over already finished mountains, clouds, buildings, or foreground forms unless it is intentionally a foreground/background band. Draw large background bands before the objects they should sit behind.
+- Keep the sky visually open unless the requested scene specifically calls for clouds, architecture, birds, wires, or similar elements.
+- Use GRADRECT for large sky, water, glow, and lighting transitions. Gradients interpolate alpha safely, including transparent endpoints.
+- Use DITHERRECT for controlled texture, ramps, smoke, foliage, and subtle pixel transitions.
+- Use RECT for masses, BOX for outlines, LINE for beams/roads/diagonals, CIRCLE/ELLIPSE for rounded forms, and TRIANGLE for roofs, mountains, wings, fins, arrows, sails, shards, trees, cones, and other pointed forms.
+- TRIANGLE uses three arbitrary vertices, not angles or side lengths.
+- Use DEF + STAMP when a structure repeats. STAMP coordinates are object centers, not top-left corners.
+- Use MASK for cutouts, unions, intersections, and reusable composites.
+- Use ROTATE for lean, tilt, fan, radial, or directional variation.
+- Use LOOP + expressions for procedural spacing, repeated motifs, waves, stripes, and offsets.
+- Draw the composition from top to bottom when constructing a test sheet. Keep test groups in separate rows with generous spacing so unrelated results cannot overlap accidentally.
+- When testing a feature, isolate that feature first: source A, source B, A OP B, then place the result. Only after it is visually correct should you combine it with ROTATE/MIRROR/LOOP or other masks.
+- Keep coordinates inside the intended composition and leave enough room around test objects.
+- Drawing uses normal source-over alpha compositing: opaque colors replace the existing pixel, while #RRGGBBAA/rgba() colors blend over what is already there. Multiple translucent layers accumulate naturally.
+- A fully transparent color (#00000000 or rgba(...,0)) has no visible effect.
+- MASK operations are alpha-aware: MINUS subtracts right-side alpha, AND keeps the left color with intersected alpha, PLUS keeps A's visible color while preserving union coverage, and OVER performs normal B-over-A compositing.
+- MULTIPLY uses a Photoshop-style multiply blend for the placed raster while still respecting source alpha.
+- MASK operations work on raster data and do not directly alter the canvas until the resulting object is stamped/rotated/mirrored.
+- Do not invent unsupported commands or implicit variables.
+
+MASK TEST CHECKLIST
+For MINUS: use a solid rectangle and a centered circle; expect a clean hole.
+For AND: use partially overlapping shapes; expect only their overlap.
+For PLUS: use two overlapping shapes with different colors; expect the A color on the overlap.
+For OVER: use the same setup; expect the B color on the overlap.
+Then test STAMP, ROTATE, and MIRROR on the resulting object.
+
+COMPOSITION SANITY CHECK
+Before finishing, scan for accidental filler: large rectangles floating in the sky, full-width bands drawn after foreground objects, repeated structures with no semantic role, or shapes that exist only because RECT was convenient. Replace them with an intentional primitive or remove them.
+
+OUTPUT CHECK
+Before finishing, mentally verify:
+GRID exists; colors are defined or valid literals; every DEF has ENDDEF; every LOOP has ENDLOOP; every STAMP/ROTATE/MIRROR/SYMMETRY/MULTIPLY (or *_TL legacy variant) names an existing object; every MASK references existing objects; numeric expressions use only supported values including WIDTH/HEIGHT; every object argument appears AFTER the object name; colors are not used as arithmetic; and no unsupported commands are invented.
+
+FINAL DISCIPLINE
+Build from top to bottom and back-to-front. Keep each test or visual feature in its own spatial region. Do not randomly jump backward through the canvas and accidentally stack unrelated tests on top of each other.
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    // Pre-loaded DSL Presets
+    const PRESETS = {
+      example1: `
+# PixelDSL Example: Daytime Park Landscape
+
+GRID 32 32
+BG #9bd7f5
+
+# --- Compact palette ---
+COLOR SKY #9bd7f5
+COLOR SKY2 #d8f1ff
+COLOR G #5f9f55
+COLOR G2 #3f7d45
+COLOR D #2f5f39
+COLOR T #7a4f2a
+COLOR L #a96f3b
+COLOR F #f4d35e
+COLOR W #fff7df
+COLOR P #f29ab2
+
+# --- Soft sky and distant hills ---
+GRADRECT 0 0 32 18 SKY SKY2 V
+TRIANGLE 0 19 9 11 18 19 G
+TRIANGLE 12 19 22 9 32 19 G2
+
+# --- Ground ---
+RECT 0 18 32 14 G
+DITHERRECT 0 22 32 10 G G2 CHECKER
+
+# --- Reusable tree ---
+DEF TREE leaf
+  RECT 3 6 2 6 T
+  RECT 2 8 4 4 T
+  CIRCLE 4 4 4 leaf
+  CIRCLE 2 7 3 leaf
+  CIRCLE 6 7 3 leaf
+  PIXEL 3 2 W
+ENDDEF
+
+# --- Path and pond ---
+TRIANGLE 13 32 18 18 23 32 L
+ELLIPSE 25 24 5 2 SKY2
+LINE 20 25 29 25 W
+
+# --- Trees ---
+STAMP 5.5 17.5 TREE G2
+STAMP 30.5 16.5 TREE D
+
+# --- Small flower patch ---
+LOOP x 4 12 4
+  PIXEL x 24 P
+  PIXEL x+1 25 F
+ENDLOOP
+
+# --- Simple park bench ---
+RECT 7 20 7 1 T
+RECT 8 22 1 3 T
+RECT 13 22 1 3 T
+LINE 7 19 13 19 L
+
+# --- Sun ---
+CIRCLE 26 5 3 F
+PIXEL 26 1 F
+PIXEL 26 9 F
+PIXEL 22 5 F
+PIXEL 30 5 F`,
+
+
+      example2: `
+# PixelDSL Example: Little Ship at Sea
+
+GRID 32 32
+BG #7fc8e8
+
+# --- Palette ---
+COLOR SKY #7fc8e8
+COLOR SKY2 #c8efff
+COLOR SEA #2f91b8
+COLOR SEA2 #236f99
+COLOR FOAM #d9f6ff
+COLOR HULL #8b4f2a
+COLOR HULL2 #5d321e
+COLOR SAIL #fff1cf
+COLOR SAIL2 #f3c978
+COLOR ROPE #46352c
+COLOR DARK #173b52
+COLOR SUN #ffe28a
+
+# --- Sky and water ---
+GRADRECT 0 0 32 17 SKY2 SKY V
+GRADRECT 0 17 32 15 SEA SEA2 V
+
+# --- Sun and distant clouds ---
+CIRCLE 25 5 3 SUN
+ELLIPSE 7 6 4 1 FOAM
+ELLIPSE 10 7 5 1 FOAM
+
+# --- Reusable wave crest ---
+DEF WAVE c
+  LINE 0 1 2 0 c
+  LINE 2 0 4 1 c
+  LINE 4 1 6 0 c
+ENDDEF
+
+LOOP x 0 28 7
+  STAMP x+3 20.5 WAVE FOAM
+ENDLOOP
+LOOP x 3 24 7
+  STAMP x+3 27.5 WAVE FOAM
+ENDLOOP
+
+# --- Ship hull base ---
+DEF HULL_SHAPE
+  TRIANGLE 0 0 22 0 18 6 HULL
+  TRIANGLE 0 0 18 6 4 6 HULL2
+  RECT 3 2 16 2 HULL
+ENDDEF
+
+# --- Sail ---
+DEF SAIL
+  TRIANGLE 10 0 10 12 2 11 SAIL
+  TRIANGLE 10 1 10 12 4 10 SAIL2
+  LINE 10 0 10 13 ROPE
+ENDDEF
+
+# --- Masked sail cutout: notch the sail with a small triangle ---
+DEF SAIL_CUT
+  TRIANGLE 10 0 10 12 2 11 SAIL
+ENDDEF
+DEF SAIL_HOLE
+  TRIANGLE 10 8 10 12 6 11 SKY
+ENDDEF
+MASK SAIL_NOTCHED SAIL_CUT MINUS SAIL_HOLE
+
+# --- Assemble ship ---
+STAMP 16 17 HULL_SHAPE
+STAMP 18 9.5 SAIL_NOTCHED
+
+# Mast and cabin details ---
+RECT 14 9 1 6 ROPE
+RECT 18 12 5 2 HULL2
+BOX 18 12 5 4 DARK
+PIXEL 19 13 FOAM
+PIXEL 21 13 FOAM
+
+# Reflected little pennant using the same raster object
+DEF FLAG
+  TRIANGLE 0 0 5 2 0 3 SUN
+ENDDEF
+MIRROR_V 25.5 8.5 FLAG
+
+# Foreground waves
+LINE 0 30 8 30 FOAM
+LINE 9 29 17 29 FOAM
+LINE 21 31 31 31 FOAM`,
+
+
+      example3: `
+# PixelDSL Example: Fantasy Castle Scene
+
+GRID 32 32
+BG #0f172a
+
+COLOR K #020617
+COLOR M #fef08a
+COLOR M2 #fde047
+COLOR C #334155
+COLOR C2 #475569
+COLOR CH #64748b
+COLOR W #78350f
+COLOR B #451a03
+COLOR F #f97316
+
+CIRCLE 24 7 4 M
+PIXEL 22 6 M2
+
+DEF TOWER
+  RECT 0 0 6 16 C
+  BOX 0 0 6 16 K
+  LINE 1 3 4 3 C2
+  LINE 2 7 5 7 C2
+  LINE 1 11 4 11 C2
+  PIXEL 1 2 CH
+  PIXEL 3 6 CH
+  PIXEL 2 10 CH
+ENDDEF
+
+STAMP 4.5 19.5 TOWER
+STAMP 26.5 19.5 TOWER
+
+BOX 1 10 3 2 K
+BOX 5 10 3 2 K
+BOX 23 10 3 2 K
+BOX 27 10 3 2 K
+
+RECT 8 16 16 12 C
+BOX 8 16 16 12 K
+LINE 9 19 22 19 C2
+LINE 9 23 22 23 C2
+
+RECT 13 21 6 7 W
+BOX 13 21 6 7 B
+LINE 15 21 15 27 K
+LINE 17 21 17 27 K
+
+PIXEL 11 20 F
+PIXEL 11 21 W
+PIXEL 20 20 F
+PIXEL 20 21 W
+
+RECT 0 28 32 4 K`,
+
+      example4: `
+# PixelDSL Example: Cyberpunk Neon City
+
+GRID 33 32
+BG #050515
+
+COLORDEF
+  K #090919
+  P #d946ef
+  C #06b6d4
+  Y #facc15
+  B #1e1b4b
+  B2 #312e81
+  CL #9ab9bd60
+ENDCOLORDEF
+
+DEF SUN
+  CIRCLE 0 0 7 P
+ENDDEF
+
+
+DEF SUN_HOLE
+  LINE -7 0 7 0 BG
+  LINE -7 2 7 2 BG
+  LINE -7 4 7 4 BG
+ENDDEF
+
+MASK SUN_CUT SUN MINUS SUN_HOLE
+STAMP 16 10 SUN_CUT
+
+# Symmetric Clouds
+ELLIPSE 7 6 7 4 CL
+ELLIPSE 25 6 7 4 CL
+
+DEF TALL_BUILDING
+  RECT 0 0 6 18 B
+  BOX 0 0 6 18 C
+  PIXEL 1 2 C
+  PIXEL 4 2 C
+  PIXEL 1 5 Y
+  PIXEL 4 5 C
+  PIXEL 1 8 C
+  PIXEL 4 8 Y
+  PIXEL 1 11 C
+  PIXEL 4 11 C
+  PIXEL 1 14 Y
+  PIXEL 4 14 Y
+ENDDEF
+
+DEF MID_BUILDING
+  RECT 0 0 8 12 B2
+  BOX 0 0 8 12 P
+  RECT 2 2 4 2 Y
+  RECT 2 6 4 2 C
+ENDDEF
+
+SYMMETRY_X 3 19 16 TALL_BUILDING
+SYMMETRY_X 12 22 16 MID_BUILDING
+
+
+RECT 0 28 32 4 K
+LINE 0 28 32 28 P
+LINE 0 30 32 30 C
+LINE 16 28 8 32 C
+LINE 16 28 24 32 C
+LINE 16 28 16 31 Y`
+    };
+
+
+    // INTERPRETER ENGINE
+
+    class PixelDSLInterpreter {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.width = 32;
+        this.height = 32;
+        this.canvasWidth = 32;
+        this.canvasHeight = 32;
+        this.bgColor = '#00000000';
+        this.colors = {};
+        this.macros = {};
+        this.objects = {};
+        this.grid = [];
+        this.drawnPixelsCount = 0;
+        this.errors = [];
+        this.transform = null;
+        this.rgbaCache = new Map();
+        this.canonicalCache = new Map();
+      }
+
+      initGrid() {
+        this.grid = Array(this.height).fill(null).map(() => Array(this.width).fill(null));
+      }
+
+      resolveColor(token) {
+        if (!token) return null;
+        if (token === 'BG') return this.bgColor;
+        if (this.colors[token]) return this.colors[token];
+        return token;
+      }
+
+      colorToRgba(token) {
+        if (token === null || token === undefined) return null;
+
+        const value = String(this.resolveColor(token)).trim();
+        if (!value) return null;
+
+        const cached = this.rgbaCache.get(value);
+        if (cached) return cached;
+
+        if (value.toLowerCase() === 'transparent') {
+          const transparent = { r: 0, g: 0, b: 0, a: 0 };
+          this.rgbaCache.set(value, transparent);
+          return transparent;
+        }
+
+        let match = value.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+        if (match) {
+          let hex = match[1];
+          if (hex.length === 3 || hex.length === 4) {
+            hex = hex.split('').map(ch => ch + ch).join('');
+          }
+          const result = {
+            r: parseInt(hex.slice(0, 2), 16),
+            g: parseInt(hex.slice(2, 4), 16),
+            b: parseInt(hex.slice(4, 6), 16),
+            a: hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1
+          };
+          this.rgbaCache.set(value, result);
+          return result;
+        }
+
+        match = value.match(/^rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)(?:\s*[,/]\s*([0-9.]+%?))?\s*\)$/i);
+        if (match) {
+          const alphaToken = match[4];
+          const alpha = alphaToken === undefined
+            ? 1
+            : alphaToken.endsWith('%')
+              ? Number(alphaToken.slice(0, -1)) / 100
+              : Number(alphaToken);
+          const result = {
+            r: Math.max(0, Math.min(255, Number(match[1]))),
+            g: Math.max(0, Math.min(255, Number(match[2]))),
+            b: Math.max(0, Math.min(255, Number(match[3]))),
+            a: Math.max(0, Math.min(1, alpha))
+          };
+          this.rgbaCache.set(value, result);
+          return result;
+        }
+
+        return null;
+      }
+
+      rgbaToHex(rgba) {
+        if (!rgba) return '#00000000';
+        const r = Math.round(Math.max(0, Math.min(255, rgba.r)));
+        const g = Math.round(Math.max(0, Math.min(255, rgba.g)));
+        const b = Math.round(Math.max(0, Math.min(255, rgba.b)));
+        const a = Math.round(Math.max(0, Math.min(1, rgba.a)) * 255);
+        const hex = (n) => n.toString(16).padStart(2, '0').toUpperCase();
+        if (a <= 0) return '#00000000';
+        return a >= 255
+          ? `#${hex(r)}${hex(g)}${hex(b)}`
+          : `#${hex(r)}${hex(g)}${hex(b)}${hex(a)}`;
+      }
+
+      rgbaToCss(rgba) {
+        if (!rgba) return 'rgba(0, 0, 0, 0)';
+        const r = Math.round(Math.max(0, Math.min(255, rgba.r)));
+        const g = Math.round(Math.max(0, Math.min(255, rgba.g)));
+        const b = Math.round(Math.max(0, Math.min(255, rgba.b)));
+        const a = Math.max(0, Math.min(1, rgba.a));
+        return `rgba(${r}, ${g}, ${b}, ${Number(a.toFixed(6))})`;
+      }
+
+      canonicalColor(token) {
+        if (token === null || token === undefined) return null;
+
+        const resolved = String(this.resolveColor(token));
+        const key = `${token}\u0000${resolved}`;
+        const cached = this.canonicalCache.get(key);
+        if (cached !== undefined) return cached;
+
+        const rgba = this.colorToRgba(token);
+        const canonical = rgba ? this.rgbaToHex(rgba) : resolved;
+        this.canonicalCache.set(key, canonical);
+        return canonical;
+      }
+
+      sourceOver(baseToken, sourceToken) {
+        const src = this.colorToRgba(sourceToken);
+        const dst = this.colorToRgba(baseToken);
+        if (!src || src.a <= 0) return dst ? this.rgbaToHex(dst) : null;
+        if (!dst || dst.a <= 0) return src.a >= 1 ? this.canonicalColor(sourceToken) : this.rgbaToHex(src);
+        if (src.a >= 1) return this.canonicalColor(sourceToken);
+
+        const outA = src.a + dst.a * (1 - src.a);
+        if (outA <= 0) return '#00000000';
+
+        return this.rgbaToHex({
+          r: (src.r * src.a + dst.r * dst.a * (1 - src.a)) / outA,
+          g: (src.g * src.a + dst.g * dst.a * (1 - src.a)) / outA,
+          b: (src.b * src.a + dst.b * dst.a * (1 - src.a)) / outA,
+          a: outA
+        });
+      }
+
+      multiplyColors(baseToken, sourceToken) {
+        const src = this.colorToRgba(sourceToken);
+        const dst = this.colorToRgba(baseToken);
+        if (!src || src.a <= 0) return dst ? this.rgbaToHex(dst) : null;
+        if (!dst || dst.a <= 0) return this.rgbaToHex(src);
+
+        const outA = src.a + dst.a * (1 - src.a);
+        const blendR = (dst.r * src.r) / 255;
+        const blendG = (dst.g * src.g) / 255;
+        const blendB = (dst.b * src.b) / 255;
+
+        return this.rgbaToHex({
+          r: (blendR * src.a + dst.r * dst.a * (1 - src.a)) / outA,
+          g: (blendG * src.a + dst.g * dst.a * (1 - src.a)) / outA,
+          b: (blendB * src.a + dst.b * dst.a * (1 - src.a)) / outA,
+          a: outA
+        });
+      }
+
+      tokenize(line) {
+        const tokens = [];
+        let current = '';
+        let parenDepth = 0;
+
+        for (const ch of String(line)) {
+          if (ch === '(') parenDepth++;
+          else if (ch === ')') parenDepth = Math.max(0, parenDepth - 1);
+
+          if (/\s/.test(ch) && parenDepth === 0) {
+            if (current) {
+              tokens.push(current);
+              current = '';
+            }
+          } else {
+            current += ch;
+          }
+        }
+
+        if (current) tokens.push(current);
+        return tokens;
+      }
+
+      getMacroBounds(macro, args = []) {
+        let minX = 0, minY = 0, maxX = 0, maxY = 0;
+        const include = (x1, y1, x2, y2) => {
+          minX = Math.min(minX, x1);
+          minY = Math.min(minY, y1);
+          maxX = Math.max(maxX, x2);
+          maxY = Math.max(maxY, y2);
+        };
+        const parameterScope = {};
+        macro.params.forEach((param, idx) => {
+          const value = args[idx] ?? '';
+          parameterScope[param] = value;
+          parameterScope[String(idx + 1)] = value;
+        });
+        for (const item of macro.lines) {
+          let sourceLine = item.line.trim();
+          for (const [key, value] of Object.entries(parameterScope)) {
+            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            sourceLine = sourceLine.replace(new RegExp(`\\$${escapedKey}\\b`, 'g'), value);
+            if (!/^\d+$/.test(key)) {
+              sourceLine = sourceLine.replace(new RegExp(`\\b${escapedKey}\\b`, 'g'), value);
+            }
+          }
+          const parts = this.tokenize(sourceLine);
+          if (!parts.length) continue;
+          const cmd = parts[0].toUpperCase();
+          const n = (token, fallback = 0) => {
+            const v = this.num(token, fallback);
+            return Number.isFinite(v) ? v : fallback;
+          };
+          if (cmd === 'PIXEL') {
+            const x=n(parts[1]), y=n(parts[2]);
+            include(x, y, x, y);
+          } else if (cmd === 'RECT' || cmd === 'BOX' || cmd === 'GRADRECT' || cmd === 'DITHERRECT') {
+            const x=n(parts[1]), y=n(parts[2]), w=Math.max(1,n(parts[3],1)), h=Math.max(1,n(parts[4],1));
+            include(x, y, x+w-1, y+h-1);
+          } else if (cmd === 'LINE') {
+            const xs=[n(parts[1]),n(parts[3])], ys=[n(parts[2]),n(parts[4])];
+            include(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
+          } else if (cmd === 'CIRCLE') {
+            const x=n(parts[1]), y=n(parts[2]), r=Math.max(0,n(parts[3]));
+            include(x-r, y-r, x+r, y+r);
+          } else if (cmd === 'ELLIPSE') {
+            const x=n(parts[1]), y=n(parts[2]), rx=Math.max(0,n(parts[3])), ry=Math.max(0,n(parts[4]));
+            include(x-rx, y-ry, x+rx, y+ry);
+          } else if (cmd === 'TRIANGLE') {
+            const xs=[n(parts[1]),n(parts[3]),n(parts[5])], ys=[n(parts[2]),n(parts[4]),n(parts[6])];
+            include(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
+          } else {
+            const rotate = cmd === 'ROTATE' || cmd === 'ROTATE_TL';
+            const multiply = cmd === 'MULTIPLY' || cmd === 'MULTIPLY_TL';
+            const symmetry = cmd === 'SYMMETRY_X' || cmd === 'SYMMETRY_X_TL';
+            const legacyTopLeft = cmd.endsWith('_TL');
+            const simplePlacement = ['STAMP','STAMP_TL','MIRROR_H','MIRROR_H_TL','MIRROR_V','MIRROR_V_TL'].includes(cmd);
+            const objectIndex = rotate || multiply || symmetry ? 4 : (simplePlacement ? 3 : -1);
+            const childName = objectIndex >= 0 ? parts[objectIndex] : null;
+            const child = childName ? this.macros[childName] : null;
+            const childArgs = objectIndex >= 0 ? parts.slice(objectIndex + 1) : [];
+            let b = child ? this.getMacroBounds(child, childArgs) : null;
+            if (!b && childName && this.objects[childName]?.mask) {
+              const raster = this.getObjectRaster(childName, childArgs);
+              if (raster) b = { width: raster.width, height: raster.height };
+            }
+            if (!b) continue;
+            const x=n(parts[1]), y=n(parts[2]);
+            let width=b.width, height=b.height;
+            if (rotate) {
+              const angle=n(parts[3])*Math.PI/180, cos=Math.cos(angle), sin=Math.sin(angle);
+              const cx=(b.width-1)/2, cy=(b.height-1)/2;
+              const corners=[[0,0],[b.width-1,0],[0,b.height-1],[b.width-1,b.height-1]];
+              const rotated=corners.map(([px,py])=>[
+                cx+(px-cx)*cos-(py-cy)*sin,
+                cy+(px-cx)*sin+(py-cy)*cos
+              ]);
+              width=Math.max(1,Math.ceil(Math.max(...rotated.map(pt=>pt[0])))-Math.floor(Math.min(...rotated.map(pt=>pt[0])))+1);
+              height=Math.max(1,Math.ceil(Math.max(...rotated.map(pt=>pt[1])))-Math.floor(Math.min(...rotated.map(pt=>pt[1])))+1);
+            }
+            const left = legacyTopLeft ? x : x-(width-1)/2;
+            const top = legacyTopLeft ? y : y-(height-1)/2;
+            include(left, top, left+width-1, top+height-1);
+            if (symmetry) {
+              const centerX=n(parts[3]);
+              const mirrorLeft = legacyTopLeft
+                ? Math.round(2*centerX-(left+width-1))
+                : Math.round(2*centerX-(Math.round(left)+width-1));
+              include(mirrorLeft, top, mirrorLeft+width-1, top+height-1);
+            }
+          }
+        }
+        if (!Number.isFinite(minX)) minX = minY = maxX = maxY = 0;
+        return {
+          minX, minY,
+          width: Math.max(1, Math.ceil(maxX-minX+1)),
+          height: Math.max(1, Math.ceil(maxY-minY+1))
+        };
+      }
+
+      makeRaster(width, height) {
+        return Array.from({length: height}, () => Array(width).fill(null));
+      }
+
+      renderMacroRaster(macro, args = []) {
+        const bounds = this.getMacroBounds(macro, args);
+        const oldGrid=this.grid, oldWidth=this.width, oldHeight=this.height;
+        const oldTransform=this.transform;
+        this.width=bounds.width;
+        this.height=bounds.height;
+        this.grid=this.makeRaster(this.width,this.height);
+        this.transform=null;
+        const scope={};
+        macro.params.forEach((param,idx)=>{
+          const value = args[idx] ?? '';
+          scope[param]=value;
+          scope[(idx+1).toString()]=value;
+        });
+        this.executeBlock(macro.lines, -bounds.minX, -bounds.minY, false, false, scope, null);
+        const raster=this.grid;
+        this.grid=oldGrid; this.width=oldWidth; this.height=oldHeight; this.transform=oldTransform;
+        return {
+          pixels:raster,
+          width:bounds.width,
+          height:bounds.height,
+          originX:bounds.minX,
+          originY:bounds.minY
+        };
+      }
+
+      getPlacementRaster(object) {
+        if (!object || !object.pixels || !object.height || !object.width) return object;
+        let minX=object.width, minY=object.height, maxX=-1, maxY=-1;
+        for (let y=0; y<object.height; y++) {
+          for (let x=0; x<object.width; x++) {
+            const color=object.pixels[y]?.[x];
+            const rgba=color ? this.colorToRgba(color) : null;
+            if (!rgba || rgba.a <= 0) continue;
+            minX=Math.min(minX,x); minY=Math.min(minY,y);
+            maxX=Math.max(maxX,x); maxY=Math.max(maxY,y);
+          }
+        }
+        if (maxX < minX || maxY < minY) return object;
+        if (minX===0 && minY===0 && maxX===object.width-1 && maxY===object.height-1) return object;
+        const pixels=Array.from({length:maxY-minY+1},(_,dy)=>
+          object.pixels[minY+dy].slice(minX,maxX+1));
+        return { ...object, pixels, width:maxX-minX+1, height:maxY-minY+1,
+          originX:(object.originX ?? 0)+minX, originY:(object.originY ?? 0)+minY };
+      }
+
+      transformRaster(raster, angle, flipX=false, flipY=false) {
+        const srcH=raster.length, srcW=srcH ? raster[0].length : 0;
+        if (!srcW || !srcH) return {pixels:[],width:0,height:0};
+        const source=this.makeRaster(srcW,srcH);
+        for(let y=0;y<srcH;y++) for(let x=0;x<srcW;x++) {
+          const sx=flipX ? srcW-1-x : x;
+          const sy=flipY ? srcH-1-y : y;
+          source[y][x]=raster[sy][sx];
+        }
+        const rad=angle*Math.PI/180, cos=Math.cos(rad), sin=Math.sin(rad);
+        const cx=(srcW-1)/2, cy=(srcH-1)/2;
+        const corners=[[0,0],[srcW-1,0],[0,srcH-1],[srcW-1,srcH-1]];
+        const rotated=corners.map(([x,y])=>[
+          cx+(x-cx)*cos-(y-cy)*sin,
+          cy+(x-cx)*sin+(y-cy)*cos
+        ]);
+        const minX=Math.floor(Math.min(...rotated.map(p=>p[0])));
+        const maxX=Math.ceil(Math.max(...rotated.map(p=>p[0])));
+        const minY=Math.floor(Math.min(...rotated.map(p=>p[1])));
+        const maxY=Math.ceil(Math.max(...rotated.map(p=>p[1])));
+        const outW=Math.max(1,maxX-minX+1), outH=Math.max(1,maxY-minY+1);
+        const out=this.makeRaster(outW,outH);
+        // Inverse nearest-neighbour sampling: every destination pixel asks which
+        // source pixel owns it. This avoids the pinhole gaps of forward stamping.
+        for(let oy=0;oy<outH;oy++) for(let ox=0;ox<outW;ox++) {
+          const rx=minX+ox, ry=minY+oy;
+          const dx=rx-cx, dy=ry-cy;
+          const sx=dx*cos+dy*sin+cx;
+          const sy=-dx*sin+dy*cos+cy;
+          const ix=Math.round(sx), iy=Math.round(sy);
+          if(ix>=0&&ix<srcW&&iy>=0&&iy<srcH) out[oy][ox]=source[iy][ix];
+        }
+        return {pixels:out,width:outW,height:outH,offsetX:minX,offsetY:minY,centerX:cx,centerY:cy};
+      }
+
+      compositeRaster(raster, x, y, mode='over') {
+        for(let yy=0;yy<raster.length;yy++) for(let xx=0;xx<(raster[yy]?.length||0);xx++) {
+          const color=raster[yy][xx];
+          const gx=Math.round(x+xx), gy=Math.round(y+yy);
+          if(gx<0||gx>=this.width||gy<0||gy>=this.height) continue;
+          if(mode==='erase') {
+            if(color) this.grid[gy][gx]=null;
+          } else if(color) {
+            const base = this.grid[gy][gx];
+            this.grid[gy][gx] = mode === 'multiply'
+              ? this.multiplyColors(base, color)
+              : this.sourceOver(base, color);
+          }
+        }
+      }
+
+      objectExists(name) {
+        return !!(this.objects[name] || this.macros[name]);
+      }
+
+      renderMaskRaster(mask, args = []) {
+        const left = this.getObjectRaster(mask.leftName, args);
+        const right = this.getObjectRaster(mask.rightName, args);
+        if (!left || !right) return null;
+
+        // Each macro raster is normalized to its own bounding box. The bounding
+        // box origin is still meaningful, though, and must be preserved while
+        // combining two objects. Otherwise a circle at (25,16) gets compared
+        // against a rectangle's pixel (0,0) instead of its real (14,5) position.
+        const leftOriginX = left.originX ?? 0;
+        const leftOriginY = left.originY ?? 0;
+        const rightOriginX = right.originX ?? 0;
+        const rightOriginY = right.originY ?? 0;
+        const originX = Math.min(leftOriginX, rightOriginX);
+        const originY = Math.min(leftOriginY, rightOriginY);
+        const maxX = Math.max(
+          leftOriginX + left.width - 1,
+          rightOriginX + right.width - 1
+        );
+        const maxY = Math.max(
+          leftOriginY + left.height - 1,
+          rightOriginY + right.height - 1
+        );
+        const width = Math.max(1, maxX - originX + 1);
+        const height = Math.max(1, maxY - originY + 1);
+        const pixels = this.makeRaster(width, height);
+
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const worldX = originX + x;
+            const worldY = originY + y;
+            const leftX = worldX - leftOriginX;
+            const leftY = worldY - leftOriginY;
+            const rightX = worldX - rightOriginX;
+            const rightY = worldY - rightOriginY;
+            const a = left.pixels[leftY]?.[leftX] || null;
+            const b = right.pixels[rightY]?.[rightX] || null;
+
+            const aRgba = a ? this.colorToRgba(a) : null;
+            const bRgba = b ? this.colorToRgba(b) : null;
+            const aVisible = !!(aRgba && aRgba.a > 0);
+            const bVisible = !!(bRgba && bRgba.a > 0);
+
+            if (mask.op === 'MINUS' || mask.op === 'SUBTRACT' || mask.op === '-') {
+              if (!aVisible) {
+                pixels[y][x] = null;
+              } else if (!bVisible) {
+                pixels[y][x] = a;
+              } else {
+                pixels[y][x] = this.rgbaToHex({
+                  r: aRgba.r,
+                  g: aRgba.g,
+                  b: aRgba.b,
+                  a: aRgba.a * (1 - bRgba.a)
+                });
+              }
+            } else if (mask.op === 'AND') {
+              pixels[y][x] = aVisible && bVisible
+                ? this.rgbaToHex({
+                    r: aRgba.r,
+                    g: aRgba.g,
+                    b: aRgba.b,
+                    a: aRgba.a * bRgba.a
+                  })
+                : null;
+            } else if (mask.op === 'PLUS' || mask.op === 'ADD' || mask.op === '+') {
+              if (!aVisible) pixels[y][x] = bVisible ? b : null;
+              else if (!bVisible) pixels[y][x] = a;
+              else {
+                const unionA = aRgba.a + bRgba.a * (1 - aRgba.a);
+                pixels[y][x] = this.rgbaToHex({
+                  r: aRgba.r,
+                  g: aRgba.g,
+                  b: aRgba.b,
+                  a: unionA
+                });
+              }
+            } else if (mask.op === 'OVER') {
+              if (!bVisible) pixels[y][x] = aVisible ? a : null;
+              else pixels[y][x] = this.sourceOver(a, b);
+            } else {
+              pixels[y][x] = aVisible ? a : null;
+            }
+          }
+        }
+
+        return { pixels, width, height, originX, originY };
+      }
+
+      getObjectRaster(name, args = []) {
+        if (this.objects[name]) {
+          const object = this.objects[name];
+          if (object.mask) return this.renderMaskRaster(object.mask, args);
+          return object;
+        }
+        if (this.macros[name]) return this.renderMacroRaster(this.macros[name], args);
+        return null;
+      }
+
+      createMaskObject(resultName, leftName, op, rightName) {
+        const normalizedOp = op.toUpperCase();
+        if (!this.objectExists(leftName) || !this.objectExists(rightName)) return false;
+
+        this.objects[resultName] = {
+          mask: {
+            leftName,
+            op: normalizedOp,
+            rightName
+          }
+        };
+        return true;
+      }
+
+      setPixel(x, y, color) {
+        x=Math.round(x); y=Math.round(y);
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
+        if (!color) return;
+
+        const canonical = this.canonicalColor(color);
+        if (!canonical) return;
+
+        const source = this.colorToRgba(canonical);
+        if (!source || source.a <= 0) return;
+
+        if (source.a >= 1) {
+          this.grid[y][x] = canonical;
+          return;
+        }
+
+        this.grid[y][x] = this.sourceOver(this.grid[y][x], canonical);
+      }
+
+      setPixelResolved(x, y, canonical, source) {
+        x = Math.round(x);
+        y = Math.round(y);
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
+        if (!canonical || !source || source.a <= 0) return;
+
+        const row = this.grid[y];
+        const base = row[x];
+
+        if (!base || source.a >= 1) {
+          row[x] = canonical;
+        } else {
+          row[x] = this.sourceOver(base, canonical);
+        }
+      }
+
+      evalExpression(token) {
+        if (token === undefined || token === null) return NaN;
+        const value = String(token).trim();
+        if (!value) return NaN;
+
+        const expanded = value
+          .replace(/\bWIDTH\b/gi, String(this.canvasWidth ?? this.width))
+          .replace(/\bHEIGHT\b/gi, String(this.canvasHeight ?? this.height));
+
+        if (/^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(expanded)) return Number(expanded);
+        if (!/^[0-9+\-*/%().\s]+$/.test(expanded)) return NaN;
+        try {
+          const result = Function(`"use strict"; return (${expanded});`)();
+          return Number.isFinite(result) ? result : NaN;
+        } catch {
+          return NaN;
+        }
+      }
+
+      num(token, fallback = 0) {
+        const value = this.evalExpression(token);
+        return Number.isFinite(value) ? value : fallback;
+      }
+
+      getFinalPixel(x, y) {
+        const background = this.colorToRgba(this.bgColor);
+        const drawn = this.grid?.[y]?.[x] ?? null;
+        if (!drawn) return background ? this.rgbaToHex(background) : '#00000000';
+        return this.sourceOver(this.bgColor, drawn);
+      }
+
+      drawTriangle(x1, y1, x2, y2, x3, y3, color) {
+        const minX = Math.floor(Math.min(x1, x2, x3));
+        const maxX = Math.ceil(Math.max(x1, x2, x3));
+        const minY = Math.floor(Math.min(y1, y2, y3));
+        const maxY = Math.ceil(Math.max(y1, y2, y3));
+        const edge = (ax, ay, bx, by, px, py) =>
+          (px - ax) * (by - ay) - (py - ay) * (bx - ax);
+
+        const area = edge(x1, y1, x2, y2, x3, y3);
+        if (area === 0) {
+          this.drawLine(x1, y1, x2, y2, color);
+          this.drawLine(x2, y2, x3, y3, color);
+          this.drawLine(x3, y3, x1, y1, color);
+          return;
+        }
+
+        for (let y = minY; y <= maxY; y++) {
+          for (let x = minX; x <= maxX; x++) {
+            const w1 = edge(x2, y2, x3, y3, x, y);
+            const w2 = edge(x3, y3, x1, y1, x, y);
+            const w3 = edge(x1, y1, x2, y2, x, y);
+            if ((w1 >= 0 && w2 >= 0 && w3 >= 0) || (w1 <= 0 && w2 <= 0 && w3 <= 0)) {
+              this.setPixel(x, y, color);
+            }
+          }
+        }
+      }
+
+      drawLine(x0, y0, x1, y1, color) {
+        x0 = Math.round(x0); y0 = Math.round(y0);
+        x1 = Math.round(x1); y1 = Math.round(y1);
+        const dx = Math.abs(x1 - x0);
+        const dy = Math.abs(y1 - y0);
+        const sx = x0 < x1 ? 1 : -1;
+        const sy = y0 < y1 ? 1 : -1;
+        let err = dx - dy;
+
+        while (true) {
+          this.setPixel(x0, y0, color);
+          if (x0 === x1 && y0 === y1) break;
+          const e2 = 2 * err;
+          if (e2 > -dy) { err -= dy; x0 += sx; }
+          if (e2 < dx) { err += dx; y0 += sy; }
+        }
+      }
+
+      drawCircle(cx, cy, r, color) {
+        cx = Math.round(cx); cy = Math.round(cy); r = Math.round(r);
+        for (let y = -r; y <= r; y++) {
+          for (let x = -r; x <= r; x++) {
+            if (x * x + y * y <= r * r) {
+              this.setPixel(cx + x, cy + y, color);
+            }
+          }
+        }
+      }
+
+      drawEllipse(cx, cy, rx, ry, color) {
+        cx = Math.round(cx); cy = Math.round(cy);
+        rx = Math.max(1, Math.round(rx));
+        ry = Math.max(1, Math.round(ry));
+        const rx2 = rx * rx;
+        const ry2 = ry * ry;
+        for (let y = -ry; y <= ry; y++) {
+          for (let x = -rx; x <= rx; x++) {
+            if ((x * x) * ry2 + (y * y) * rx2 <= rx2 * ry2) {
+              this.setPixel(cx + x, cy + y, color);
+            }
+          }
+        }
+      }
+
+      blendColors(aToken, bToken, t) {
+        const a = this.colorToRgba(aToken);
+        const b = this.colorToRgba(bToken);
+        if (!a || !b) return t < 0.5 ? this.resolveColor(aToken) : this.resolveColor(bToken);
+
+        const aA = a.a * (1 - t);
+        const bA = b.a * t;
+        const outA = aA + bA;
+        if (outA <= 0) return '#00000000';
+
+        return this.rgbaToHex({
+          r: (a.r * aA + b.r * bA) / outA,
+          g: (a.g * aA + b.g * bA) / outA,
+          b: (a.b * aA + b.b * bA) / outA,
+          a: outA
+        });
+      }
+
+      ditherValue(x, y, pattern) {
+        if (pattern === 'BAYER2') {
+          const matrix = [[0, 2], [3, 1]];
+          return matrix[y & 1][x & 1] / 4;
+        }
+        if (pattern === 'BAYER4') {
+          const matrix = [
+            [0, 8, 2, 10],
+            [12, 4, 14, 6],
+            [3, 11, 1, 9],
+            [15, 7, 13, 5]
+          ];
+          return matrix[y & 3][x & 3] / 16;
+        }
+        return (x + y) & 1 ? 1 : 0;
+      }
+
+      parse(code) {
+        this.reset();
+        this.initGrid();
+
+        const rawLines = code.split('\n');
+        let i = 0;
+        const linesToExecute = [];
+
+        while (i < rawLines.length) {
+          let lineNum = i + 1;
+          let line = rawLines[i].trim();
+
+          if (line.startsWith('#')) {
+            line = '';
+          } else {
+            line = line.replace(/\s+#(?=\s|$).*$/, '').trim();
+          }
+
+          if (!line) { i++; continue; }
+
+          const tokens = line.split(/\s+/);
+          const cmd = tokens[0].toUpperCase();
+
+          if (cmd === 'COLORDEF' || cmd === 'COLORS') {
+            i++;
+            while (i < rawLines.length) {
+              const colorLineNum = i + 1;
+              let colorLine = rawLines[i].trim();
+              if (colorLine.startsWith('#')) {
+                colorLine = '';
+              } else {
+                colorLine = colorLine.replace(/\s+#(?=\s|$).*$/, '').trim();
+              }
+
+              const colorEnd = colorLine.toUpperCase();
+              if (colorEnd === 'ENDCOLORDEF' || colorEnd === 'COLOREND' || colorEnd === 'ENDCOLORS') break;
+
+              if (colorLine) {
+                const colorTokens = this.tokenize(colorLine);
+                if (colorTokens[0].toUpperCase() === 'COLOR') colorTokens.shift();
+                const sym = colorTokens[0];
+                const value = colorTokens[1];
+                if (sym && value) {
+                  this.colors[sym] = value;
+                } else {
+                  this.errors.push({ line: colorLineNum, message: 'Color definition needs a name and value' });
+                }
+              }
+              i++;
+            }
+          } else if (cmd === 'DEF') {
+            const macroName = tokens[1];
+            const params = tokens.slice(2);
+            const macroLines = [];
+            i++;
+            while (i < rawLines.length) {
+              let innerLineNum = i + 1;
+              let mLine = rawLines[i].trim();
+              if (mLine.startsWith('#')) {
+                mLine = '';
+              } else {
+                mLine = mLine.replace(/\s+#(?=\s|$).*$/, '').trim();
+              }
+              if (mLine.toUpperCase() === 'ENDDEF') break;
+              if (mLine) macroLines.push({ line: mLine, lineNum: innerLineNum });
+              i++;
+            }
+            if (macroName) {
+              this.macros[macroName] = { params, lines: macroLines };
+            }
+          } else {
+            linesToExecute.push({ line, lineNum });
+          }
+          i++;
+        }
+
+        this.executeBlock(linesToExecute, 0, 0, false, false, {}, null);
+        return { errors: this.errors, width: this.width, height: this.height };
+      }
+
+      executeBlock(lines, offsetX, offsetY, flipX, flipY, scopeVars, transform = null) {
+        const previousTransform = this.transform;
+        this.transform = transform;
+        let i = 0;
+        while (i < lines.length) {
+          const { line, lineNum } = lines[i];
+          
+          let processedLine = line;
+          for (const [key, val] of Object.entries(scopeVars)) {
+            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            processedLine = processedLine.replace(new RegExp(`\\$${escapedKey}\\b`, 'g'), val);
+            if (!/^\d+$/.test(key)) {
+              processedLine = processedLine.replace(new RegExp(`\\b${escapedKey}\\b`, 'g'), val);
+            }
+          }
+
+          const tokens = this.tokenize(processedLine.trim());
+          const cmd = tokens[0].toUpperCase();
+
+          try {
+            if (cmd === 'GRID') {
+              const nextWidth = Math.max(1, Math.round(this.num(tokens[1], this.canvasWidth ?? 32)));
+              const nextHeight = Math.max(1, Math.round(this.num(tokens[2], this.canvasHeight ?? 32)));
+              this.width = nextWidth;
+              this.height = nextHeight;
+              this.canvasWidth = nextWidth;
+              this.canvasHeight = nextHeight;
+              this.initGrid();
+            } else if (cmd === 'BG') {
+              this.bgColor = this.canonicalColor(tokens[1]) || '#00000000';
+            } else if (cmd === 'COLOR') {
+              const sym = tokens[1];
+              const colorValue = tokens[2];
+              if (sym && colorValue) this.colors[sym] = this.canonicalColor(colorValue) || colorValue;
+            } else if (cmd === 'PIXEL') {
+              let rx = this.num(tokens[1]);
+              let ry = this.num(tokens[2]);
+              const color = this.resolveColor(tokens[3]);
+              
+              const finalX = offsetX + (flipX ? -rx : rx);
+              const finalY = offsetY + (flipY ? -ry : ry);
+              this.setPixel(finalX, finalY, color);
+            } else if (cmd === 'RECT' || cmd === 'BOX') {
+              let rx = this.num(tokens[1]);
+              let ry = this.num(tokens[2]);
+              let w = Math.max(1, Math.round(this.num(tokens[3], 1)));
+              let h = Math.max(1, Math.round(this.num(tokens[4], 1)));
+              const color = this.resolveColor(tokens[5]);
+
+              let finalX = offsetX + (flipX ? -(rx + w - 1) : rx);
+              let finalY = offsetY + (flipY ? -(ry + h - 1) : ry);
+
+              if (cmd === 'RECT') {
+                const canonical = this.canonicalColor(color);
+                const source = this.colorToRgba(canonical);
+                const integerAligned = Number.isInteger(finalX) && Number.isInteger(finalY);
+
+                if (integerAligned && source && source.a >= 1) {
+                  const x0 = Math.max(0, finalX);
+                  const x1 = Math.min(this.width, finalX + w);
+                  const y0 = Math.max(0, finalY);
+                  const y1 = Math.min(this.height, finalY + h);
+
+                  for (let yy = y0; yy < y1; yy++) {
+                    this.grid[yy].fill(canonical, x0, x1);
+                  }
+                } else if (integerAligned && source) {
+                  const x0 = Math.max(0, finalX);
+                  const x1 = Math.min(this.width, finalX + w);
+                  const y0 = Math.max(0, finalY);
+                  const y1 = Math.min(this.height, finalY + h);
+
+                  for (let yy = y0; yy < y1; yy++) {
+                    const row = this.grid[yy];
+                    for (let xx = x0; xx < x1; xx++) {
+                      if (!row[xx] || source.a >= 1) row[xx] = canonical;
+                      else row[xx] = this.sourceOver(row[xx], canonical);
+                    }
+                  }
+                } else {
+                  for (let dy = 0; dy < h; dy++) {
+                    for (let dx = 0; dx < w; dx++) {
+                      this.setPixel(finalX + dx, finalY + dy, color);
+                    }
+                  }
+                }
+              } else {
+                for (let dx = 0; dx < w; dx++) {
+                  this.setPixel(finalX + dx, finalY, color);
+                  this.setPixel(finalX + dx, finalY + h - 1, color);
+                }
+                for (let dy = 0; dy < h; dy++) {
+                  this.setPixel(finalX, finalY + dy, color);
+                  this.setPixel(finalX + w - 1, finalY + dy, color);
+                }
+              }
+            } else if (cmd === 'LINE') {
+              let rx1 = this.num(tokens[1]);
+              let ry1 = this.num(tokens[2]);
+              let rx2 = this.num(tokens[3]);
+              let ry2 = this.num(tokens[4]);
+              const color = this.resolveColor(tokens[5]);
+
+              const x1 = offsetX + (flipX ? -rx1 : rx1);
+              const y1 = offsetY + (flipY ? -ry1 : ry1);
+              const x2 = offsetX + (flipX ? -rx2 : rx2);
+              const y2 = offsetY + (flipY ? -ry2 : ry2);
+
+              this.drawLine(x1, y1, x2, y2, color);
+            } else if (cmd === 'CIRCLE') {
+              let rx = this.num(tokens[1]);
+              let ry = this.num(tokens[2]);
+              let r = Math.max(1, Math.round(this.num(tokens[3], 1)));
+              const color = this.resolveColor(tokens[4]);
+
+              const cx = offsetX + (flipX ? -rx : rx);
+              const cy = offsetY + (flipY ? -ry : ry);
+              this.drawCircle(cx, cy, r, color);
+            } else if (cmd === 'ELLIPSE') {
+              let rx = this.num(tokens[1]);
+              let ry = this.num(tokens[2]);
+              let radX = Math.max(1, Math.round(this.num(tokens[3], 1)));
+              let radY = Math.max(1, Math.round(this.num(tokens[4], 1)));
+              const color = this.resolveColor(tokens[5]);
+
+              const cx = offsetX + (flipX ? -rx : rx);
+              const cy = offsetY + (flipY ? -ry : ry);
+              this.drawEllipse(cx, cy, radX, radY, color);
+            } else if (cmd === 'TRIANGLE') {
+              const x1 = offsetX + (flipX ? -this.num(tokens[1]) : this.num(tokens[1]));
+              const y1 = offsetY + (flipY ? -this.num(tokens[2]) : this.num(tokens[2]));
+              const x2 = offsetX + (flipX ? -this.num(tokens[3]) : this.num(tokens[3]));
+              const y2 = offsetY + (flipY ? -this.num(tokens[4]) : this.num(tokens[4]));
+              const x3 = offsetX + (flipX ? -this.num(tokens[5]) : this.num(tokens[5]));
+              const y3 = offsetY + (flipY ? -this.num(tokens[6]) : this.num(tokens[6]));
+              const color = this.resolveColor(tokens[7]);
+              this.drawTriangle(x1, y1, x2, y2, x3, y3, color);
+            } else if (cmd === 'GRADRECT') {
+              let rx = this.num(tokens[1]);
+              let ry = this.num(tokens[2]);
+              let w = Math.max(1, Math.round(this.num(tokens[3], 1)));
+              let h = Math.max(1, Math.round(this.num(tokens[4], 1)));
+              const colorA = tokens[5];
+              const colorB = tokens[6];
+              let direction = (tokens[7] || 'V').toUpperCase();
+              if (direction !== 'H' && direction !== 'V') direction = 'V';
+
+              let finalX = offsetX + (flipX ? -(rx + w - 1) : rx);
+              let finalY = offsetY + (flipY ? -(ry + h - 1) : ry);
+
+              const rgbaA = this.colorToRgba(colorA);
+              const rgbaB = this.colorToRgba(colorB);
+              const blendAt = (t) => {
+                if (!rgbaA || !rgbaB) return {
+                  canonical: this.blendColors(colorA, colorB, t),
+                  source: null
+                };
+
+                const aA = rgbaA.a * (1 - t);
+                const bA = rgbaB.a * t;
+                const outA = aA + bA;
+
+                if (outA <= 0) {
+                  return { canonical: '#00000000', source: { r: 0, g: 0, b: 0, a: 0 } };
+                }
+
+                const source = {
+                  r: (rgbaA.r * aA + rgbaB.r * bA) / outA,
+                  g: (rgbaA.g * aA + rgbaB.g * bA) / outA,
+                  b: (rgbaA.b * aA + rgbaB.b * bA) / outA,
+                  a: outA
+                };
+
+                return {
+                  canonical: this.rgbaToHex(source),
+                  source
+                };
+              };
+
+              if (direction === 'V') {
+                for (let dy = 0; dy < h; dy++) {
+                  let t = h <= 1 ? 0 : dy / (h - 1);
+                  if (flipY) t = 1 - t;
+                  const blended = blendAt(t);
+
+                  for (let dx = 0; dx < w; dx++) {
+                    this.setPixelResolved(finalX + dx, finalY + dy, blended.canonical, blended.source);
+                  }
+                }
+              } else {
+                for (let dx = 0; dx < w; dx++) {
+                  let t = w <= 1 ? 0 : dx / (w - 1);
+                  if (flipX) t = 1 - t;
+                  const blended = blendAt(t);
+
+                  for (let dy = 0; dy < h; dy++) {
+                    this.setPixelResolved(finalX + dx, finalY + dy, blended.canonical, blended.source);
+                  }
+                }
+              }
+            } else if (cmd === 'DITHERRECT') {
+              let rx = this.num(tokens[1]);
+              let ry = this.num(tokens[2]);
+              let w = Math.max(1, Math.round(this.num(tokens[3], 1)));
+              let h = Math.max(1, Math.round(this.num(tokens[4], 1)));
+              const colorA = this.resolveColor(tokens[5]);
+              const colorB = this.resolveColor(tokens[6]);
+              const canonicalA = this.canonicalColor(colorA);
+              const canonicalB = this.canonicalColor(colorB);
+              const sourceA = this.colorToRgba(canonicalA);
+              const sourceB = this.colorToRgba(canonicalB);
+              const pattern = (tokens[7] || 'CHECKER').toUpperCase();
+
+              let finalX = offsetX + (flipX ? -(rx + w - 1) : rx);
+              let finalY = offsetY + (flipY ? -(ry + h - 1) : ry);
+
+              for (let dy = 0; dy < h; dy++) {
+                for (let dx = 0; dx < w; dx++) {
+                  const patternX = flipX ? (w - 1 - dx) : dx;
+                  const patternY = flipY ? (h - 1 - dy) : dy;
+                  const value = this.ditherValue(patternX, patternY, pattern);
+                  if (value < 0.5) {
+                    this.setPixelResolved(finalX + dx, finalY + dy, canonicalA, sourceA);
+                  } else {
+                    this.setPixelResolved(finalX + dx, finalY + dy, canonicalB, sourceB);
+                  }
+                }
+              }
+            } else if (cmd === 'ROTATE' || cmd === 'ROTATE_TL') {
+              const x=this.num(tokens[1]);
+              const y=this.num(tokens[2]);
+              const angle=this.num(tokens[3]);
+              const objectName=tokens[4];
+              const args=tokens.slice(5);
+              const sourceObject=this.getObjectRaster(objectName,args);
+              if(sourceObject) {
+                const legacyTopLeft=cmd==='ROTATE_TL';
+                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
+                const transformed=this.transformRaster(object.pixels,angle,flipX,flipY);
+                const drawX=legacyTopLeft
+                  ? offsetX+x+transformed.offsetX
+                  : offsetX+x-(transformed.width-1)/2;
+                const drawY=legacyTopLeft
+                  ? offsetY+y+transformed.offsetY
+                  : offsetY+y-(transformed.height-1)/2;
+                this.compositeRaster(transformed.pixels,drawX,drawY,'over');
+              } else {
+                this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
+              }
+            } else if (['STAMP','STAMP_TL','MIRROR_H','MIRROR_H_TL','MIRROR_V','MIRROR_V_TL'].includes(cmd)) {
+              const x=this.num(tokens[1]);
+              const y=this.num(tokens[2]);
+              const objectName=tokens[3];
+              const args=tokens.slice(4);
+              const sourceObject=this.getObjectRaster(objectName,args);
+              if(sourceObject) {
+                const legacyTopLeft=cmd.endsWith('_TL');
+                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
+                const doFlipX=cmd==='MIRROR_H' || cmd==='MIRROR_H_TL';
+                const doFlipY=cmd==='MIRROR_V' || cmd==='MIRROR_V_TL';
+                const transformed=(doFlipX||doFlipY)
+                  ? this.transformRaster(object.pixels,0,doFlipX,doFlipY)
+                  : object;
+                const drawX=legacyTopLeft ? x : x-(transformed.width-1)/2;
+                const drawY=legacyTopLeft ? y : y-(transformed.height-1)/2;
+                this.compositeRaster(transformed.pixels,offsetX+drawX,offsetY+drawY,'over');
+              } else {
+                this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
+              }
+            } else if (cmd === 'MULTIPLY' || cmd === 'MULTIPLY_TL') {
+              const x=this.num(tokens[1]);
+              const y=this.num(tokens[2]);
+              const objectName=tokens[3];
+              const args=tokens.slice(4);
+              const sourceObject=this.getObjectRaster(objectName,args);
+              if(sourceObject) {
+                const legacyTopLeft=cmd==='MULTIPLY_TL';
+                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
+                const drawX=legacyTopLeft ? x : x-(object.width-1)/2;
+                const drawY=legacyTopLeft ? y : y-(object.height-1)/2;
+                this.compositeRaster(object.pixels,offsetX+drawX,offsetY+drawY,'multiply');
+              } else {
+                this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
+              }
+            } else if (cmd === 'SYMMETRY_X' || cmd === 'SYMMETRY_X_TL') {
+              const x=this.num(tokens[1]);
+              const y=this.num(tokens[2]);
+              const centerX=this.num(tokens[3]);
+              const objectName=tokens[4];
+              const args=tokens.slice(5);
+              const sourceObject=this.getObjectRaster(objectName,args);
+              if(sourceObject) {
+                const legacyTopLeft=cmd==='SYMMETRY_X_TL';
+                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
+                const drawX=legacyTopLeft ? x : x-(object.width-1)/2;
+                const drawY=legacyTopLeft ? y : y-(object.height-1)/2;
+                this.compositeRaster(object.pixels,offsetX+drawX,offsetY+drawY,'over');
+                const actualLeft=Math.round(drawX);
+                const mirroredX=legacyTopLeft
+                  ? Math.round(2*centerX-(drawX+object.width-1))
+                  : Math.round(2*centerX-(actualLeft+object.width-1));
+                const mirrored=this.transformRaster(object.pixels,0,true,false);
+                this.compositeRaster(mirrored.pixels,offsetX+mirroredX,offsetY+drawY,'over');
+              } else {
+                this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
+              }
+            } else if (cmd === 'MASK') {
+              const resultName=tokens[1];
+              let leftName=tokens[2];
+              let op=tokens[3] ? tokens[3].toUpperCase() : '';
+              let rightName=tokens[4];
+              // Also accept: MASK result A - B / MASK result A + B
+              if((op==='=' || op===':') && tokens[4]) {
+                leftName=tokens[2]; op=(tokens[4]||'').toUpperCase(); rightName=tokens[5];
+              }
+              if(!resultName || !leftName || !rightName) {
+                this.errors.push({line:lineNum,message:'MASK syntax: MASK result A MINUS B (or PLUS/OVER/AND)'});
+              } else if(!this.createMaskObject(resultName,leftName,op,rightName)) {
+                this.errors.push({line:lineNum,message:`MASK needs existing objects '${leftName}' and '${rightName}'`});
+              }
+            } else if (cmd === 'LOOP') {
+              const loopVar = tokens[1];
+              const start = this.num(tokens[2]);
+              const end = this.num(tokens[3]);
+              const step = this.num(tokens[4], 1);
+              if (step === 0) {
+                this.errors.push({ line: lineNum, message: 'LOOP step cannot be zero' });
+                i++;
+                continue;
+              }
+
+              const loopLines = [];
+              i++;
+              while (i < lines.length) {
+                if (lines[i].line.trim().toUpperCase() === 'ENDLOOP') break;
+                loopLines.push(lines[i]);
+                i++;
+              }
+
+              for (let val = start; step > 0 ? val <= end : val >= end; val += step) {
+                const innerVars = { ...scopeVars, [loopVar]: val, [`$${loopVar}`]: val };
+                this.executeBlock(loopLines, offsetX, offsetY, flipX, flipY, innerVars, this.transform);
+              }
+            }
+          } catch (err) {
+            this.errors.push({ line: lineNum, message: err.message });
+          }
+          i++;
+        }
+        this.transform = previousTransform;
+      }
+    }
+
+
+    // UI CONTROLLER & VIEWPORT PAN/ZOOM
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const interpreter = new PixelDSLInterpreter();
+
+      // DOM Elements
+      const codeEditor = document.getElementById('codeEditor');
+      const editorFileName = document.getElementById('editorFileName');
+      const lineNumbers = document.getElementById('lineNumbers');
+      const lineCount = document.getElementById('lineCount');
+      const pixelCanvas = document.getElementById('pixelCanvas');
+      const ctx = pixelCanvas.getContext('2d', { alpha: true });
+      ctx.imageSmoothingEnabled = false;
+      
+      const viewport = document.getElementById('viewport');
+      const canvasContainer = document.getElementById('canvasContainer');
+      const canvasDimBadge = document.getElementById('canvasDimBadge');
+      const gridOverlay = document.getElementById('gridOverlay');
+      const gridToggle = document.getElementById('gridToggle');
+      const inspectCoords = document.getElementById('inspectCoords');
+      const inspectColor = document.getElementById('inspectColor');
+      const inspectSwatch = document.getElementById('inspectSwatch');
+      const drawnPixelsCount = document.getElementById('drawnPixelsCount');
+      const renderTimeMs = document.getElementById('renderTimeMs');
+      const statusText = document.getElementById('statusText');
+      const errorBanner = document.getElementById('errorBanner');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Controls
+      const presetSelect = document.getElementById('presetSelect');
+      const mobilePresetSelect = document.getElementById('mobilePresetSelect');
+      const exportScaleSelect = document.getElementById('exportScaleSelect');
+      const zoomInBtn = document.getElementById('zoomInBtn');
+      const zoomOutBtn = document.getElementById('zoomOutBtn');
+      const zoomResetBtn = document.getElementById('zoomResetBtn');
+      const zoomLabel = document.getElementById('zoomLabel');
+      const livePreviewToggle = document.getElementById('livePreviewToggle');
+      const renderBtn = document.getElementById('renderBtn');
+
+      let livePreviewEnabled = true;
+      let renderImageData = null;
+      let renderImageWidth = 0;
+      let renderImageHeight = 0;
+
+      function isMobileViewport() {
+        return window.matchMedia('(max-width: 768px)').matches;
+      }
+
+      // Modals & Actions
+      const cheatSheetBtn = document.getElementById('cheatSheetBtn');
+      const cheatSheetModal = document.getElementById('cheatSheetModal');
+      const closeCheatSheetBtn = document.getElementById('closeCheatSheetBtn');
+      const llmPromptBtn = document.getElementById('llmPromptBtn');
+      const llmPromptModal = document.getElementById('llmPromptModal');
+      const closeLlmModalBtn = document.getElementById('closeLlmModalBtn');
+      const inspectColorEl = document.getElementById('inspectColor');
+      const copyPromptTemplateBtn = document.getElementById('copyPromptTemplateBtn');
+      const exportPngBtn = document.getElementById('exportPngBtn');
+      const exportSvgBtn = document.getElementById('exportSvgBtn');
+      const copyCodeBtn = document.getElementById('copyCodeBtn');
+      const clearCodeBtn = document.getElementById('clearCodeBtn');
+      const openCodeBtn = document.getElementById('openCodeBtn');
+      const downloadCodeBtn = document.getElementById('downloadCodeBtn');
+      const codeFileInput = document.getElementById('codeFileInput');
+      const dropOverlay = document.getElementById('dropOverlay');
+
+      // Mobile Tabs
+      const tabEditor = document.getElementById('tabEditor');
+      const tabPreview = document.getElementById('tabPreview');
+      const editorPane = document.getElementById('editorPane');
+      const previewPane = document.getElementById('previewPane');
+
+      // Pan & Zoom State
+      let zoomLevel = 1.0;
+      let panX = 0;
+      let panY = 0;
+      let isPanning = false;
+      let startX = 0;
+      let startY = 0;
+
+      let renderTimeout = null;
+
+      function fitCanvasToViewport() {
+        const rect = viewport.getBoundingClientRect();
+        const maxW = Math.max(1, rect.width * 0.90);
+        const maxH = Math.max(1, rect.height * 0.90);
+        const aspect = interpreter.width / Math.max(1, interpreter.height);
+
+        let width = maxW;
+        let height = width / aspect;
+        if (height > maxH) {
+          height = maxH;
+          width = height * aspect;
+        }
+
+        canvasContainer.style.width = `${Math.max(1, Math.floor(width))}px`;
+        canvasContainer.style.height = `${Math.max(1, Math.floor(height))}px`;
+      }
+
+      let gridSignature = '';
+
+      function updateGridOverlay() {
+        const w = Math.max(1, interpreter.width);
+        const h = Math.max(1, interpreter.height);
+        const signature = `${w}x${h}`;
+
+        if (gridSignature !== signature) {
+          const vertical = [];
+          const horizontal = [];
+          for (let x = 0; x <= w; x++) vertical.push(`M ${x} 0 V ${h}`);
+          for (let y = 0; y <= h; y++) horizontal.push(`M 0 ${y} H ${w}`);
+
+          gridOverlay.setAttribute('viewBox', `0 0 ${w} ${h}`);
+          gridOverlay.setAttribute('preserveAspectRatio', 'none');
+          gridOverlay.innerHTML = `<path d="${vertical.join(' ')} ${horizontal.join(' ')}"></path>`;
+          gridSignature = signature;
+        }
+
+        const renderedCellX = (canvasContainer.clientWidth * zoomLevel) / w;
+        const renderedCellY = (canvasContainer.clientHeight * zoomLevel) / h;
+        const minRenderedCell = Math.min(renderedCellX, renderedCellY);
+        const path = gridOverlay.querySelector('path');
+
+        if (path) {
+          const strokeUnitsX = renderedCellX > 0 ? 1 / renderedCellX : 1;
+          const strokeUnitsY = renderedCellY > 0 ? 1 / renderedCellY : 1;
+          path.style.strokeWidth = `${Math.max(0.01, Math.min(strokeUnitsX, strokeUnitsY))}`;
+        }
+
+        gridOverlay.style.opacity = minRenderedCell < 1.35 ? '0' : '1';
+      }
+
+      function updateTransform() {
+        canvasContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+        zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
+        updateGridOverlay();
+      }
+
+      function updateExportScaleOptions() {
+        const width = interpreter.width;
+        const height = interpreter.height;
+        const selected = exportScaleSelect.value || '8';
+        for (const option of exportScaleSelect.options) {
+          const scale = Number(option.value);
+          option.textContent = `${scale}x (${width * scale}x${height * scale})`;
+        }
+        exportScaleSelect.value = [...exportScaleSelect.options].some(option => option.value === selected)
+          ? selected
+          : '8';
+      }
+
+      function renderScene() {
+        const startTime = performance.now();
+        const code = codeEditor.value;
+
+        const result = interpreter.parse(code);
+        updateExportScaleOptions();
+
+        const w = interpreter.width;
+        const h = interpreter.height;
+
+        if (pixelCanvas.width !== w || pixelCanvas.height !== h) {
+          pixelCanvas.width = w;
+          pixelCanvas.height = h;
+          canvasDimBadge.textContent = `${w}x${h}`;
+          renderImageData = null;
+        }
+
+        if (!renderImageData || renderImageWidth !== w || renderImageHeight !== h) {
+          renderImageData = ctx.createImageData(w, h);
+          renderImageWidth = w;
+          renderImageHeight = h;
+        } else {
+          renderImageData.data.fill(0);
+        }
+
+        const data = renderImageData.data;
+        const grid = interpreter.grid;
+        let visiblePixels = 0;
+
+        for (let y = 0, di = 0; y < h; y++) {
+          const row = grid[y];
+          for (let x = 0; x < w; x++, di += 4) {
+            const color = row[x];
+            if (!color) continue;
+
+            const rgba = interpreter.colorToRgba(color);
+            if (!rgba || rgba.a <= 0) continue;
+
+            data[di] = rgba.r;
+            data[di + 1] = rgba.g;
+            data[di + 2] = rgba.b;
+            data[di + 3] = Math.round(rgba.a * 255);
+            visiblePixels++;
+          }
+        }
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.putImageData(renderImageData, 0, 0);
+
+        const bgRgba = interpreter.colorToRgba(interpreter.bgColor);
+        pixelCanvas.style.backgroundColor = bgRgba
+          ? interpreter.rgbaToCss(bgRgba)
+          : 'transparent';
+
+        interpreter.drawnPixelsCount = visiblePixels;
+
+        const endTime = performance.now();
+        renderTimeMs.textContent = `${(endTime - startTime).toFixed(1)} ms`;
+        drawnPixelsCount.textContent = visiblePixels;
+
+        if (result.errors.length > 0) {
+          errorBanner.classList.remove('hidden');
+          errorMessage.textContent = `Line ${result.errors[0].line}: ${result.errors[0].message}`;
+          statusText.textContent = 'Syntax Error';
+          statusText.style.color = 'var(--rose)';
+        } else {
+          errorBanner.classList.add('hidden');
+          statusText.textContent = 'Render OK';
+          statusText.style.color = 'var(--emerald)';
+        }
+
+        fitCanvasToViewport();
+        updateTransform();
+      }
+
+      function markRenderPending() {
+        statusText.textContent = 'Edited — Render pending';
+        statusText.style.color = 'var(--cyan)';
+      }
+
+      function requestLiveRender() {
+        clearTimeout(renderTimeout);
+        if (!livePreviewEnabled || isMobileViewport()) {
+          renderTimeout = null;
+          return;
+        }
+
+        renderTimeout = setTimeout(() => {
+          renderTimeout = null;
+          renderScene();
+        }, 100);
+      }
+
+      window.addEventListener('resize', () => {
+        fitCanvasToViewport();
+        updateTransform();
+        if (isMobileViewport()) {
+          clearTimeout(renderTimeout);
+          renderTimeout = null;
+        }
+      });
+
+      // Sync Line Numbers and Scrolling
+      function updateLineNumbers() {
+        const lines = codeEditor.value.split('\n');
+        lineCount.textContent = `(${lines.length} lines)`;
+        let numsHtml = '';
+        for (let i = 1; i <= lines.length; i++) {
+          numsHtml += `${i}\n`;
+        }
+        lineNumbers.textContent = numsHtml;
+      }
+
+      function syncScroll() {
+        lineNumbers.scrollTop = codeEditor.scrollTop;
+      }
+
+      codeEditor.addEventListener('scroll', syncScroll);
+
+      codeEditor.addEventListener('input', () => {
+        updateLineNumbers();
+        syncScroll();
+
+        if (isMobileViewport()) {
+          clearTimeout(renderTimeout);
+          renderTimeout = null;
+          markRenderPending();
+          return;
+        }
+
+        if (livePreviewEnabled) {
+          requestLiveRender();
+        } else {
+          clearTimeout(renderTimeout);
+          renderTimeout = null;
+          markRenderPending();
+        }
+      });
+
+      // PANNING & ZOOMING INTERACTION (Mouse & Touch)
+
+    // ZOOM HELPER — anchors zoom at a client (screen) point
+    // Assumes transform-origin: center center on #canvasContainer
+    // and that updateTransform() does:
+    //   translate(panX px, panY px) scale(zoomLevel)
+    
+    function zoomAt(clientX, clientY, factor) {
+      const newZoom = Math.max(0.1, Math.min(25.0, zoomLevel * factor));
+      if (newZoom === zoomLevel) return;
+    
+      const rect = viewport.getBoundingClientRect();
+      const vcx = rect.left + rect.width  / 2;   // viewport center, client space
+      const vcy = rect.top  + rect.height / 2;
+    
+      // Vector from current container center → anchor point (client space)
+      const dx = clientX - (vcx + panX);
+      const dy = clientY - (vcy + panY);
+    
+      const ratio = newZoom / zoomLevel;
+      panX += dx * (1 - ratio);
+      panY += dy * (1 - ratio);
+    
+      zoomLevel = newZoom;
+      updateTransform();
+    }
+    
+    
+    // MOUSE PAN + INSPECTOR
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isPanning = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+    
+    window.addEventListener('mousemove', (e) => {
+      if (isPanning) {
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        updateTransform();
+      }
+    });
+    // Pixel inspector - updates only when you click on the canvas
+    pixelCanvas.addEventListener('click', (e) => {
+      const rect = pixelCanvas.getBoundingClientRect();
+      
+      if (e.clientX >= rect.left && e.clientX <= rect.right &&
+          e.clientY >= rect.top  && e.clientY <= rect.bottom) {
+        
+        const x = Math.floor((e.clientX - rect.left) * (interpreter.width  / rect.width));
+        const y = Math.floor((e.clientY - rect.top ) * (interpreter.height / rect.height));
+
+        if (x >= 0 && x < interpreter.width && y >= 0 && y < interpreter.height) {
+          inspectCoords.textContent = `(${x}, ${y})`;
+
+          const color = interpreter.getFinalPixel(x, y);
+          const rgba = interpreter.colorToRgba(color) || { r: 0, g: 0, b: 0, a: 0 };
+
+          inspectColor.textContent = color;
+          inspectSwatch.style.backgroundColor = interpreter.rgbaToCss(rgba);
+        }
+      }
+    });
+// Pixel inspector
+      // const rect = pixelCanvas.getBoundingClientRect();
+      // if (e.clientX >= rect.left && e.clientX <= rect.right &&
+      //     e.clientY >= rect.top  && e.clientY <= rect.bottom) {
+      //   const x = Math.floor((e.clientX - rect.left) * (interpreter.width  / rect.width));
+      //   const y = Math.floor((e.clientY - rect.top ) * (interpreter.height / rect.height));
+    
+      //   if (x >= 0 && x < interpreter.width && y >= 0 && y < interpreter.height) {
+      //     inspectCoords.textContent = `(${x}, ${y})`;
+
+      //     const color = interpreter.getFinalPixel(x, y);
+      //     const rgba = interpreter.colorToRgba(color) || { r: 0, g: 0, b: 0, a: 0 };
+
+      //     inspectColor.textContent = color;
+      //     inspectSwatch.style.backgroundColor = interpreter.rgbaToCss(rgba);
+      //   }
+      // }
+    window.addEventListener('mouseup', () => { isPanning = false; });
+    
+    
+    // TOUCH — 1 finger pan, 2 fingers pan + pinch-zoom
+    let touchMode = 0;                          // 0=none, 1=pan, 2=pinch
+    let pinchLastMid  = { x: 0, y: 0 };
+    let pinchLastDist = 0;
+    
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchMode = 1;
+        isPanning = true;
+        startX = e.touches[0].clientX - panX;
+        startY = e.touches[0].clientY - panY;
+      } else if (e.touches.length === 2) {
+        touchMode = 2;
+        isPanning = false;
+        const [t1, t2] = e.touches;
+        pinchLastMid  = { x: (t1.clientX + t2.clientX) / 2,
+                          y: (t1.clientY + t2.clientY) / 2 };
+        pinchLastDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      }
+    }, { passive: true });
+    
+    viewport.addEventListener('touchmove', (e) => {
+      if (touchMode === 1 && e.touches.length === 1) {
+        panX = e.touches[0].clientX - startX;
+        panY = e.touches[0].clientY - startY;
+        updateTransform();
+    
+      } else if (touchMode === 2 && e.touches.length === 2) {
+        const [t1, t2] = e.touches;
+        const mid  = { x: (t1.clientX + t2.clientX) / 2,
+                       y: (t1.clientY + t2.clientY) / 2 };
+        const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    
+        // 1) Pan by midpoint delta
+        panX += mid.x - pinchLastMid.x;
+        panY += mid.y - pinchLastMid.y;
+    
+        // 2) Zoom anchored at the current midpoint
+        if (pinchLastDist > 0 && dist > 0) {
+          zoomAt(mid.x, mid.y, dist / pinchLastDist);
+        } else {
+          updateTransform();
+        }
+    
+        pinchLastMid  = mid;
+        pinchLastDist = dist;
+      }
+    }, { passive: true });
+    
+    function endTouch(e) {
+      if (e.touches.length === 0) {
+        touchMode = 0;
+        isPanning = false;
+      } else if (e.touches.length === 1) {
+        // Went from 2 fingers → 1: restart single-finger pan on the remaining finger
+        touchMode = 1;
+        isPanning = true;
+        startX = e.touches[0].clientX - panX;
+        startY = e.touches[0].clientY - panY;
+      }
+    }
+    viewport.addEventListener('touchend',    endTouch);
+    viewport.addEventListener('touchcancel', endTouch);
+    
+    
+    // WHEEL ZOOM — anchored at the mouse
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.15 : 0.85);
+    }, { passive: false });
+    
+    // BUTTONS — anchored at viewport center
+    function zoomAtViewportCenter(factor) {
+      const rect = viewport.getBoundingClientRect();
+      zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, factor);
+    }
+    zoomInBtn .addEventListener('click', () => zoomAtViewportCenter(1.25));
+    zoomOutBtn.addEventListener('click', () => zoomAtViewportCenter(0.8));
+    zoomResetBtn.addEventListener('click', () => {
+      zoomLevel = 1.0; panX = 0; panY = 0; updateTransform();
+    });
+    
+    gridToggle.addEventListener('change', (e) => {
+      gridOverlay.style.display = e.target.checked ? 'block' : 'none';
+    });
+    gridOverlay.style.display = gridToggle.checked ? 'block' : 'none';
+
+      livePreviewToggle.addEventListener('change', (e) => {
+        livePreviewEnabled = e.target.checked;
+        clearTimeout(renderTimeout);
+        renderTimeout = null;
+
+        if (livePreviewEnabled) {
+          renderScene();
+        } else {
+          statusText.textContent = 'Live Preview Off';
+          statusText.style.color = 'var(--text-muted)';
+        }
+      });
+
+      renderBtn.addEventListener('click', () => {
+        clearTimeout(renderTimeout);
+        renderTimeout = null;
+        renderScene();
+      });
+
+      // EXPORT ENGINES
+      exportPngBtn.addEventListener('click', () => {
+        const scale = parseInt(exportScaleSelect.value) || 8;
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = interpreter.width * scale;
+        exportCanvas.height = interpreter.height * scale;
+        const expCtx = exportCanvas.getContext('2d');
+        expCtx.imageSmoothingEnabled = false;
+
+        expCtx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
+        const bgRgba = interpreter.colorToRgba(interpreter.bgColor);
+        if (bgRgba && bgRgba.a > 0) {
+          expCtx.fillStyle = interpreter.rgbaToCss(bgRgba);
+          expCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        }
+
+        for (let y = 0; y < interpreter.height; y++) {
+          for (let x = 0; x < interpreter.width; x++) {
+            const color = interpreter.grid[y][x];
+            const rgba = color ? interpreter.colorToRgba(color) : null;
+            if (rgba && rgba.a > 0) {
+              expCtx.fillStyle = interpreter.rgbaToCss(rgba);
+              expCtx.fillRect(x * scale, y * scale, scale, scale);
+            }
+          }
+        }
+
+        const link = document.createElement('a');
+        link.download = `pixeldsl-${interpreter.width}x${interpreter.height}.png`;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+      });
+
+      exportSvgBtn.addEventListener('click', () => {
+        const scale = parseInt(exportScaleSelect.value) || 8;
+        const w = interpreter.width;
+        const h = interpreter.height;
+
+        const svgColorAttrs = (token) => {
+          const rgba = interpreter.colorToRgba(token);
+          if (!rgba || rgba.a <= 0) return null;
+          const hex = interpreter.rgbaToHex({ r: rgba.r, g: rgba.g, b: rgba.b, a: 1 });
+          const alpha = Math.max(0, Math.min(1, rgba.a));
+          return alpha >= 1
+            ? `fill="${hex}"`
+            : `fill="${hex}" fill-opacity="${Number(alpha.toFixed(6))}"`;
+        };
+
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w * scale}" height="${h * scale}" shape-rendering="crispEdges">\n`;
+
+        const bgAttrs = svgColorAttrs(interpreter.bgColor);
+        if (bgAttrs) {
+          svg += `  <rect width="${w}" height="${h}" ${bgAttrs} />\n`;
+        }
+
+        for (let y = 0; y < h; y++) {
+          let x = 0;
+          while (x < w) {
+            const color = interpreter.grid[y][x];
+            const attrs = color ? svgColorAttrs(color) : null;
+            if (attrs) {
+              let runWidth = 1;
+              while (
+                x + runWidth < w &&
+                interpreter.grid[y][x + runWidth] === color
+              ) {
+                runWidth++;
+              }
+              svg += `  <rect x="${x}" y="${y}" width="${runWidth}" height="1" ${attrs} />\n`;
+              x += runWidth;
+            } else {
+              x++;
+            }
+          }
+        }
+
+        svg += `</svg>`;
+
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `pixeldsl-${w}x${h}.svg`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Presets & Clipboard
+      function loadPreset(key) {
+        if (PRESETS[key]) {
+          codeEditor.value = PRESETS[key];
+          setEditorFileName('script.pxd');
+          updateLineNumbers();
+          codeEditor.scrollTop = 0;
+          syncScroll();
+
+          if (!isMobileViewport() && livePreviewEnabled) {
+            renderScene();
+          } else {
+            markRenderPending();
+          }
+        }
+      }
+
+      presetSelect.addEventListener('change', (e) => loadPreset(e.target.value));
+      mobilePresetSelect.addEventListener('change', (e) => loadPreset(e.target.value));
+
+      async function copyTextSafe(text) {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch (e) {}
+
+        const helper = document.createElement('textarea');
+        helper.value = text;
+        helper.setAttribute('readonly', '');
+        helper.style.position = 'fixed';
+        helper.style.left = '-9999px';
+        helper.style.top = '0';
+        document.body.appendChild(helper);
+        helper.focus();
+        helper.select();
+        helper.setSelectionRange(0, helper.value.length);
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (e) {}
+        helper.remove();
+        return copied;
+      }
+
+      let currentFileName = 'script.pxd';
+
+      function sanitizeCodeFileName(name) {
+        let value = String(name || '').trim().replace(/[<>:"/\\|?*\x00-\x1F]/g, '_');
+        if (!value) value = 'script';
+        if (!/\.[A-Za-z0-9_-]+$/.test(value)) value += '.pxd';
+        return value;
+      }
+
+      function setEditorFileName(name) {
+        currentFileName = sanitizeCodeFileName(name);
+        editorFileName.textContent = currentFileName;
+      }
+
+      editorFileName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); editorFileName.blur(); }
+        else if (e.key === 'Escape') { e.preventDefault(); editorFileName.textContent = currentFileName; editorFileName.blur(); }
+      });
+      editorFileName.addEventListener('blur', () => setEditorFileName(editorFileName.textContent));
+      editorFileName.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        document.execCommand('insertText', false, text.replace(/[\r\n]/g, ''));
+      });
+
+      async function loadCodeFile(file) {
+        if (!file) return;
+        try {
+          const code = await file.text();
+          codeEditor.value = code;
+          setEditorFileName(file.name || 'script.pxd');
+          updateLineNumbers();
+          codeEditor.scrollTop = 0;
+          syncScroll();
+
+          if (!isMobileViewport() && livePreviewEnabled) {
+            renderScene();
+          } else {
+            markRenderPending();
+          }
+        } catch (err) {
+          errorBanner.classList.remove('hidden');
+          errorMessage.textContent = `Could not open file: ${err.message || err}`;
+          statusText.textContent = 'File Error';
+          statusText.style.color = 'var(--rose)';
+        }
+      }
+
+      openCodeBtn.addEventListener('click', () => codeFileInput.click());
+
+      codeFileInput.addEventListener('change', async (e) => {
+        await loadCodeFile(e.target.files?.[0]);
+        e.target.value = '';
+      });
+
+      downloadCodeBtn.addEventListener('click', () => {
+        const baseName = sanitizeCodeFileName(currentFileName || 'script.pxd').replace(/\.[^.]*$/, '');
+        const blob = new Blob([codeEditor.value], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `${baseName || 'script'}.pxd`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+
+      let dragDepth = 0;
+      const isFileDrag = (e) => e.dataTransfer?.types?.includes('Files');
+
+      const workspace = document.querySelector('main');
+
+      workspace.addEventListener('dragenter', (e) => {
+        if (!isFileDrag(e)) return;
+        e.preventDefault();
+        dragDepth++;
+        dropOverlay.classList.add('active');
+      });
+
+      workspace.addEventListener('dragover', (e) => {
+        if (!isFileDrag(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        dropOverlay.classList.add('active');
+      });
+
+      workspace.addEventListener('dragleave', (e) => {
+        if (!isFileDrag(e)) return;
+        e.preventDefault();
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (dragDepth === 0) dropOverlay.classList.remove('active');
+      });
+
+      workspace.addEventListener('drop', async (e) => {
+        if (!isFileDrag(e)) return;
+        e.preventDefault();
+        dragDepth = 0;
+        dropOverlay.classList.remove('active');
+        await loadCodeFile(e.dataTransfer.files?.[0]);
+      });
+
+      window.addEventListener('dragend', () => {
+        dragDepth = 0;
+        dropOverlay.classList.remove('active');
+      });
+
+      copyCodeBtn.addEventListener('click', async () => {
+        const copied = await copyTextSafe(codeEditor.value);
+        copyCodeBtn.textContent = copied ? 'Copied!' : 'Copy failed';
+        setTimeout(() => copyCodeBtn.textContent = 'Copy', 1500);
+      });
+
+      clearCodeBtn.addEventListener('click', () => {
+        codeEditor.value = 'GRID 32 32\nBG #0f172a\n\nCOLOR R #ef4444\nPIXEL 16 16 R';
+        setEditorFileName('script.pxd');
+        updateLineNumbers();
+        codeEditor.scrollTop = 0;
+        syncScroll();
+
+        if (!isMobileViewport() && livePreviewEnabled) {
+          renderScene();
+        } else {
+          markRenderPending();
+        }
+      });
+
+      // Modals
+      cheatSheetBtn.addEventListener('click', () => cheatSheetModal.classList.remove('hidden'));
+      closeCheatSheetBtn.addEventListener('click', () => cheatSheetModal.classList.add('hidden'));
+
+      llmPromptBtn.addEventListener('click', () => llmPromptModal.classList.remove('hidden'));
+      closeLlmModalBtn.addEventListener('click', () => llmPromptModal.classList.add('hidden'));
+
+      inspectColorEl.addEventListener('click', async () => {
+        const hexText = inspectColorEl.innerText.trim();
+        if (!hexText) return;
+
+        const copied = await copyTextSafe(hexText);
+        
+        if (copied) {
+          const originalText = inspectColorEl.textContent;
+          inspectColorEl.textContent = 'Copied!';
+          setTimeout(() => {
+            inspectColorEl.textContent = originalText;
+          }, 1500);
+        }
+      });
+
+      copyPromptTemplateBtn.addEventListener('click', async () => {
+        const text = document.getElementById('promptTemplateText').innerText;
+        const copied = await copyTextSafe(text);
+        copyPromptTemplateBtn.textContent = copied ? 'Copied!' : 'Copy failed';
+        setTimeout(() => copyPromptTemplateBtn.textContent = 'Copy Prompt', 1500);
+      });
+
+      // Mobile Navigation
+      tabEditor.addEventListener('click', () => {
+        document.body.classList.remove('mobile-preview-active');
+        editorPane.classList.remove('mobile-hidden');
+        previewPane.classList.remove('mobile-active');
+        tabEditor.classList.add('active');
+        tabPreview.classList.remove('active');
+      });
+
+      tabPreview.addEventListener('click', () => {
+        document.body.classList.add('mobile-preview-active');
+        editorPane.classList.add('mobile-hidden');
+        previewPane.classList.add('mobile-active');
+        tabPreview.classList.add('active');
+        tabEditor.classList.remove('active');
+        requestAnimationFrame(() => {
+          fitCanvasToViewport();
+          renderScene();
+        });
+      });
+
+      // Initial Launch
+      loadPreset('example1');
+    });
+  </script>
+</body>
+</html>
