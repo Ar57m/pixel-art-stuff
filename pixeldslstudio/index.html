@@ -504,6 +504,103 @@
       flex-shrink: 0;
     }
 
+    .logo-icon {
+      border: 0;
+      appearance: none;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .logo-icon:hover { transform: translateY(-1px); filter: brightness(1.15); }
+    .logo-icon:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+    .library-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(2, 6, 23, 0.62);
+      backdrop-filter: blur(2px);
+    }
+    .library-backdrop.hidden { display: none; }
+    .saved-library {
+      position: fixed;
+      z-index: 61;
+      inset: 0 auto 0 0;
+      width: min(360px, 88vw);
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      box-shadow: 20px 0 50px rgba(0, 0, 0, 0.38);
+      transform: translateX(-105%);
+      transition: transform 0.2s ease;
+      overflow: hidden;
+    }
+    .saved-library.open { transform: translateX(0); }
+    .saved-library-header {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-dark);
+      font-weight: 700;
+    }
+    .saved-library-subtitle {
+      padding: 10px 14px;
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      line-height: 1.5;
+      border-bottom: 1px solid var(--border-dark);
+    }
+    #savedProjectsList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .saved-project-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px;
+      min-width: 0;
+      border: 1px solid var(--border-dark);
+      border-radius: 9px;
+      background: rgba(2, 6, 23, 0.45);
+    }
+    .saved-project-thumb {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      object-fit: contain;
+      border: 1px solid var(--border-dark);
+      border-radius: 5px;
+      background-color: #111827;
+      image-rendering: pixelated;
+    }
+    .saved-project-meta { min-width: 0; flex: 1; }
+    .saved-project-name {
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 650;
+      overflow-wrap: anywhere;
+      margin-bottom: 4px;
+    }
+    .saved-project-date { color: var(--text-muted); font-size: 0.66rem; margin-bottom: 7px; }
+    .saved-project-actions { display: flex; gap: 6px; }
+    .saved-project-actions .btn { padding: 4px 7px; font-size: 0.68rem; }
+    .library-empty {
+      padding: 24px 12px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.55;
+      text-align: center;
+    }
+    #libraryStatus { padding: 0 14px 12px; color: var(--text-muted); font-size: 0.7rem; }
+
     /* Modal Windows */
     .modal-backdrop {
       position: fixed;
@@ -542,31 +639,78 @@
     }
 
     .modal-body {
-      padding: 20px;
+      padding: 22px;
       overflow-y: auto;
-      font-size: 0.8rem;
+      font-size: 0.84rem;
+      line-height: 1.65;
     }
 
     .cheat-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+      gap: 16px;
+      align-items: start;
     }
 
     .cheat-card {
+      min-width: 0;
       background-color: var(--bg);
-      padding: 12px;
+      padding: 15px;
       border-radius: 8px;
       border: 1px solid var(--border-dark);
+      line-height: 1.65;
+    }
+    .cheat-card strong {
+      display: block;
+      margin-bottom: 4px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    .cheat-card p {
+      margin-top: 6px;
+      line-height: 1.65;
     }
     .cheat-card code {
       display: block;
-      margin-top: 6px;
+      width: 100%;
+      max-width: 100%;
+      margin-top: 10px;
       color: #d8b4fe;
       background-color: #020617;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 10px 11px;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
       font-family: var(--font-mono);
+      font-size: 0.76rem;
+      line-height: 1.65;
+      white-space: pre;
+      overflow-x: auto;
+      overflow-y: hidden;
+      tab-size: 2;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .cheat-card p code {
+      display: inline;
+      width: auto;
+      max-width: none;
+      margin: 0;
+      padding: 1px 4px;
+      border: 0;
+      font-size: 0.95em;
+      line-height: inherit;
+      white-space: normal;
+      overflow: visible;
+    }
+
+    @media (max-width: 768px) {
+      .modal-backdrop { padding: 8px; }
+      .modal-card { max-height: 92vh; }
+      .modal-header { padding: 12px 14px; }
+      .modal-body { padding: 12px; font-size: 0.82rem; }
+      .cheat-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .cheat-card { padding: 12px; }
+      .cheat-card code { font-size: 0.72rem; padding: 9px; }
     }
 
     .prompt-box {
@@ -827,13 +971,13 @@
   
   <header>
     <div class="brand">
-      <div class="logo-icon">
-        <div class="logo-inner">
-          <svg width="18" height="18" fill="none" stroke="#22d3ee" viewBox="0 0 24 24">
+      <button id="libraryToggleBtn" class="logo-icon" type="button" title="Saved projects" aria-label="Open saved projects" aria-expanded="false">
+        <span class="logo-inner">
+          <svg width="18" height="18" fill="none" stroke="#22d3ee" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
           </svg>
-        </div>
-      </div>
+        </span>
+      </button>
       <div class="brand-title font-mono">
         PixelDSL <span class="badge-tag">STUDIO</span>
       </div>
@@ -844,10 +988,10 @@
       <div class="select-box">
         <span>Preset:</span>
         <select id="presetSelect">
-          <option value="example1">Daytime Park Landscape</option>
-          <option value="example2">Ship at Sea</option>
-          <option value="example3">Fantasy Castle Scene</option>
-          <option value="example4">Cyberpunk Neon City</option>
+          <option value="example1">Sad Purple Octopus</option>
+          <option value="example2">Rainy Cityscape</option>
+          <option value="example3">Castle of Quiet Sighs</option>
+          <option value="example4">Simple Neon City</option>
         </select>
       </div>
 
@@ -886,7 +1030,17 @@
     </div>
   </header>
 
-  
+  <div id="libraryBackdrop" class="library-backdrop hidden" aria-hidden="true"></div>
+  <aside id="savedLibraryDrawer" class="saved-library" aria-label="Saved projects" aria-hidden="true">
+    <div class="saved-library-header">
+      <span>Saved Projects</span>
+      <button id="closeLibraryBtn" class="btn btn-dark" type="button" aria-label="Close saved projects">✕</button>
+    </div>
+    <div class="saved-library-subtitle">Saved projects live in this browser using IndexedDB. Your current code is also autosaved as a private draft, even before you press Save.</div>
+    <div id="savedProjectsList"><div class="library-empty">Loading saved projects…</div></div>
+    <div id="libraryStatus" role="status">Autosave is ready.</div>
+  </aside>
+
   <div class="mobile-tabs">
     <button id="tabEditor" class="mobile-tab-btn active">Editor</button>
     <button id="tabPreview" class="mobile-tab-btn">Live Preview</button>
@@ -895,7 +1049,7 @@
   
   <main>
 
-    <div id="dropOverlay" class="drop-overlay">Drop a PixelDSL text file here</div>
+    <div id="dropOverlay" class="drop-overlay">Drop a PixelDSL source file or metadata PNG here</div>
 
     
     <section id="editorPane" class="pane">
@@ -910,13 +1064,14 @@
         <div class="editor-toolbar-row">
           
           <select id="mobilePresetSelect" style="display:none;" class="select-box">
-            <option value="example1">Park Landscape</option>
-            <option value="example2">Sea Ship</option>
-            <option value="example3">Castle</option>
-            <option value="example4">Cyberpunk</option>
+            <option value="example1">Sad Purple Octopus</option>
+            <option value="example2">Rainy Cityscape</option>
+            <option value="example3">Castle of Quiet Sighs</option>
+            <option value="example4">Simple Neon city</option>
           </select>
 
-          <input id="codeFileInput" type="file" accept=".pxd,.pxdsl,.pixeldsl,.txt,text/plain" style="display:none;">
+          <input id="codeFileInput" type="file" accept=".pxd,.pxdsl,.pixeldsl,.txt,.png,text/plain,image/png" style="display:none;">
+          <button id="saveProjectBtn" class="btn btn-cyan" style="padding:4px 8px; font-size:0.7rem;">Save</button>
           <button id="openCodeBtn" class="btn btn-dark" style="padding:4px 8px; font-size:0.7rem;">
             <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
             Open
@@ -996,7 +1151,7 @@
 
         
         <div id="inspectorBadge" class="inspector-badge">
-          <div>Pos: <span id="inspectCoords" style="color:var(--cyan); font-weight:600;">(0, 0)</span></div>
+          <div>Pos: <span id="inspectCoords" style="color:var(--cyan); font-weight:600; cursor:pointer;" title="Click to copy">(0, 0)</span></div>
           <div style="display:flex; align-items:center; gap:6px;">
             Color:
             <span id="inspectSwatch" class="color-swatch"></span>
@@ -1034,25 +1189,25 @@
         <div class="cheat-grid">
           <div class="cheat-card">
             <strong>GRID width height</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Sets the pixel canvas size.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Sets the pixel canvas size.</p>
             <code>GRID 32 32</code>
           </div>
 
           <div class="cheat-card">
             <strong>BG color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Sets the canvas background. Use <b>transparent</b> or <b>#RRGGBBAA</b> for transparency.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Sets the canvas background. Use <b>transparent</b> or <b>#RRGGBBAA</b> for transparency.</p>
             <code>BG #0f172a</code>
           </div>
 
           <div class="cheat-card">
             <strong>COLOR symbol color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Defines one reusable color name. Supports <b>#RRGGBB</b>, <b>#RRGGBBAA</b>, <b>#RGB/#RGBA</b>, rgb(), and rgba().</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Defines one reusable color name. Supports <b>#RRGGBB</b>, <b>#RRGGBBAA</b>, <b>#RGB/#RGBA</b>, rgb(), and rgba().</p>
             <code>COLOR O rgba(255, 165, 0, 0.15)</code>
           </div>
 
           <div class="cheat-card">
             <strong>COLORDEF / COLORS ... ENDCOLORDEF</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Compact palette block. <b>COLORDEF</b> and <b>COLORS</b> are equivalent. Use one symbol/value pair per line; <b>COLOREND</b> and <b>ENDCOLORS</b> are also accepted.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Compact palette block. <b>COLORDEF</b> and <b>COLORS</b> are equivalent. Use one symbol/value pair per line; <b>COLOREND</b> and <b>ENDCOLORS</b> are also accepted.</p>
             <code>COLORDEF
   K #161b22
   S #8b949e
@@ -1061,61 +1216,118 @@ ENDCOLORDEF</code>
 
           <div class="cheat-card">
             <strong>PIXEL x y color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Plots a single pixel.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Plots a single pixel.</p>
             <code>PIXEL 12 8 R</code>
           </div>
 
           <div class="cheat-card">
+            <strong>FILL x y color</strong>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Flood-fills the 4-connected region matching the pixel at (x,y), replacing that region with the new color. It uses the canvas/raster as it exists at that exact point in the script.</p>
+            <code>BOX 4 4 12 10 K
+FILL 5 5 B</code>
+          </div>
+
+          <div class="cheat-card">
             <strong>RECT x y width height color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Solid filled rectangle.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Solid filled rectangle.</p>
             <code>RECT 4 4 10 6 #3b82f6</code>
           </div>
 
           <div class="cheat-card">
             <strong>BOX x y width height color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">1-pixel hollow rectangle outline.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">1-pixel hollow rectangle outline.</p>
             <code>BOX 2 2 12 12 K</code>
           </div>
 
           <div class="cheat-card">
             <strong>LINE x1 y1 x2 y2 color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Draws a pixel line.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Draws a pixel line.</p>
             <code>LINE 0 0 15 15 R</code>
           </div>
 
           <div class="cheat-card">
             <strong>CIRCLE x y radius color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Filled circle.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Filled circle.</p>
             <code>CIRCLE 16 16 6 Y</code>
           </div>
 
           <div class="cheat-card">
             <strong>ELLIPSE x y radiusX radiusY color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Filled ellipse centered at x,y.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Filled ellipse centered at x,y.</p>
             <code>ELLIPSE 16 12 10 6 S</code>
           </div>
 
           <div class="cheat-card">
             <strong>TRIANGLE x1 y1 x2 y2 x3 y3 color</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Filled triangle from any three vertices. Great for roofs, mountains, wings, fins, shards, sails, arrows, and irregular silhouettes.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Filled triangle from any three vertices. Great for roofs, mountains, wings, fins, shards, sails, arrows, and irregular silhouettes.</p>
             <code>TRIANGLE 4 24 16 4 28 24 R</code>
           </div>
 
           <div class="cheat-card">
-            <strong>ROTATE x y angle object [args...]</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Renders the object as a raster, rotates it around its center, and places the rotated object with its visible-bounds center at (x,y). Positive angles are clockwise; inverse sampling avoids rotation holes. Use ROTATE_TL to retain the legacy top-left anchor.</p>
-            <code>ROTATE 12 8 25 TREE G</code>
+            <strong>ROTATE x y angle NAME [args...] [ANCHOR mode]</strong>
+            <p style="color:var(--text-muted);">Parameter order: <b>x,y</b> is the placement point; <b>angle</b> is degrees clockwise; <b>NAME</b> is a previously defined DEF or MASK; remaining arguments follow that object's DEF parameter order. The default anchor is the rotated result's visible center.</p>
+            <code>ROTATE 120 90 -12 TREE BARK
+ROTATE 120 90 25 TREE BARK ANCHOR bottom
+ROTATE 10 10 25 TREE BARK ANCHOR tl</code>
           </div>
 
           <div class="cheat-card">
-            <strong>MULTIPLY x y name [args...]</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Places an object centered at (x,y) using a Photoshop-style multiply blend. Existing pixels and the object's alpha are composited instead of simply replacing each other. Use MULTIPLY_TL for the legacy top-left anchor.</p>
-            <code>MULTIPLY 12 8 LIGHT O</code>
+            <strong>MULTIPLY x y NAME [args...] [ANCHOR mode]</strong>
+            <p style="color:var(--text-muted);">Blends the object's pixels with the existing scene using multiply while respecting alpha. <b>x,y</b> uses the selected anchor; <b>NAME</b> is a DEF/MASK; arguments follow NAME. The default is center; <b>tl</b> and <b>bottom</b> select top-left and bottom-center placement.</p>
+            <code>MULTIPLY 12 8 LIGHT O
+MULTIPLY 80 190 LIGHT O ANCHOR bottom</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>LET name = expression</strong>
+            <p style="color:var(--text-muted);">Defines or updates a local value for later lines in the current script block. Values may be numbers, booleans, color names, color literals, or ternary results. The equals sign is optional. LET does not replace COLOR/COLORDEF: use a palette for stable named colors and LET for computed values.</p>
+            <code>LET buildingHeight = 28 + i % 5
+LET darkSide = true
+LET windowColor = (i % 2 == 0 ? LIT : GLASS)
+RECT x 40 8 buildingHeight BRICK
+PIXEL x 42 windowColor</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>ANCHOR name y / BASE AT name</strong>
+            <p style="color:var(--text-muted);">ANCHOR declares a reusable numeric coordinate; BASE AT assigns that coordinate to the convenience variable <b>BASE</b>. Use the same named ground line for multiple structures. This is a coordinate variable, not the trailing placement option ANCHOR center|tl|bottom.</p>
+            <code>ANCHOR ground 190
+BASE AT ground
+BAR 20 BASE 12 40 BRICK
+BAR 44 ground 10 26 STONE</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>BAR x base width height color</strong>
+            <p style="color:var(--text-muted);"><b>x</b> is the left edge; <b>base</b> is the inclusive bottom pixel row; <b>width</b> and <b>height</b> are positive dimensions; <b>color</b> is the fill. The top row is computed as <code>base - height + 1</code>, so you do not need to calculate a center or top-left y coordinate.</p>
+            <code>BAR 40 190 16 48 BRICK
+BAR 60 ground 10 30 STONE</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>BBOX x y NAME [args...] color</strong>
+            <p style="color:var(--text-muted);">Debug helper: draws a 1-pixel outline around a DEF or MASK object's visible raster bounds, centered at <b>x,y</b>. Arguments follow NAME in DEF parameter order; the last value is the outline color. DEF bounds are inferred from drawing commands and nested placements; you do not need to hand-union rectangles.</p>
+            <code>DEF UMBRELLA c
+  ELLIPSE 0 0 12 5 c
+  LINE 0 4 0 24 c
+ENDDEF
+BBOX 166 90 UMBRELLA RED #00FFFF
+STAMP 166 90 UMBRELLA RED</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>RAND(index, seed) / PICK(random, value, weight, ...)</strong>
+            <p style="color:var(--text-muted);"><b>RAND</b> returns a deterministic pseudo-random number in [0,1) for an index/seed pair, so a scene can be regenerated consistently. <b>PICK</b> uses that number to select one of the following value/weight pairs. Weights must be positive. Both are useful inside loops and color expressions.</p>
+            <code>LOOP i 0 20 1
+  LET window = PICK(RAND(i, 42), LIT, 6, GLASS, 3, DARK, 1)
+  PIXEL i 8 window
+ENDLOOP
+RECT 0 0 WIDTH 1 (PICK(RAND(0, 7), SKY, 8, DUSK, 2))</code>
           </div>
 
           <div class="cheat-card">
             <strong>Numeric expressions &amp; WIDTH / HEIGHT</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Use +, -, *, /, %, parentheses, loop variables, DEF parameters, and the current canvas constants <b>WIDTH</b> and <b>HEIGHT</b> anywhere a numeric argument is accepted. They are not color symbols.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Use +, -, *, /, %, parentheses, loop variables, DEF parameters, and the current canvas constants <b>WIDTH</b> and <b>HEIGHT</b> anywhere a numeric argument is accepted. They are not color symbols.</p>
             <code>LOOP x 0 WIDTH-1 4
   RECT x HEIGHT/2 3 3 R
 ENDLOOP</code>
@@ -1123,47 +1335,64 @@ ENDLOOP</code>
 
           <div class="cheat-card">
             <strong>GRADRECT x y w h color1 color2 [H|V]</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Filled two-color pixel gradient. Default direction is vertical.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Filled two-color pixel gradient. Default direction is vertical.</p>
             <code>GRADRECT 0 0 32 16 SKY1 SKY2 V</code>
           </div>
 
           <div class="cheat-card">
-            <strong>DITHERRECT x y w h color1 color2 [pattern]</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Two-color ordered dithering. Patterns: CHECKER, BAYER2, BAYER4.</p>
+            <strong>DITHERRECT x y w h color1 color2 [pattern] [coverage]</strong>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Two-color ordered dithering. Patterns: CHECKER, BAYER2/4/8, CLUSTER, DIAGONAL, HORIZONTAL, VERTICAL, ATKINSON, FLOYD, JARVIS, STUCKI, SIERRA, SIERRALITE. Optional coverage 0–1 (default 0.5).</p>
             <code>DITHERRECT 4 4 24 8 K S BAYER4</code>
           </div>
 
           <div class="cheat-card">
             <strong>DEF name [params...] ... ENDDEF</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">General reusable drawing block. Parameters can stand in for colors or other tokens.</p>
-            <code>DEF TREE leaf
-  CIRCLE 3 3 3 leaf
-ENDDEF</code>
+            <p style="color:var(--text-muted);">General reusable drawing block. Parameters can stand in for coordinates, sizes, colors, or other values. Palette symbols defined by COLOR/COLORDEF are global and are visible inside DEF. LET variables are local to the active execution block; loop variables are local to each loop iteration. DEF bounds are inferred from primitive geometry and nested placements. A MASK forwards its argument list unchanged to both source objects, so use compatible parameter order on both sides.</p>
+            <code>DEF LEAF c
+  CIRCLE 40 40 3 c
+ENDDEF
+DEF TREE c
+  STAMP 10 10 LEAF c
+  STAMP 10 16 LEAF c
+ENDDEF
+STAMP 16 16 TREE G</code>
           </div>
 
           <div class="cheat-card">
-            <strong>STAMP x y name [args...]</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Places an object with its visible-bounds center at (x,y). Arguments always come AFTER the object name and match the DEF parameter order.</p>
-            <code>STAMP 20 12 TREE G</code>
+            <strong>STAMP x y NAME [args...] [ANCHOR center|tl|bottom]</strong>
+            <p style="color:var(--text-muted);">Parameter order: <b>x,y</b> is the chosen anchor point; <b>NAME</b> is a DEF or MASK; <b>args</b> come after NAME and follow its DEF parameter order. Default is <b>center</b>. <b>tl</b> uses the object's local raster top-left. <b>bottom</b> uses the bottom-center point, useful for placing feet or building bases on a shared ground line.</p>
+            <code>STAMP 80 170 TREE PINE
+STAMP 80 190 TOWER STONE ANCHOR bottom
+STAMP 12 12 ICON GOLD ANCHOR tl</code>
           </div>
 
           <div class="cheat-card">
             <strong>LOOP var start end step ... ENDLOOP</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Repeats a block with an inclusive end value.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Repeats a block with an inclusive end value. Nested loops use the same ENDLOOP keyword at every level: close the inner loop first, then the outer loop. LOOPEND is invalid.</p>
             <code>LOOP x 2 26 4
   LINE x 20 x 24 S
 ENDLOOP</code>
           </div>
 
           <div class="cheat-card">
-            <strong>SYMMETRY_X / MIRROR_H / MIRROR_V (+ *_TL legacy variants)</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">MIRROR_H/V flips the raster and centers it at (x,y). SYMMETRY_X centers the original at (x,y) and reflects it around centerX. *_TL variants retain legacy top-left placement.</p>
-            <code>SYMMETRY_X 8 8 15.5 TREE G</code>
+            <strong>MIRROR_H / MIRROR_V x y NAME [args...] [ANCHOR mode]</strong>
+            <p style="color:var(--text-muted);"><b>x,y</b> is the anchor point; <b>NAME</b> is the object to flip; <b>args</b> follow the DEF declaration. <b>MIRROR_H</b> flips left-to-right; <b>MIRROR_V</b> flips top-to-bottom. Both default to the visible center.</p>
+            <code>MIRROR_H 100 60 TREE PINE
+MIRROR_V 100 60 TREE PINE ANCHOR bottom
+MIRROR_H 10 10 TREE PINE ANCHOR tl</code>
+          </div>
+
+          <div class="cheat-card">
+            <strong>SYMMETRY_X x y centerX NAME [args...] [ANCHOR mode]</strong>
+            <p style="color:var(--text-muted);"><b>x,y</b> positions the original using the selected anchor; <b>centerX</b> is the vertical axis to reflect across; <b>NAME</b> is the object; <b>args</b> follow its DEF parameters. It draws the original plus a horizontally reflected copy. The default anchor is center.</p>
+            <code>SYMMETRY_X 8 8 15.5 TREE PINE ANCHOR center
+SYMMETRY_X 80 190 160 TOWER STONE ANCHOR bottom
+SYMMETRY_X_TL 8 8 15 TREE PINE</code>
           </div>
 
           <div class="cheat-card">
             <strong>MASK result A OP B</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Reusable raster composition. MINUS keeps A minus B; AND keeps only overlap; PLUS is a union with A winning overlap; OVER layers B over A, so B wins overlap. Operands keep their original local coordinates. MASK has no args of its own; args are supplied when the result is placed and are forwarded to both source objects.</p>
+            <p style="color:var(--text-muted);">Reusable raster composition. MINUS keeps A where B is empty; AND keeps only overlap; PLUS unions both and gives A priority in overlap; OVER composites B over A. Operands retain their original local coordinates. A MASK has no parameter list: arguments supplied when placing the result are forwarded independently, in the same order, to both source objects. Thus both source DEFs must agree on the meaning/order of forwarded arguments. Palette colors are global inside DEF and MASK source objects. Ternary expressions are valid as numeric or color values when wrapped as one argument.</p>
             <code>MASK CUTOUT ARROW MINUS HOLE
 STAMP 31.5 22.5 CUTOUT R
 
@@ -1179,8 +1408,30 @@ MASK ADD A + B</code>
           </div>
 
           <div class="cheat-card">
+            <strong>IF / ELSE / ENDIF, Boolean operators & ternary values</strong>
+            <p style="color:var(--text-muted); font-size:0.82rem;">IF runs its block when the condition is true; ELSE is optional and ENDIF closes the block. IF blocks can be nested inside other IFs, LOOPs, and DEFs. Arithmetic: + - * / %. Comparisons: == != < <= > >= (=== and !== are aliases). Boolean operators: &&, ||, !, or the word forms AND, OR, NOT. The true/false literals and parentheses are supported; numeric zero is false and nonzero is true. Normal precedence applies: arithmetic, comparison, equality, AND, OR, then ternary. Use condition ? valueWhenTrue : valueWhenFalse to return a number or color symbol. Wrap expressions in parentheses when used as a command argument, including DEF parameters.</p>
+            <code>COLOR EVEN #ff4d6d
+COLOR ODD #488bff
+
+DEF GEM c
+  CIRCLE 0 0 1 c
+ENDDEF
+
+LOOP x 1 11 1
+  IF x % 2 == 0
+    PIXEL x 4 EVEN
+  ELSE
+    PIXEL x 5 ODD
+  ENDIF
+  STAMP x 12 GEM (x%2==0?EVEN:ODD)
+ENDLOOP
+
+RECT 0 0 (WIDTH>32?8:4) 2 EVEN</code>
+          </div>
+
+          <div class="cheat-card">
             <strong># comments</strong>
-            <p style="color:var(--text-muted); font-size:0.75rem;">Full-line comments begin with #. Inline comments are allowed after a space; hex colors stay intact.</p>
+            <p style="color:var(--text-muted); font-size:0.82rem;">Full-line comments begin with #. Inline comments are allowed after a space; hex colors stay intact.</p>
             <code>BG #0f172a  # night sky</code>
           </div>
         </div>
@@ -1225,22 +1476,42 @@ ENDCOLORDEF
 COLORS
   K #161b22
 ENDCOLORS
-COLOREND and ENDCOLORS are also accepted. Direct COLOR symbol color is also valid. Colors may be #RRGGBB, #RRGGBBAA, #RGB/#RGBA, rgb(), rgba(), or transparent. rgba()/rgb() may contain spaces inside the parentheses and are kept as one color token.
+COLOREND and ENDCOLORS are also accepted. Direct COLOR symbol color is also valid. Colors may be #RRGGBB, #RRGGBBAA, #RGB/#RGBA, rgb(), rgba(), or transparent. rgba()/rgb() may contain spaces inside the parentheses and are kept as one color token. Palette names are case-sensitive, must be a single identifier without spaces (letters/digits/underscores are safest), and should not reuse reserved command words. In particular, avoid naming a palette color BG: BG is the background command/special background color. Use names such as BACKGROUND or SKY instead. To set the canvas background, use BG #hex or BG SKY; do not write COLOR BG #111111 / BG BG.
 
 3. DRAWING COMMANDS
 PIXEL x y color
+FILL x y color
 RECT x y w h color
+BAR x base w h color          # filled rect whose inclusive bottom row is base
 BOX x y w h color
 LINE x1 y1 x2 y2 color
 CIRCLE x y radius color
 ELLIPSE x y radiusX radiusY color
 TRIANGLE x1 y1 x2 y2 x3 y3 color
 GRADRECT x y w h color1 color2 [H|V]
-DITHERRECT x y w h color1 color2 [CHECKER|BAYER2|BAYER4]
-MULTIPLY x y name [args...]
+DITHERRECT x y w h color1 color2 [pattern] [coverage 0..1]
+BBOX x y NAME [args...] color # outline visible bounds for debugging
+
+DITHERRECT draws a two-color pattern inside a rectangle. Available patterns:
+- Ordered/graphic patterns: CHECKER, BAYER2, BAYER4, BAYER8, CLUSTER, DIAGONAL, HORIZONTAL, VERTICAL.
+- Error-diffusion patterns: ATKINSON, FLOYD (Floyd–Steinberg), JARVIS, STUCKI, SIERRA, SIERRALITE.
+The optional coverage is a number from 0 to 1 and defaults to 0.5. It controls the approximate share of color2; 0 is all color1 and 1 is all color2.
+
+IMPORTANT DITHERING APPEARANCE NOTE:
+At coverage 0.5, BAYER2, BAYER4, BAYER8, FLOYD, JARVIS, and SIERRALITE currently appear as a checkerboard in this renderer. ATKINSON at 0.5 tends to form larger square-like clusters. Other patterns may produce different appearances, but not every pattern/coverage combination has been visually tested. Do not assume a pattern name guarantees a unique texture. If you want an interesting texture rather than a checkerboard, try a different coverage such as 0.3, 0.35, 0.4, 0.6, or 0.7, or compare several patterns; use the result that best suits the artwork. Use 0.5 only when a checkerboard/even split is intentional. These are visual tendencies, not strict guarantees for every rectangle size.
+MULTIPLY x y name [args...] [ANCHOR center|tl|bottom]
 MULTIPLY_TL x y name [args...] # legacy top-left placement
 
-4. NUMERIC EXPRESSIONS
+FILL x y color performs an order-dependent flood fill on the current raster. It replaces the 4-connected region whose pixels match the color at (x,y); diagonals alone do not connect regions. Draw the boundaries first, then FILL. At scene level it sees the scene drawn so far; inside a DEF it only sees that DEF's temporary object raster. A transparent/empty region is treated as one region.
+
+4. NUMERIC EXPRESSIONS AND VALUES
+Numeric arguments may use numbers, +, -, *, /, %, parentheses, LOOP variables, DEF parameters, WIDTH, HEIGHT, RAND(index,seed), and weighted PICK(random,value,weight,...). WIDTH and HEIGHT are numeric canvas constants, not color symbols. Expressions normally have no spaces; wrap a whole expression in parentheses when it is a single command argument.
+
+LET name = expression defines or updates a value used by later lines in the active block. It can hold a number, true/false, a color name/literal, or a ternary result. The equals sign is optional. COLOR/COLORDEF remains the preferred way to define a stable named palette; LET is for computed or temporary values.
+ANCHOR name y declares a reusable coordinate value. BASE AT name sets the variable BASE to that coordinate. BAR x base w h color fills a rectangle using its inclusive bottom row as the y anchor, avoiding manual center/top calculations.
+RAND(index, seed) deterministically returns a number in [0,1). PICK(random, value1, weight1, value2, weight2, ...) selects one value according to positive weights; use RAND as the first argument.
+BBOX x y NAME [args...] color is a debugging outline around a DEF/MASK object's visible raster bounds. DEF bounds are inferred from primitives and nested placements.
+
 Numeric arguments may use numbers, +, -, *, /, %, parentheses, LOOP variables, DEF parameters, and the canvas constants WIDTH and HEIGHT.
 Expressions contain NO spaces. WIDTH and HEIGHT always refer to the current GRID dimensions and are numeric only; they are not color symbols. Example inside a loop:
 LOOP i 0 5 1
@@ -1257,20 +1528,16 @@ DEF name [params...]
 ENDDEF
 
 Use named parameters directly (for example c) or as $c. Numbered positional references must use $1, $2, etc.; bare numbers are always numeric literals. This keeps coordinates such as 1 from being mistaken for arguments.
-A DEF is drawn in its own local coordinate system. Local (0,0) is the DEF's own coordinate origin; negative local coordinates are allowed. Its raster preserves the local positions used by its primitives, which matters for masks. Center-anchored placement ignores transparent outer padding and centers the visible content.
+A DEF is drawn in its own local coordinate system; negative and far-from-zero local coordinates are allowed. Primitive and nested-placement bounds are inferred automatically; do not hand-union primitive rectangles. It may call already-defined DEF or MASK objects using STAMP, ROTATE, MIRROR_H/V, MULTIPLY, or SYMMETRY_X. Each nested placement accepts ANCHOR center|tl|bottom. The final parent is placed using its visible bounds. Palette symbols from COLOR/COLORDEF are global and are visible inside DEF; LET/loop values are scoped to active execution blocks. MASK has no parameters of its own: its argument list is passed unchanged to both source objects, so both should have compatible parameter order. Ternary expressions such as (x%2==0?RED:BLUE) may return a color symbol. Use a shared named ground coordinate and BAR for repeated structures rather than calculating cy=base-h/2.
 
-STAMP x y name [args...]
-STAMP_TL x y name [args...]  # legacy top-left anchor
-ROTATE x y angle name [args...]
-ROTATE_TL x y angle name [args...]  # legacy top-left anchor
-MIRROR_H x y name [args...]
-MIRROR_H_TL x y name [args...]  # legacy top-left anchor
-MIRROR_V x y name [args...]
-MIRROR_V_TL x y name [args...]  # legacy top-left anchor
-MULTIPLY x y name [args...]
-MULTIPLY_TL x y name [args...]  # legacy top-left anchor
-SYMMETRY_X x y centerX name [args...]
-SYMMETRY_X_TL x y centerX name [args...]  # legacy top-left anchor
+STAMP x y NAME [args...] [ANCHOR center|tl|bottom]
+ROTATE x y angle NAME [args...] [ANCHOR center|tl|bottom]
+MIRROR_H x y NAME [args...] [ANCHOR center|tl|bottom]
+MIRROR_V x y NAME [args...] [ANCHOR center|tl|bottom]
+MULTIPLY x y NAME [args...] [ANCHOR center|tl|bottom]
+SYMMETRY_X x y centerX NAME [args...] [ANCHOR center|tl|bottom]
+
+ANCHOR is a trailing option on a placement command, not a separate placement command. center (default) means visible-bounds center; tl means the local raster top-left; bottom means bottom-center. Example: STAMP 80 190 TOWER BRICK ANCHOR bottom. For older scripts, *_TL names remain supported as legacy top-left defaults; a trailing ANCHOR option overrides the default.
 
 IMPORTANT ARGUMENT ORDER
 Arguments ALWAYS come after the object name.
@@ -1285,8 +1552,8 @@ DEF stripe c w h
 ENDDEF
 STAMP 20 20 stripe Y 12 6
 
-PLACEMENT ANCHOR RULE: STAMP, ROTATE, MIRROR_H, MIRROR_V, MULTIPLY, and SYMMETRY_X use (x,y) as the center of the object's visible raster bounds. For ROTATE, this is the center of the rotated result; rotation itself is around the object center. Positive angles are clockwise. Inverse sampling avoids rotation holes. Transparent outer padding is ignored when centering. If a raster has an even width or height, its center falls between pixels; use a .5 coordinate when exact half-pixel centering matters.
-Legacy migration: append _TL to STAMP, ROTATE, MIRROR_H, MIRROR_V, MULTIPLY, or SYMMETRY_X to keep the old top-left anchor behavior (for example STAMP_TL 20 12 TREE G).
+PLACEMENT ANCHOR RULE: all placement commands default to visible-bounds center. ANCHOR center keeps that behavior; ANCHOR tl places the object's local raster top-left at (x,y); ANCHOR bottom centers it horizontally and aligns its inclusive bottom row to y. ROTATE anchors the rotated result, while rotation itself is around the source object's center. Positive angles are clockwise. Transparent outer padding is ignored by center/bottom placement. If a raster has an even width or height, its center falls between pixels; use .5 coordinates when exact half-pixel centering matters.
+Legacy migration: *_TL names remain supported as top-left defaults; a trailing ANCHOR mode overrides that default. Prefer the explicit trailing mode in new scripts.
 
 6. RASTER MASKS
 MASK result A MINUS B
@@ -1337,20 +1604,72 @@ LOOP variable start end step
 ENDLOOP
 The end value is inclusive. Positive step increases; negative step decreases.
 
-8. COMMENTS
+NESTED LOOPS: use the exact same LOOP / ENDLOOP pair at every level. Each LOOP must have its own ENDLOOP. Do NOT use LOOPEND, END LOOP, or a different closing keyword for inner loops. Nesting is determined by block depth, not by different names for inner and outer loops. Example:
+LOOP y 0 20 10
+  LOOP x 0 20 10
+    PIXEL x y WHITE
+  ENDLOOP
+ENDLOOP
+
+8. CONDITIONS, BOOLEAN OPERATORS & TERNARY EXPRESSIONS
+IF condition
+  commands...
+ELSE
+  commands...
+ENDIF
+
+ELSE is optional. Every IF must have one ENDIF. IF blocks can be nested and can be used inside LOOPs and DEFs. Only the selected branch is executed. Conditions can contain spaces, parentheses, numeric expressions, and these operators:
+- Comparisons: ==, !=, <, <=, >, >= (=== and !== are accepted aliases).
+- Boolean: &&, ||, !; the word forms AND, OR, NOT are also accepted.
+- Boolean literals: true and false (case-insensitive).
+- Arithmetic: +, -, *, /, %; precedence follows normal programming-language order. Parentheses can make grouping explicit.
+- Numeric values are true when nonzero and false when zero. Comparisons and boolean operations produce true/false.
+
+Examples:
+IF x % 2 == 0 && y >= 4
+  PIXEL x y EVEN
+ELSE
+  PIXEL x y ODD
+ENDIF
+
+IF !(x < 3 || y == 0)
+  CIRCLE x y 2 HIGHLIGHT
+ENDIF
+
+Ternary expressions use condition ? valueWhenTrue : valueWhenFalse. They are valid anywhere a single numeric or color argument is accepted. Keep command-argument expressions together as one token, usually by wrapping the full expression in parentheses. A color ternary returns the chosen color symbol or literal:
+COLOR COLOR1 #ff4d6d
+COLOR COLOR2 #488bff
+DEF DOT c
+  PIXEL 0 0 c
+ENDDEF
+LOOP x 0 9 1
+  PIXEL x 5 (x%2==0?COLOR1:COLOR2)
+  STAMP x 8 DOT (x%2==0?COLOR1:COLOR2)
+ENDLOOP
+RECT 0 0 (WIDTH>32?8:4) 2 COLOR1
+
+Ternaries can be nested, but prefer parentheses when nesting to keep them readable. Color symbols such as COLOR1 and COLOR2 are values in a ternary branch, not arithmetic variables. Conditions inside DEFs can use DEF parameters and LOOP variables after substitution. FILL and all drawing operations affect the raster at the point where the command executes, so their results can differ depending on IF branch and command order.
+
+9. COMMENTS
 Full-line comments begin with #. Inline comments are allowed after whitespace. Hex colors beginning with # remain valid color literals.
 
-9. ARTWORK STRATEGY
+10. ARTWORK STRATEGY
 - Draw back-to-front: background, sky, distant forms, midground, foreground, details, highlights.
 - Prefer strong silhouettes and a few meaningful shapes over huge numbers of individual PIXEL commands.
 - Every large RECT must have a clear semantic purpose (building, ground band, water, road, wall, etc.). Never scatter rectangular filler into the sky or empty space.
 - Do not place a full-width RECT over already finished mountains, clouds, buildings, or foreground forms unless it is intentionally a foreground/background band. Draw large background bands before the objects they should sit behind.
 - Keep the sky visually open unless the requested scene specifically calls for clouds, architecture, birds, wires, or similar elements.
 - Use GRADRECT for large sky, water, glow, and lighting transitions. Gradients interpolate alpha safely, including transparent endpoints.
-- Use DITHERRECT for controlled texture, ramps, smoke, foliage, and subtle pixel transitions.
+- Use DITHERRECT for controlled texture, ramps, smoke, foliage, and subtle pixel transitions. Choose its pattern and coverage deliberately: at 0.5, BAYER2/4/8, FLOYD, JARVIS, and SIERRALITE currently look like checkerboards; ATKINSON at 0.5 tends toward larger square-like clusters. Other combinations may differ and have not all been tested. For richer texture, experiment with coverage around 0.3–0.4 or 0.6–0.7 and select what looks best. You may freely experiment with any supported pattern and coverage; do not use 0.5 by default if a checkerboard would be undesirable.
 - Use RECT for masses, BOX for outlines, LINE for beams/roads/diagonals, CIRCLE/ELLIPSE for rounded forms, and TRIANGLE for roofs, mountains, wings, fins, arrows, sails, shards, trees, cones, and other pointed forms.
 - TRIANGLE uses three arbitrary vertices, not angles or side lengths.
-- Use DEF + STAMP when a structure repeats. STAMP coordinates are object centers, not top-left corners.
+- Use DEF + STAMP when a structure repeats. STAMP coordinates default to the visible center; use ANCHOR bottom to align feet/bases on a shared ground row, or ANCHOR tl for intentional top-left placement.
+- Establish shared baselines with ANCHOR ground 190 and BASE AT ground; use BAR x BASE w h color for bottom-anchored filled structures.
+- Default to a clear front/side view for architecture: the ground line is horizontal and buildings share a base y. Use top-down only when the scene calls for a map/overhead view. Perspective is a composition convention, not an automatic rendering transform.
+- Use RAND/PICK for deterministic variation instead of complicated ternaries when choosing among several palette colors or sizes. Keep COLORDEF for the named palette; LET holds per-building computed values.
+- Use BBOX temporarily to inspect an object's visible size/placement, then remove debugging boxes from final artwork.
+- Compose complex DEFs from smaller DEF/MASK objects with STAMP, ROTATE, MIRROR_H/V, MULTIPLY, and SYMMETRY_X; each nested placement uses the same visible-center anchor.
+- Use FILL only after drawing the boundaries that should contain it; its result depends on all pixels already drawn at that exact point in the script.
 - Use MASK for cutouts, unions, intersections, and reusable composites.
 - Use ROTATE for lean, tilt, fan, radial, or directional variation.
 - Use LOOP + expressions for procedural spacing, repeated motifs, waves, stripes, and offsets.
@@ -1360,7 +1679,7 @@ Full-line comments begin with #. Inline comments are allowed after whitespace. H
 - Drawing uses normal source-over alpha compositing: opaque colors replace the existing pixel, while #RRGGBBAA/rgba() colors blend over what is already there. Multiple translucent layers accumulate naturally.
 - A fully transparent color (#00000000 or rgba(...,0)) has no visible effect.
 - MASK operations are alpha-aware: MINUS subtracts right-side alpha, AND keeps the left color with intersected alpha, PLUS keeps A's visible color while preserving union coverage, and OVER performs normal B-over-A compositing.
-- MULTIPLY uses a Photoshop-style multiply blend for the placed raster while still respecting source alpha.
+- MULTIPLY uses a multiply blend for the placed raster while still respecting source alpha.
 - MASK operations work on raster data and do not directly alter the canvas until the resulting object is stamped/rotated/mirrored.
 - Do not invent unsupported commands or implicit variables.
 
@@ -1376,7 +1695,7 @@ Before finishing, scan for accidental filler: large rectangles floating in the s
 
 OUTPUT CHECK
 Before finishing, mentally verify:
-GRID exists; colors are defined or valid literals; every DEF has ENDDEF; every LOOP has ENDLOOP; every STAMP/ROTATE/MIRROR/SYMMETRY/MULTIPLY (or *_TL legacy variant) names an existing object; every MASK references existing objects; numeric expressions use only supported values including WIDTH/HEIGHT; every object argument appears AFTER the object name; colors are not used as arithmetic; and no unsupported commands are invented.
+GRID exists; colors are defined or valid literals; every DEF has ENDDEF; every LOOP has exactly one matching ENDLOOP (including nested loops, closed from inner to outer; never write LOOPEND); every IF has ENDIF with an optional ELSE; use non-reserved, single-token names for colors/variables/DEFs and never use BG as a palette symbol; boolean comparisons and ternary expressions are parenthesized where useful; every STAMP/ROTATE/MIRROR/SYMMETRY/MULTIPLY (or *_TL legacy variant) names an existing object; every MASK references existing objects; FILL occurs after the boundary or region it is meant to fill; numeric expressions use only supported values including WIDTH/HEIGHT; every object argument appears AFTER the object name; colors are not used as arithmetic; and no unsupported commands are invented.
 
 FINAL DISCIPLINE
 Build from top to bottom and back-to-front. Keep each test or visual feature in its own spatial region. Do not randomly jump backward through the canvas and accidentally stack unrelated tests on top of each other.
@@ -1391,217 +1710,439 @@ Build from top to bottom and back-to-front. Keep each test or visual feature in 
     // Pre-loaded DSL Presets
     const PRESETS = {
       example1: `
-# PixelDSL Example: Daytime Park Landscape
+# PixelDSL Example: Sad Purple Octopus
 
-GRID 32 32
-BG #9bd7f5
+GRID 128 128
+BG #00000000
 
-# --- Compact palette ---
-COLOR SKY #9bd7f5
-COLOR SKY2 #d8f1ff
-COLOR G #5f9f55
-COLOR G2 #3f7d45
-COLOR D #2f5f39
-COLOR T #7a4f2a
-COLOR L #a96f3b
-COLOR F #f4d35e
-COLOR W #fff7df
-COLOR P #f29ab2
+COLORDEF
+  K #2e1140
+  D #4b2178
+  M #6f36ad
+  L #9a5fe0
+  H #c9a3f5
+  W #ffffff
+  E #1a0b2b
+  B #ff9ecb
+ENDCOLORDEF
 
-# --- Soft sky and distant hills ---
-GRADRECT 0 0 32 18 SKY SKY2 V
-TRIANGLE 0 19 9 11 18 19 G
-TRIANGLE 12 19 22 9 32 19 G2
-
-# --- Ground ---
-RECT 0 18 32 14 G
-DITHERRECT 0 22 32 10 G G2 CHECKER
-
-# --- Reusable tree ---
-DEF TREE leaf
-  RECT 3 6 2 6 T
-  RECT 2 8 4 4 T
-  CIRCLE 4 4 4 leaf
-  CIRCLE 2 7 3 leaf
-  CIRCLE 6 7 3 leaf
-  PIXEL 3 2 W
+# TENTACLE
+DEF tent c
+  CIRCLE 12 10 11 K
+  CIRCLE 12 18 10 K
+  CIRCLE 13 25 9 K
+  CIRCLE 14 31 8 K
+  CIRCLE 16 36 7 K
+  CIRCLE 18 40 6 K
+  CIRCLE 20 43 5 K
+  CIRCLE 22 45 4 K
+  CIRCLE 12 10 9 c
+  CIRCLE 12 18 8 c
+  CIRCLE 13 25 7 c
+  CIRCLE 14 31 6 c
+  CIRCLE 16 36 5 c
+  CIRCLE 18 40 4 c
+  CIRCLE 20 43 3 c
+  CIRCLE 22 45 2 c
 ENDDEF
 
-# --- Path and pond ---
-TRIANGLE 13 32 18 18 23 32 L
-ELLIPSE 25 24 5 2 SKY2
-LINE 20 25 29 25 W
+# TENTACLE FAN (back to front)
+ROTATE 48 95 25 tent D
+ROTATE 80 95 -13 tent D
+ROTATE 57 97 6 tent M
+ROTATE 71 97 -6 tent M
+ROTATE 64 99 0 tent M
 
-# --- Trees ---
-STAMP 5.5 17.5 TREE G2
-STAMP 30.5 16.5 TREE D
+# HEAD SILHOUETTE (dark rim)
+ELLIPSE 64 56 34 31 K
+CIRCLE 96 56 8 K
+CIRCLE 93 44 8 K
+CIRCLE 86 35 8 K
+CIRCLE 75 29 8 K
+CIRCLE 64 27 8 K
+CIRCLE 53 29 8 K
+CIRCLE 42 35 8 K
+CIRCLE 35 44 8 K
+CIRCLE 32 56 8 K
+CIRCLE 35 68 8 K
+CIRCLE 93 68 8 K
 
-# --- Small flower patch ---
-LOOP x 4 12 4
-  PIXEL x 24 P
-  PIXEL x+1 25 F
-ENDLOOP
+# HEAD BASE
+ELLIPSE 64 56 32 29 D
 
-# --- Simple park bench ---
-RECT 7 20 7 1 T
-RECT 8 22 1 3 T
-RECT 13 22 1 3 T
-LINE 7 19 13 19 L
+# FLUFFY RIM BUMPS
+CIRCLE 96 56 6 D
+CIRCLE 93 44 6 M
+CIRCLE 86 35 6 M
+CIRCLE 85 41.5 7 L
+CIRCLE 75 29 6 L
+CIRCLE 64 27 6 L
+CIRCLE 53 29 6 L
+CIRCLE 42 35 6 M
+CIRCLE 35 44 6 M
+CIRCLE 32 56 6 D
+CIRCLE 35 68 6 D
+CIRCLE 93 68 6 D
 
-# --- Sun ---
-CIRCLE 26 5 3 F
-PIXEL 26 1 F
-PIXEL 26 9 F
-PIXEL 22 5 F
-PIXEL 30 5 F`,
+# SOFT TOP-LEFT LIGHTING
+ELLIPSE 58 46 26 20 M
+ELLIPSE 54 40 18 13 L
+ELLIPSE 51 36 10 7 H
+
+# EYES
+ELLIPSE 48 61 9 10 W
+ELLIPSE 80 61 9 10 W
+ELLIPSE 48 64 7 7 E
+ELLIPSE 80 64 7 7 E
+CIRCLE 45 61 2.5 W
+CIRCLE 77 61 2.5 W
+CIRCLE 51 68 1.5 #ffffff99
+CIRCLE 83 68 1.5 #ffffff99
+
+# SAD DROOPY LIDS
+TRIANGLE 39 52 50 50.5 39 60 M
+TRIANGLE 71 49 89 49 89 60 M
+
+# WORRIED BROWS
+LINE 40 47 56 43 K
+LINE 40 48 56 44 K
+LINE 72 43 88 47 K
+LINE 72 44 88 48 K
+
+# BLUSH
+ELLIPSE 40 70 4 4 #ff9ecb99
+ELLIPSE 88 70 4 4 #ff9ecb99
+
+# SAD FROWN
+LINE 59 79 64 75 K
+LINE 64 75 69 79 K
+PIXEL 58 80 K
+PIXEL 70 80 K`,
 
 
       example2: `
-# PixelDSL Example: Little Ship at Sea
+# PixelDSL Example: Rainy Cityscape
 
-GRID 32 32
-BG #7fc8e8
+GRID 320 240
+BG #cdd9e1
 
-# --- Palette ---
-COLOR SKY #7fc8e8
-COLOR SKY2 #c8efff
-COLOR SEA #2f91b8
-COLOR SEA2 #236f99
-COLOR FOAM #d9f6ff
-COLOR HULL #8b4f2a
-COLOR HULL2 #5d321e
-COLOR SAIL #fff1cf
-COLOR SAIL2 #f3c978
-COLOR ROPE #46352c
-COLOR DARK #173b52
-COLOR SUN #ffe28a
+COLORDEF
+  SKYT #a2bbcf
+  SKYB #cdd9e1
+  FAR #5a6c7e
+  MID #3d4d5e
+  MID2 #2c3949
+  NEAR #222d39
+  WIN #ffd98a
+  WINP #b7c9d7
+  SWALK #5b6570
+  CURB #7c8791
+  ROAD #262d35
+  ROAD2 #343d47
+  YELL #e3bd4e
+  RED #c0392b
+  BLUE #3f7fc4
+  GRN #3f8f5a
+  K #10161d
+  SKIN #e0b088
+  COAT #2b3542
+  UMB1 #d9503f
+  UMB2 #3a86b8
+  UMB3 #e0b93f
+  TREE #2e5a3a
+  TREE2 #3d7549
+  BARK #3a2b20
+  GLOW #ffe9b0
+ENDCOLORDEF
 
-# --- Sky and water ---
-GRADRECT 0 0 32 17 SKY2 SKY V
-GRADRECT 0 17 32 15 SEA SEA2 V
+# SKY
+GRADRECT 0 0 320 184 SKYT SKYB V
 
-# --- Sun and distant clouds ---
-CIRCLE 25 5 3 SUN
-ELLIPSE 7 6 4 1 FOAM
-ELLIPSE 10 7 5 1 FOAM
+ELLIPSE 70 30 48 12 rgba(222,233,240,0.70)
+ELLIPSE 108 24 30 9 rgba(222,233,240,0.70)
+ELLIPSE 230 40 54 13 rgba(222,233,240,0.60)
+ELLIPSE 266 34 30 9 rgba(222,233,240,0.60)
+ELLIPSE 160 54 42 10 rgba(222,233,240,0.45)
 
-# --- Reusable wave crest ---
-DEF WAVE c
-  LINE 0 1 2 0 c
-  LINE 2 0 4 1 c
-  LINE 4 1 6 0 c
-ENDDEF
-
-LOOP x 0 28 7
-  STAMP x+3 20.5 WAVE FOAM
+# DISTANT SKYLINE
+LOOP i 0 17 1
+  LET fx = i*19
+  LET fh = 20+RAND(i,5)*40
+  RECT fx (182-fh) 17 fh FAR
 ENDLOOP
-LOOP x 3 24 7
-  STAMP x+3 27.5 WAVE FOAM
+
+RECT 0 138 320 44 rgba(206,218,227,0.32)
+
+# MIDGROUND TOWERS
+DEF TOWER w h c cols rows
+  RECT 0 0 w h c
+  RECT 0 0 w 4 MID2
+  RECT (w-3) 0 3 h MID2
+  LOOP r 0 rows-1 1
+    LOOP n 0 cols-1 1
+      RECT 5+n*9 10+r*14 5 8 (RAND(r*13+n*3+w,5)<0.4?WIN:WINP)
+    ENDLOOP
+  ENDLOOP
+ENDDEF
+
+STAMP 32.5 182 TOWER 46 112 MID 4 6 ANCHOR bottom
+STAMP 80.5 182 TOWER 38 86 NEAR 3 5 ANCHOR bottom
+STAMP 132.5 182 TOWER 54 130 MID 5 8 ANCHOR bottom
+STAMP 185.5 182 TOWER 40 98 NEAR 3 6 ANCHOR bottom
+STAMP 236.5 182 TOWER 50 116 MID 4 7 ANCHOR bottom
+STAMP 289.5 182 TOWER 44 82 NEAR 3 5 ANCHOR bottom
+
+# STREET
+RECT 0 182 320 14 SWALK
+RECT 0 193 320 3 CURB
+GRADRECT 0 196 320 44 ROAD2 ROAD V
+
+
+LOOP i 0 15 1
+  RECT 6+i*20 217 11 3 YELL
 ENDLOOP
 
-# --- Ship hull base ---
-DEF HULL_SHAPE
-  TRIANGLE 0 0 22 0 18 6 HULL
-  TRIANGLE 0 0 18 6 4 6 HULL2
-  RECT 3 2 16 2 HULL
+LOOP i 0 11 1
+  LET px = 14+i*27
+  LET py = 202+RAND(i,17)*32
+  ELLIPSE px py 8 2 rgba(178,198,214,0.16)
+ENDLOOP
+
+# TREES
+DEF TREE
+  RECT -2 -32 5 33 BARK
+  CIRCLE 0 -40 13 TREE
+  CIRCLE -9 -34 9 TREE2
+  CIRCLE 9 -35 10 TREE
+  CIRCLE 2 -46 9 TREE2
 ENDDEF
 
-# --- Sail ---
-DEF SAIL
-  TRIANGLE 10 0 10 12 2 11 SAIL
-  TRIANGLE 10 1 10 12 4 10 SAIL2
-  LINE 10 0 10 13 ROPE
+STAMP 22 194 TREE ANCHOR bottom
+STAMP 300 194 TREE ANCHOR bottom
+
+# STREET LAMPS
+DEF LAMP
+  RECT -2 -70 4 70 COAT
+  CIRCLE 0 -72 6 GLOW
+  CIRCLE 0 -72 16 rgba(255,233,176,0.14)
 ENDDEF
 
-# --- Masked sail cutout: notch the sail with a small triangle ---
-DEF SAIL_CUT
-  TRIANGLE 10 0 10 12 2 11 SAIL
+STAMP 155 194 LAMP ANCHOR bottom
+STAMP 220 194 LAMP ANCHOR bottom
+
+# CARS
+DEF CAR c
+  TRIANGLE 6 8 -15 0 -15 15 rgba(255,222,150,0.1)
+  RECT 2 4 30 11 c
+  RECT 8 -3 18 8 c
+  RECT 10 -1 6 5 rgba(183,201,215,0.85)
+  RECT 18 -1 6 5 rgba(183,201,215,0.85)
+  RECT 2 12 30 2 K
+  CIRCLE 8 13 3 K
+  CIRCLE 25 13 3 K
+  PIXEL 1 8 GLOW
+  PIXEL 32 9 RED
 ENDDEF
-DEF SAIL_HOLE
-  TRIANGLE 10 8 10 12 6 11 SKY
+
+STAMP 45 216 CAR RED ANCHOR bottom
+STAMP 160 216 CAR BLUE ANCHOR bottom
+STAMP 265 216 CAR GRN ANCHOR bottom
+MIRROR_H 100 239 CAR RED ANCHOR bottom
+MIRROR_H 215 239 CAR BLUE ANCHOR bottom
+
+# PEDESTRIANS
+DEF PERSON umb coat
+  RECT -3 -9 3 10 coat
+  RECT 1 -9 3 10 coat
+  RECT -5 -21 10 13 coat
+  CIRCLE 0 -25 4 SKIN
+  LINE 4 -17 4 -33 K
+  ELLIPSE 0 -33 12 5 umb
 ENDDEF
-MASK SAIL_NOTCHED SAIL_CUT MINUS SAIL_HOLE
 
-# --- Assemble ship ---
-STAMP 16 17 HULL_SHAPE
-STAMP 18 9.5 SAIL_NOTCHED
+STAMP 58 194 PERSON UMB1 COAT ANCHOR bottom
+STAMP 92 194 PERSON UMB2 COAT ANCHOR bottom
+STAMP 125 194 PERSON UMB3 COAT ANCHOR bottom
+STAMP 180 194 PERSON UMB1 COAT ANCHOR bottom
+STAMP 265 194 PERSON UMB2 COAT ANCHOR bottom
 
-# Mast and cabin details ---
-RECT 14 9 1 6 ROPE
-RECT 18 12 5 2 HULL2
-BOX 18 12 5 4 DARK
-PIXEL 19 13 FOAM
-PIXEL 21 13 FOAM
+# RAIN
+LOOP i 0 179 1
+  LET rx = (i*47+RAND(i,3)*70)%340-10
+  LET ry = (i*71+RAND(i+13,7)*110)%260-10
+  LINE rx ry (rx-2) (ry+9) rgba(198,212,223,0.42)
+ENDLOOP
 
-# Reflected little pennant using the same raster object
-DEF FLAG
-  TRIANGLE 0 0 5 2 0 3 SUN
-ENDDEF
-MIRROR_V 25.5 8.5 FLAG
-
-# Foreground waves
-LINE 0 30 8 30 FOAM
-LINE 9 29 17 29 FOAM
-LINE 21 31 31 31 FOAM`,
+LOOP i 0 59 1
+  LET rx = (i*89+RAND(i+31,5)*50)%340-10
+  LET ry = (i*37+RAND(i+61,9)*90)%260-10
+  LINE rx ry (rx-3) (ry+14) rgba(214,226,235,0.50)
+ENDLOOP`,
 
 
       example3: `
-# PixelDSL Example: Fantasy Castle Scene
+# PixelDSL Example: Castle of Quiet Sighs
 
-GRID 32 32
-BG #0f172a
+GRID 128 64
+BG #14082a
 
-COLOR K #020617
-COLOR M #fef08a
-COLOR M2 #fde047
-COLOR C #334155
-COLOR C2 #475569
-COLOR CH #64748b
-COLOR W #78350f
-COLOR B #451a03
-COLOR F #f97316
+COLORDEF
+  SKY1 #1b0f3d
+  SKY2 #4a2a7a
+  SKY3 #c06b9e
+  MOON #fff4c8
+  MOON2 #ffe9a0
+  STAR #e8d8ff
+  HILL #2a1a4a
+  HILL2 #3a2560
+  STONE #3f3160
+  STONE2 #55447c
+  STONE3 #7a68a8
+  LIGHT #a08cce
+  DARK #1a1030
+  DARK2 #0a0518
+  DARKEST #050210
+  LIT #ffd166
+  LIT2 #ff9a3c
+  ROOF #a04878
+  ROOF2 #c86694
+  GROUND #1e1438
+  GROUND2 #34245c
+  PATH #4a3a2c
+  PATH2 #6a5540
+ENDCOLORDEF
 
-CIRCLE 24 7 4 M
-PIXEL 22 6 M2
+# SKY
+GRADRECT 0 0 128 44 SKY1 SKY3 V
 
-DEF TOWER
-  RECT 0 0 6 16 C
-  BOX 0 0 6 16 K
-  LINE 1 3 4 3 C2
-  LINE 2 7 5 7 C2
-  LINE 1 11 4 11 C2
-  PIXEL 1 2 CH
-  PIXEL 3 6 CH
-  PIXEL 2 10 CH
+# stars (bright / dim variation)
+LOOP i 0 38 1
+  LET sx = (i*37+11)%124+2
+  LET sy = (i*11+5)%28+2
+  IF (i*13+3)%5 != 0
+    PIXEL sx sy ((i*7)%3==0?MOON2:STAR)
+  ENDIF
+ENDLOOP
+
+# moon + layered glow
+CIRCLE 101 13 17 rgba(255,233,160,0.05)
+CIRCLE 101 13 12 rgba(255,233,160,0.11)
+CIRCLE 101 13 8 MOON
+CIRCLE 98 10 2.5 MOON2
+CIRCLE 104 15 1.5 MOON2
+CIRCLE 100 16 1 MOON2
+
+# distant hills (silhouettes against the bright horizon)
+TRIANGLE 0 44 26 22 50 44 HILL
+TRIANGLE 30 44 58 16 90 44 HILL
+TRIANGLE 72 44 102 24 128 44 HILL
+TRIANGLE 10 45 40 28 70 45 HILL2
+TRIANGLE 60 45 88 30 116 45 HILL2
+
+# GROUND
+GRADRECT 0 44 128 20 GROUND2 GROUND V
+DITHERRECT 0 44 128 5 GROUND2 GROUND HORIZONTAL 0.45
+
+# PATH TO THE GATE
+TRIANGLE 58 54 70 54 82 64 PATH
+TRIANGLE 58 54 82 64 46 64 PATH
+LOOP j 0 9 1
+  LET py = 54+j
+  LET pl = 58-j*1.2
+  DITHERRECT pl py (12+j*2.4) 1 PATH PATH2 BAYER2 0.35
+ENDLOOP
+
+# ASTLE BACK WALL
+RECT 16 42 96 12 STONE
+DITHERRECT 16 42 96 12 STONE STONE3 BAYER4 0.18
+LOOP i 0 95 4
+  RECT 16+i 39 2 3 STONE
+ENDLOOP
+LINE 16 41 111 41 DARK
+
+# reusable battlemented tower
+DEF TOWER w h c dc
+  RECT 0 0 w h c
+  DITHERRECT 0 0 w h c dc BAYER4 0.22
+  LINE 0 0 0 h-1 DARK
+  LINE w-1 0 w-1 h-1 LIGHT
+  LOOP i 0 w-1 3
+    RECT i -3 2 3 c
+  ENDLOOP
 ENDDEF
 
-STAMP 4.5 19.5 TOWER
-STAMP 26.5 19.5 TOWER
+# far towers
+STAMP 16 27 TOWER 12 24 STONE2 STONE3 ANCHOR tl
+MIRROR_H 100 27 TOWER 12 24 STONE2 STONE3 ANCHOR tl
 
-BOX 1 10 3 2 K
-BOX 5 10 3 2 K
-BOX 23 10 3 2 K
-BOX 27 10 3 2 K
+# inner towers
+STAMP 36 19 TOWER 14 32 STONE2 STONE3 ANCHOR tl
+STAMP 78 19 TOWER 14 32 STONE2 STONE3 ANCHOR tl
 
-RECT 8 16 16 12 C
-BOX 8 16 16 12 K
-LINE 9 19 22 19 C2
-LINE 9 23 22 23 C2
+# keep (tallest)
+STAMP 54 11 TOWER 20 40 STONE2 STONE3 ANCHOR tl
 
-RECT 13 21 6 7 W
-BOX 13 21 6 7 B
-LINE 15 21 15 27 K
-LINE 17 21 17 27 K
+# keep shadow band under battlements
+LINE 54 17 73 17 DARK
 
-PIXEL 11 20 F
-PIXEL 11 21 W
-PIXEL 20 20 F
-PIXEL 20 21 W
+# KEEP WINDOWS
+LOOP i 0 2 1
+  LET wx = 57+i*6
+  RECT wx 28 4 8 DARK2
+  RECT wx+1 29 2 6 (i==1?LIT:DARK2)
+  LINE wx+1 32 wx+2 32 DARK2
+ENDLOOP
+# warm spill from the one lit window
+ELLIPSE 64 33 4 3 rgba(255,209,102,0.16)
 
-RECT 0 28 32 4 K`,
+# TOWER ARROW SLITS
+DEF SLIT c
+  RECT 0 0 2 5 DARK2
+  RECT 0 1 2 3 c
+ENDDEF
+STAMP 20 36 SLIT DARK2 ANCHOR tl
+STAMP 23 36 SLIT LIT ANCHOR tl
+STAMP 42 28 SLIT DARK2 ANCHOR tl
+STAMP 45 28 SLIT DARK2 ANCHOR tl
+STAMP 82 28 SLIT DARK2 ANCHOR tl
+STAMP 85 28 SLIT LIT ANCHOR tl
+STAMP 104 36 SLIT LIT ANCHOR tl
+STAMP 107 36 SLIT DARK2 ANCHOR tl
+
+# GATE (FILL creates the dark interior)
+RECT 58 44 13 10 DARK2
+ELLIPSE 64 44 6 4 DARK2
+FILL 64 50 DARKEST
+# portcullis
+LINE 61 42 61 53 DARK2
+LINE 64 42 64 53 DARK2
+LINE 67 42 67 53 DARK2
+LINE 59 48 69 48 DARK2
+LINE 59 52 69 52 DARK2
+# torch glow at gate
+ELLIPSE 60 46 2 2 rgba(255,154,60,0.5)
+ELLIPSE 68 46 2 2 rgba(255,154,60,0.5)
+
+# FLAGS
+LINE 64 11 64 3 DARK2
+TRIANGLE 65 4 76 7 65 10 ROOF2
+LINE 43 19 43 12 DARK2
+TRIANGLE 44 13 52 15 44 18 ROOF
+LINE 85 19 85 12 DARK2
+TRIANGLE 86 13 94 15 86 18 ROOF
+
+# ATMOSPHERE
+# distant bats
+LINE 30 18 32 16 DARKEST
+LINE 32 16 34 18 DARKEST
+LINE 26 22 28 20 DARKEST
+LINE 28 20 30 22 DARKEST
+
+# foreground fog band
+DITHERRECT 0 58 128 6 GROUND GROUND2 HORIZONTAL 0.55`,
 
       example4: `
-# PixelDSL Example: Cyberpunk Neon City
+# PixelDSL Example: Simple Neon City
 
 GRID 33 32
 BG #050515
@@ -1689,8 +2230,16 @@ LINE 16 28 16 31 Y`
         this.drawnPixelsCount = 0;
         this.errors = [];
         this.transform = null;
+        this.renderingMacros = [];
         this.rgbaCache = new Map();
         this.canonicalCache = new Map();
+        // Hard limits keep malformed/generated scripts from locking up the UI.
+        this.executionSteps = 0;
+        this.loopIterations = 0;
+        this.executionDepth = 0;
+        this.executionLimitHit = false;
+        this.maxExecutionSteps = 150000;
+        this.maxLoopIterations = 50000;
       }
 
       initGrid() {
@@ -1698,10 +2247,17 @@ LINE 16 28 16 31 Y`
       }
 
       resolveColor(token) {
-        if (!token) return null;
-        if (token === 'BG') return this.bgColor;
-        if (this.colors[token]) return this.colors[token];
-        return token;
+        if (token === undefined || token === null || token === '') return null;
+        const raw = String(token).trim();
+        if (raw === 'BG') return this.bgColor;
+        if (Object.prototype.hasOwnProperty.call(this.colors, raw)) return this.colors[raw];
+        if (raw.includes('?')) {
+          const selected = this.evaluateDslExpression(raw);
+          if (typeof selected === 'string' && selected !== raw) return this.resolveColor(selected);
+          if (typeof selected === 'number' && Number.isFinite(selected)) return String(selected);
+          if (typeof selected === 'boolean') return selected ? '#FFFFFFFF' : '#00000000';
+        }
+        return raw;
       }
 
       colorToRgba(token) {
@@ -1852,101 +2408,218 @@ LINE 16 28 16 31 Y`
         return tokens;
       }
 
-      getMacroBounds(macro, args = []) {
-        let minX = 0, minY = 0, maxX = 0, maxY = 0;
-        const include = (x1, y1, x2, y2) => {
-          minX = Math.min(minX, x1);
-          minY = Math.min(minY, y1);
-          maxX = Math.max(maxX, x2);
-          maxY = Math.max(maxY, y2);
-        };
-        const parameterScope = {};
-        macro.params.forEach((param, idx) => {
-          const value = args[idx] ?? '';
-          parameterScope[param] = value;
-          parameterScope[String(idx + 1)] = value;
-        });
-        for (const item of macro.lines) {
-          let sourceLine = item.line.trim();
-          for (const [key, value] of Object.entries(parameterScope)) {
-            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            sourceLine = sourceLine.replace(new RegExp(`\\$${escapedKey}\\b`, 'g'), value);
-            if (!/^\d+$/.test(key)) {
-              sourceLine = sourceLine.replace(new RegExp(`\\b${escapedKey}\\b`, 'g'), value);
-            }
-          }
-          const parts = this.tokenize(sourceLine);
-          if (!parts.length) continue;
-          const cmd = parts[0].toUpperCase();
-          const n = (token, fallback = 0) => {
-            const v = this.num(token, fallback);
-            return Number.isFinite(v) ? v : fallback;
-          };
-          if (cmd === 'PIXEL') {
-            const x=n(parts[1]), y=n(parts[2]);
-            include(x, y, x, y);
-          } else if (cmd === 'RECT' || cmd === 'BOX' || cmd === 'GRADRECT' || cmd === 'DITHERRECT') {
-            const x=n(parts[1]), y=n(parts[2]), w=Math.max(1,n(parts[3],1)), h=Math.max(1,n(parts[4],1));
-            include(x, y, x+w-1, y+h-1);
-          } else if (cmd === 'LINE') {
-            const xs=[n(parts[1]),n(parts[3])], ys=[n(parts[2]),n(parts[4])];
-            include(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
-          } else if (cmd === 'CIRCLE') {
-            const x=n(parts[1]), y=n(parts[2]), r=Math.max(0,n(parts[3]));
-            include(x-r, y-r, x+r, y+r);
-          } else if (cmd === 'ELLIPSE') {
-            const x=n(parts[1]), y=n(parts[2]), rx=Math.max(0,n(parts[3])), ry=Math.max(0,n(parts[4]));
-            include(x-rx, y-ry, x+rx, y+ry);
-          } else if (cmd === 'TRIANGLE') {
-            const xs=[n(parts[1]),n(parts[3]),n(parts[5])], ys=[n(parts[2]),n(parts[4]),n(parts[6])];
-            include(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
-          } else {
-            const rotate = cmd === 'ROTATE' || cmd === 'ROTATE_TL';
-            const multiply = cmd === 'MULTIPLY' || cmd === 'MULTIPLY_TL';
-            const symmetry = cmd === 'SYMMETRY_X' || cmd === 'SYMMETRY_X_TL';
-            const legacyTopLeft = cmd.endsWith('_TL');
-            const simplePlacement = ['STAMP','STAMP_TL','MIRROR_H','MIRROR_H_TL','MIRROR_V','MIRROR_V_TL'].includes(cmd);
-            const objectIndex = rotate || multiply || symmetry ? 4 : (simplePlacement ? 3 : -1);
-            const childName = objectIndex >= 0 ? parts[objectIndex] : null;
-            const child = childName ? this.macros[childName] : null;
-            const childArgs = objectIndex >= 0 ? parts.slice(objectIndex + 1) : [];
-            let b = child ? this.getMacroBounds(child, childArgs) : null;
-            if (!b && childName && this.objects[childName]?.mask) {
-              const raster = this.getObjectRaster(childName, childArgs);
-              if (raster) b = { width: raster.width, height: raster.height };
-            }
-            if (!b) continue;
-            const x=n(parts[1]), y=n(parts[2]);
-            let width=b.width, height=b.height;
-            if (rotate) {
-              const angle=n(parts[3])*Math.PI/180, cos=Math.cos(angle), sin=Math.sin(angle);
-              const cx=(b.width-1)/2, cy=(b.height-1)/2;
-              const corners=[[0,0],[b.width-1,0],[0,b.height-1],[b.width-1,b.height-1]];
-              const rotated=corners.map(([px,py])=>[
-                cx+(px-cx)*cos-(py-cy)*sin,
-                cy+(px-cx)*sin+(py-cy)*cos
-              ]);
-              width=Math.max(1,Math.ceil(Math.max(...rotated.map(pt=>pt[0])))-Math.floor(Math.min(...rotated.map(pt=>pt[0])))+1);
-              height=Math.max(1,Math.ceil(Math.max(...rotated.map(pt=>pt[1])))-Math.floor(Math.min(...rotated.map(pt=>pt[1])))+1);
-            }
-            const left = legacyTopLeft ? x : x-(width-1)/2;
-            const top = legacyTopLeft ? y : y-(height-1)/2;
-            include(left, top, left+width-1, top+height-1);
-            if (symmetry) {
-              const centerX=n(parts[3]);
-              const mirrorLeft = legacyTopLeft
-                ? Math.round(2*centerX-(left+width-1))
-                : Math.round(2*centerX-(Math.round(left)+width-1));
-              include(mirrorLeft, top, mirrorLeft+width-1, top+height-1);
-            }
+      substituteVariables(sourceLine, scopeVars = {}, preserveTokens = 0) {
+        let prefix = '';
+        let body = String(sourceLine);
+        for (let i = 0; i < preserveTokens; i++) {
+          const match = body.match(/^(\s*\S+)([\s\S]*)$/);
+          if (!match) break;
+          prefix += match[1];
+          body = match[2];
+          const whitespace = body.match(/^\s+/)?.[0] || '';
+          if (whitespace) {
+            prefix += whitespace;
+            body = body.slice(whitespace.length);
           }
         }
-        if (!Number.isFinite(minX)) minX = minY = maxX = maxY = 0;
-        return {
-          minX, minY,
-          width: Math.max(1, Math.ceil(maxX-minX+1)),
-          height: Math.max(1, Math.ceil(maxY-minY+1))
+        for (const [key, value] of Object.entries(scopeVars)) {
+          const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          body = body.replace(new RegExp(`\\$${escapedKey}\\b`, 'g'), String(value));
+          if (!/^\d+$/.test(key)) body = body.replace(new RegExp(`\\b${escapedKey}\\b`, 'g'), String(value));
+        }
+        return prefix + body;
+      }
+
+      valueExpression(expression) {
+        const raw = String(expression ?? '').trim();
+        if (!raw) return NaN;
+        if (/^rgba?\s*\(/i.test(raw)) return raw;
+        return this.evaluateDslExpression(raw);
+      }
+
+      placementAnchor(tokens, objectIndex, defaultAnchor = 'center') {
+        let end = tokens.length;
+        let anchor = defaultAnchor;
+        if (tokens.length >= objectIndex + 3 && String(tokens[tokens.length - 2]).toUpperCase() === 'ANCHOR') {
+          const requested = String(tokens[tokens.length - 1]).toLowerCase();
+          if (['center', 'tl', 'bottom'].includes(requested)) {
+            anchor = requested;
+            end = tokens.length - 2;
+          }
+        }
+        return { anchor, args: tokens.slice(objectIndex + 1, end), end };
+      }
+
+      anchoredPosition(x, y, width, height, anchor) {
+        if (anchor === 'tl') return { left: x, top: y };
+        if (anchor === 'bottom') return { left: x - (width - 1) / 2, top: y - height + 1 };
+        return { left: x - (width - 1) / 2, top: y - (height - 1) / 2 };
+      }
+
+      getMacroBounds(macro, args = []) {
+        let minX = 0, minY = 0, maxX = 0, maxY = 0;
+        let visited = 0;
+        const include = (x1, y1, x2, y2) => {
+          if (![x1, y1, x2, y2].every(Number.isFinite)) return;
+          minX = Math.min(minX, x1, x2);
+          minY = Math.min(minY, y1, y2);
+          maxX = Math.max(maxX, x1, x2);
+          maxY = Math.max(maxY, y1, y2);
         };
+        const initialScope = {};
+        macro.params.forEach((param, idx) => {
+          const value = args[idx] ?? '';
+          initialScope[param] = value;
+          initialScope[String(idx + 1)] = value;
+        });
+        const commandName = item => String(item?.line || '').trim().split(/\s+/)[0]?.toUpperCase();
+        const findBlock = (lines, start, open, close, alternate = null) => {
+          let depth = 0, alt = -1;
+          for (let j = start + 1; j < lines.length; j++) {
+            const cmd = commandName(lines[j]);
+            if (cmd === open) depth++;
+            else if (cmd === close) {
+              if (depth === 0) return { end: j, alt };
+              depth--;
+            } else if (alternate && cmd === alternate && depth === 0) alt = j;
+          }
+          return { end: lines.length, alt };
+        };
+        const evalValue = (expr, scope) => {
+          const evaluated = this.valueExpression(this.substituteVariables(expr, scope));
+          return typeof evaluated === 'number' && !Number.isFinite(evaluated) ? NaN : evaluated;
+        };
+        const numeric = (expr, scope, fallback = 0) => {
+          const value = evalValue(expr ?? '', scope);
+          if (typeof value === 'number' && Number.isFinite(value)) return value;
+          if (typeof value === 'boolean') return value ? 1 : 0;
+          if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) return Number(value);
+          return fallback;
+        };
+        const walk = (lines, scope, depth = 0) => {
+          if (depth > 30 || visited > 40000) return;
+          for (let i = 0; i < lines.length && visited++ < 40000; i++) {
+            const raw = lines[i].line.trim();
+            const rawTokens = this.tokenize(raw);
+            if (!rawTokens.length) continue;
+            const rawCmd = rawTokens[0].toUpperCase();
+            const preserve = ['LET', 'ANCHOR'].includes(rawCmd) ? 2 : (rawCmd === 'BASE' && rawTokens[1]?.toUpperCase() === 'AT' ? 2 : 0);
+            const processed = this.substituteVariables(raw, scope, preserve);
+            const parts = this.tokenize(processed);
+            const cmd = parts[0]?.toUpperCase();
+            if (!cmd) continue;
+
+            if (cmd === 'LET' || cmd === 'ANCHOR') {
+              const name = parts[1];
+              let expression = processed.trim().split(/\s+/).slice(2).join(' ').replace(/^=\s*/, '');
+              const result = evalValue(expression, scope);
+              if (name && !(typeof result === 'number' && !Number.isFinite(result))) scope[name] = String(result);
+              continue;
+            }
+            if (cmd === 'BASE' && parts[1]?.toUpperCase() === 'AT') {
+              const result = evalValue(processed.trim().split(/\s+/).slice(2).join(' '), scope);
+              if (!(typeof result === 'number' && !Number.isFinite(result))) scope.BASE = String(result);
+              continue;
+            }
+            if (cmd === 'LOOP') {
+              const block = findBlock(lines, i, 'LOOP', 'ENDLOOP');
+              const loopVar = parts[1];
+              const startValue = numeric(parts[2], scope);
+              const endValue = numeric(parts[3], scope);
+              const stepValue = numeric(parts[4] ?? '1', scope, 1);
+              if (block.end < lines.length && loopVar && stepValue !== 0) {
+                const body = lines.slice(i + 1, block.end);
+                let count = 0;
+                for (let value = startValue; (stepValue > 0 ? value <= endValue : value >= endValue) && count++ < 10000; value += stepValue) {
+                  const inner = { ...scope, [loopVar]: value, [`$${loopVar}`]: value };
+                  walk(body, inner, depth + 1);
+                }
+                i = block.end;
+              }
+              continue;
+            }
+            if (cmd === 'IF') {
+              const block = findBlock(lines, i, 'IF', 'ENDIF', 'ELSE');
+              if (block.end < lines.length) {
+                const condition = processed.trim().slice(2).trim();
+                const value = this.evaluateDslExpression(condition);
+                const truth = typeof value === 'boolean' ? value : typeof value === 'number' ? value !== 0 : !!value;
+                const trueLines = lines.slice(i + 1, block.alt >= 0 ? block.alt : block.end);
+                const falseLines = block.alt >= 0 ? lines.slice(block.alt + 1, block.end) : [];
+                walk(truth ? trueLines : falseLines, scope, depth + 1);
+                i = block.end;
+              }
+              continue;
+            }
+            if (['ENDLOOP', 'ENDIF', 'ELSE', 'COLOR', 'COLORDEF', 'COLORS', 'MASK', 'GRID', 'BG'].includes(cmd)) continue;
+
+            if (cmd === 'PIXEL' || cmd === 'FILL') {
+              const x = numeric(parts[1], scope), y = numeric(parts[2], scope);
+              include(x, y, x, y);
+            } else if (['RECT', 'BOX', 'BAR', 'GRADRECT', 'DITHERRECT'].includes(cmd)) {
+              const x = numeric(parts[1], scope);
+              const h = Math.max(1, numeric(parts[4], scope, 1));
+              const w = Math.max(1, numeric(parts[3], scope, 1));
+              let y = numeric(parts[2], scope);
+              if (cmd === 'BAR') y = y - h + 1;
+              include(x, y, x + w - 1, y + h - 1);
+            } else if (cmd === 'LINE') {
+              const xs = [numeric(parts[1], scope), numeric(parts[3], scope)];
+              const ys = [numeric(parts[2], scope), numeric(parts[4], scope)];
+              include(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
+            } else if (cmd === 'CIRCLE') {
+              const x = numeric(parts[1], scope), y = numeric(parts[2], scope), r = Math.max(0, numeric(parts[3], scope));
+              include(x - r, y - r, x + r, y + r);
+            } else if (cmd === 'ELLIPSE') {
+              const x = numeric(parts[1], scope), y = numeric(parts[2], scope), rx = Math.max(0, numeric(parts[3], scope)), ry = Math.max(0, numeric(parts[4], scope));
+              include(x - rx, y - ry, x + rx, y + ry);
+            } else if (cmd === 'TRIANGLE') {
+              const xs = [numeric(parts[1], scope), numeric(parts[3], scope), numeric(parts[5], scope)];
+              const ys = [numeric(parts[2], scope), numeric(parts[4], scope), numeric(parts[6], scope)];
+              include(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
+            } else {
+              const rotate = cmd === 'ROTATE' || cmd === 'ROTATE_TL';
+              const multiply = cmd === 'MULTIPLY' || cmd === 'MULTIPLY_TL';
+              const symmetry = cmd === 'SYMMETRY_X' || cmd === 'SYMMETRY_X_TL';
+              const bbox = cmd === 'BBOX';
+              const simple = ['STAMP','STAMP_TL','MIRROR_H','MIRROR_H_TL','MIRROR_V','MIRROR_V_TL'].includes(cmd);
+              const objectIndex = rotate ? 4 : (multiply || bbox ? 3 : (symmetry ? 4 : (simple ? 3 : -1)));
+              if (objectIndex < 0) continue;
+              let name = parts[objectIndex];
+              let place;
+              let childArgs;
+              if (bbox) {
+                childArgs = parts.slice(objectIndex + 1, -1);
+                place = { anchor: 'center' };
+              } else {
+                place = this.placementAnchor(parts, objectIndex, cmd.endsWith('_TL') ? 'tl' : 'center');
+                childArgs = place.args;
+              }
+              let child = this.getObjectRaster(name, childArgs);
+              if (!child) continue;
+              if (bbox || place.anchor !== 'tl') child = this.getPlacementRaster(child);
+              let width = child.width, height = child.height;
+              if (rotate) {
+                const angle = numeric(parts[3], scope) * Math.PI / 180;
+                const cos = Math.cos(angle), sin = Math.sin(angle), cx = (width - 1) / 2, cy = (height - 1) / 2;
+                const corners = [[0,0],[width-1,0],[0,height-1],[width-1,height-1]].map(([px,py]) => [cx+(px-cx)*cos-(py-cy)*sin, cy+(px-cy)*sin+(py-cy)*cos]);
+                width = Math.max(1, Math.ceil(Math.max(...corners.map(pt=>pt[0])))-Math.floor(Math.min(...corners.map(pt=>pt[0])))+1);
+                height = Math.max(1, Math.ceil(Math.max(...corners.map(pt=>pt[1])))-Math.floor(Math.min(...corners.map(pt=>pt[1])))+1);
+              }
+              const x = numeric(parts[1], scope), y = numeric(parts[2], scope);
+              const pos = bbox ? { left: x - (width - 1) / 2, top: y - (height - 1) / 2 } : this.anchoredPosition(x, y, width, height, place.anchor);
+              include(pos.left, pos.top, pos.left + width - 1, pos.top + height - 1);
+              if (symmetry) {
+                const centerX = numeric(parts[3], scope);
+                const mirrorLeft = place.anchor === 'tl' ? Math.round(2 * centerX - (pos.left + width - 1)) : Math.round(2 * centerX - (Math.round(pos.left) + width - 1));
+                include(mirrorLeft, pos.top, mirrorLeft + width - 1, pos.top + height - 1);
+              }
+            }
+          }
+        };
+        walk(macro.lines, initialScope);
+        if (![minX, minY, maxX, maxY].every(Number.isFinite)) minX = minY = maxX = maxY = 0;
+        return { minX, minY, width: Math.max(1, Math.ceil(maxX - minX + 1)), height: Math.max(1, Math.ceil(maxY - minY + 1)) };
       }
 
       makeRaster(width, height) {
@@ -2149,7 +2822,17 @@ LINE 16 28 16 31 Y`
           if (object.mask) return this.renderMaskRaster(object.mask, args);
           return object;
         }
-        if (this.macros[name]) return this.renderMacroRaster(this.macros[name], args);
+        if (this.macros[name]) {
+          // Recursive object definitions cannot produce a finite raster. Stop
+          // them here instead of letting bounds/raster generation recurse forever.
+          if (this.renderingMacros.includes(name)) return null;
+          this.renderingMacros.push(name);
+          try {
+            return this.renderMacroRaster(this.macros[name], args);
+          } finally {
+            this.renderingMacros.pop();
+          }
+        }
         return null;
       }
 
@@ -2202,23 +2885,241 @@ LINE 16 28 16 31 Y`
         }
       }
 
-      evalExpression(token) {
-        if (token === undefined || token === null) return NaN;
-        const value = String(token).trim();
-        if (!value) return NaN;
+      floodFill(x, y, color) {
+        x = Math.round(x);
+        y = Math.round(y);
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return 0;
 
-        const expanded = value
-          .replace(/\bWIDTH\b/gi, String(this.canvasWidth ?? this.width))
-          .replace(/\bHEIGHT\b/gi, String(this.canvasHeight ?? this.height));
+        const colorKey = (value) => {
+          if (value === null || value === undefined) return null;
+          const rgba = this.colorToRgba(value);
+          return !rgba || rgba.a <= 0 ? null : this.canonicalColor(value);
+        };
+        const sourceKey = colorKey(this.grid[y][x]);
+        const target = this.canonicalColor(color);
+        const targetRgba = this.colorToRgba(target);
+        const replacement = targetRgba && targetRgba.a > 0 ? target : null;
+        const replacementKey = colorKey(replacement);
+        if (sourceKey === replacementKey) return 0;
 
-        if (/^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(expanded)) return Number(expanded);
-        if (!/^[0-9+\-*/%().\s]+$/.test(expanded)) return NaN;
+        const visited = new Uint8Array(this.width * this.height);
+        const startIndex = y * this.width + x;
+        visited[startIndex] = 1;
+        const stack = [[x, y]];
+        let filled = 0;
+
+        while (stack.length) {
+          const [cx, cy] = stack.pop();
+          this.grid[cy][cx] = replacement;
+          filled++;
+
+          // Mark matching neighbors when queued so each pixel enters the stack once.
+          // Four-way adjacency keeps diagonal-only regions separate.
+          const neighbors = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
+          for (const [nx, ny] of neighbors) {
+            if (nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) continue;
+            const index = ny * this.width + nx;
+            if (visited[index]) continue;
+            visited[index] = 1;
+            if (colorKey(this.grid[ny][nx]) === sourceKey) stack.push([nx, ny]);
+          }
+        }
+        return filled;
+      }
+
+      evaluateDslExpression(expression) {
+        if (expression === undefined || expression === null) return NaN;
+        const source = String(expression).trim();
+        if (!source) return NaN;
+        const tokens = [];
+        const tokenPattern = /\s+|(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|#[0-9a-fA-F]{3,8}\b|(?:===|!==|==|!=|<=|>=|&&|\|\||[(),+\-*/%!?<>:])|[A-Za-z_$][A-Za-z0-9_$]*/gy;
+        let position = 0;
+        while (position < source.length) {
+          tokenPattern.lastIndex = position;
+          const match = tokenPattern.exec(source);
+          if (!match || match.index !== position) return NaN;
+          position = tokenPattern.lastIndex;
+          if (/^\s+$/.test(match[0])) continue;
+          let token = match[0];
+          const lower = token.toLowerCase();
+          if (lower === 'and') token = '&&';
+          else if (lower === 'or') token = '||';
+          else if (lower === 'not') token = '!';
+          tokens.push(token);
+        }
+        let index = 0;
+        const peek = () => tokens[index];
+        const take = () => tokens[index++];
+        const truthy = value => {
+          if (typeof value === 'boolean') return value;
+          if (typeof value === 'number') return Number.isFinite(value) && value !== 0;
+          if (value === null || value === undefined) return false;
+          const lower = String(value).toLowerCase();
+          if (lower === 'false' || lower === 'null' || lower === '') return false;
+          if (lower === 'true') return true;
+          const n = Number(value);
+          return Number.isFinite(n) ? n !== 0 : true;
+        };
+        const number = value => {
+          if (typeof value === 'number') return value;
+          if (typeof value === 'boolean') return value ? 1 : 0;
+          if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) return Number(value);
+          return NaN;
+        };
+        const equal = (a, b) => {
+          const na = number(a), nb = number(b);
+          if (Number.isFinite(na) && Number.isFinite(nb)) return na === nb;
+          if (typeof a === 'boolean' || typeof b === 'boolean') return truthy(a) === truthy(b);
+          return String(a).toLowerCase() === String(b).toLowerCase();
+        };
+        const parsePrimary = () => {
+          const token = take();
+          if (token === undefined) return NaN;
+          if (token === '(') {
+            const value = parseTernary();
+            if (take() !== ')') throw new Error('Missing closing parenthesis in expression');
+            return value;
+          }
+          if (token === ')') throw new Error('Unexpected closing parenthesis in expression');
+          if (/^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(token)) return Number(token);
+          if (token.startsWith('#')) return token;
+          const lower = token.toLowerCase();
+          if (lower === 'true') return true;
+          if (lower === 'false') return false;
+          if (lower === 'width') return Number(this.canvasWidth ?? this.width);
+          if (lower === 'height') return Number(this.canvasHeight ?? this.height);
+          if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(token) && peek() === '(') {
+            take();
+            const args = [];
+            if (peek() !== ')') {
+              while (true) {
+                args.push(parseTernary());
+                if (peek() !== ',') break;
+                take();
+              }
+            }
+            if (take() !== ')') throw new Error(`Missing closing parenthesis after ${token}`);
+            const name = token.toUpperCase();
+            if (name === 'RAND') {
+              if (args.length !== 2) throw new Error('RAND syntax: RAND(index, seed)');
+              const key = `${String(args[0])}|${String(args[1])}`;
+              let hash = 2166136261;
+              for (let i = 0; i < key.length; i++) hash = Math.imul(hash ^ key.charCodeAt(i), 16777619) >>> 0;
+              return hash / 4294967296;
+            }
+            if (name === 'PICK') {
+              if (args.length < 3 || args.length % 2 === 0) throw new Error('PICK syntax: PICK(random, value1, weight1, value2, weight2, ...)');
+              const randomValue = number(args[0]);
+              if (!Number.isFinite(randomValue)) throw new Error('PICK first argument must be numeric, usually RAND(...)');
+              let total = 0;
+              for (let i = 2; i < args.length; i += 2) {
+                const weight = number(args[i]);
+                if (!Number.isFinite(weight) || weight <= 0) throw new Error('PICK weights must be positive numbers');
+                total += weight;
+              }
+              let point = (((randomValue % 1) + 1) % 1) * total;
+              for (let i = 2; i < args.length; i += 2) {
+                const weight = number(args[i]);
+                if (point < weight) return args[i - 1];
+                point -= weight;
+              }
+              return args[args.length - 2];
+            }
+            if (name === 'RGB' || name === 'RGBA') return `${name.toLowerCase()}(${args.join(', ')})`;
+            throw new Error(`Unknown expression function '${token}'`);
+          }
+          return token;
+        };
+        const parseUnary = () => {
+          if (peek() === '!') { take(); return !truthy(parseUnary()); }
+          if (peek() === '+') { take(); return number(parseUnary()); }
+          if (peek() === '-') { take(); return -number(parseUnary()); }
+          return parsePrimary();
+        };
+        const parseMultiply = () => {
+          let value = parseUnary();
+          while (['*', '/', '%'].includes(peek())) {
+            const op = take(), right = parseUnary();
+            const a = number(value), b = number(right);
+            if (!Number.isFinite(a) || !Number.isFinite(b)) value = NaN;
+            else if (op === '*') value = a * b;
+            else if (op === '/') value = b === 0 ? NaN : a / b;
+            else value = b === 0 ? NaN : a % b;
+          }
+          return value;
+        };
+        const parseAdd = () => {
+          let value = parseMultiply();
+          while (peek() === '+' || peek() === '-') {
+            const op = take(), right = parseMultiply();
+            const a = number(value), b = number(right);
+            value = !Number.isFinite(a) || !Number.isFinite(b) ? NaN : op === '+' ? a + b : a - b;
+          }
+          return value;
+        };
+        const parseCompare = () => {
+          let value = parseAdd();
+          while (['<', '<=', '>', '>='].includes(peek())) {
+            const op = take(), right = parseAdd();
+            const a = number(value), b = number(right);
+            if (!Number.isFinite(a) || !Number.isFinite(b)) value = false;
+            else if (op === '<') value = a < b;
+            else if (op === '<=') value = a <= b;
+            else if (op === '>') value = a > b;
+            else value = a >= b;
+          }
+          return value;
+        };
+        const parseEquality = () => {
+          let value = parseCompare();
+          while (['==', '!=', '===', '!=='].includes(peek())) {
+            const op = take(), right = parseCompare();
+            value = op === '==' || op === '===' ? equal(value, right) : !equal(value, right);
+          }
+          return value;
+        };
+        const parseAnd = () => {
+          let value = parseEquality();
+          while (peek() === '&&') {
+            take();
+            const right = parseEquality();
+            value = truthy(value) && truthy(right);
+          }
+          return value;
+        };
+        const parseOr = () => {
+          let value = parseAnd();
+          while (peek() === '||') {
+            take();
+            const right = parseAnd();
+            value = truthy(value) || truthy(right);
+          }
+          return value;
+        };
+        const parseTernary = () => {
+          const condition = parseOr();
+          if (peek() !== '?') return condition;
+          take();
+          const whenTrue = parseTernary();
+          if (take() !== ':') throw new Error('Ternary expression needs : between its two values');
+          const whenFalse = parseTernary();
+          return truthy(condition) ? whenTrue : whenFalse;
+        };
         try {
-          const result = Function(`"use strict"; return (${expanded});`)();
-          return Number.isFinite(result) ? result : NaN;
+          const result = parseTernary();
+          if (index !== tokens.length) return NaN;
+          return result;
         } catch {
           return NaN;
         }
+      }
+
+      evalExpression(token) {
+        const value = this.evaluateDslExpression(token);
+        if (typeof value === 'number') return Number.isFinite(value) ? value : NaN;
+        if (typeof value === 'boolean') return value ? 1 : 0;
+        if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) return Number(value);
+        return NaN;
       }
 
       num(token, fallback = 0) {
@@ -2324,9 +3225,11 @@ LINE 16 28 16 31 Y`
       }
 
       ditherValue(x, y, pattern) {
+        // Ordered thresholds are centered inside each matrix cell. This makes
+        // the optional coverage value behave consistently from 0 to 1.
         if (pattern === 'BAYER2') {
           const matrix = [[0, 2], [3, 1]];
-          return matrix[y & 1][x & 1] / 4;
+          return (matrix[y & 1][x & 1] + 0.5) / 4;
         }
         if (pattern === 'BAYER4') {
           const matrix = [
@@ -2335,9 +3238,97 @@ LINE 16 28 16 31 Y`
             [3, 11, 1, 9],
             [15, 7, 13, 5]
           ];
-          return matrix[y & 3][x & 3] / 16;
+          return (matrix[y & 3][x & 3] + 0.5) / 16;
         }
-        return (x + y) & 1 ? 1 : 0;
+        if (pattern === 'BAYER8') {
+          const b2 = [[0, 2], [3, 1]];
+          const matrix = Array.from({ length: 8 }, () => Array(8).fill(0));
+          for (let yy = 0; yy < 8; yy++) {
+            for (let xx = 0; xx < 8; xx++) {
+              const x0 = xx & 1, y0 = yy & 1;
+              const x1 = (xx >> 1) & 1, y1 = (yy >> 1) & 1;
+              const x2 = (xx >> 2) & 1, y2 = (yy >> 2) & 1;
+              matrix[yy][xx] = b2[y0][x0] * 16 + b2[y1][x1] * 4 + b2[y2][x2];
+            }
+          }
+          return (matrix[y & 7][x & 7] + 0.5) / 64;
+        }
+        if (pattern === 'CHECKER') return ((x + y) & 1) ? 0.75 : 0.25;
+        if (pattern === 'HORIZONTAL') return (y & 1) ? 0.75 : 0.25;
+        if (pattern === 'VERTICAL') return (x & 1) ? 0.75 : 0.25;
+        if (pattern === 'DIAGONAL') return ((x + y) % 4 < 2) ? 0.25 : 0.75;
+        if (pattern === 'CLUSTER') {
+          const matrix = [
+            [0.10, 0.35, 0.65, 0.90],
+            [0.35, 0.20, 0.80, 0.65],
+            [0.65, 0.80, 0.20, 0.35],
+            [0.90, 0.65, 0.35, 0.10]
+          ];
+          return matrix[y & 3][x & 3];
+        }
+        return ((x + y) & 1) ? 0.75 : 0.25;
+      }
+
+      ditherMask(w, h, pattern, coverage) {
+        const mask = Array.from({ length: h }, () => Array(w).fill(false));
+        const amount = Math.max(0, Math.min(1, coverage));
+        const errorDiffusion = {
+          ATKINSON: {
+            divisor: 8,
+            taps: [[1,0,1],[2,0,1],[-1,1,1],[0,1,1],[1,1,1],[0,2,1]]
+          },
+          FLOYD: {
+            divisor: 16,
+            taps: [[1,0,7],[-1,1,3],[0,1,5],[1,1,1]]
+          },
+          FLOYDSTEINBERG: {
+            divisor: 16,
+            taps: [[1,0,7],[-1,1,3],[0,1,5],[1,1,1]]
+          },
+          JARVIS: {
+            divisor: 48,
+            taps: [[1,0,7],[2,0,5],[-2,1,3],[-1,1,5],[0,1,7],[1,1,5],[2,1,3],[-2,2,1],[-1,2,3],[0,2,5],[1,2,3],[2,2,1]]
+          },
+          STUCKI: {
+            divisor: 42,
+            taps: [[1,0,8],[2,0,4],[-2,1,2],[-1,1,4],[0,1,8],[1,1,4],[2,1,2],[-2,2,1],[-1,2,2],[0,2,4],[1,2,2],[2,2,1]]
+          },
+          SIERRA: {
+            divisor: 32,
+            taps: [[1,0,5],[2,0,3],[-2,1,2],[-1,1,4],[0,1,5],[1,1,4],[2,1,2],[-1,2,2],[0,2,3],[1,2,2]]
+          },
+          SIERRALITE: {
+            divisor: 4,
+            taps: [[1,0,2],[-1,1,1],[0,1,1]]
+          }
+        };
+
+        const diffusion = errorDiffusion[pattern];
+        if (diffusion) {
+          const values = Array.from({ length: h }, () => Array(w).fill(amount));
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const oldValue = values[y][x];
+              const on = oldValue >= 0.5;
+              mask[y][x] = on;
+              const error = oldValue - (on ? 1 : 0);
+              for (const [dx, dy, weight] of diffusion.taps) {
+                const nx = x + dx, ny = y + dy;
+                if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                  values[ny][nx] += error * weight / diffusion.divisor;
+                }
+              }
+            }
+          }
+          return mask;
+        }
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            mask[y][x] = this.ditherValue(x, y, pattern) < amount;
+          }
+        }
+        return mask;
       }
 
       parse(code) {
@@ -2364,6 +3355,7 @@ LINE 16 28 16 31 Y`
           const cmd = tokens[0].toUpperCase();
 
           if (cmd === 'COLORDEF' || cmd === 'COLORS') {
+            let foundColorEnd = false;
             i++;
             while (i < rawLines.length) {
               const colorLineNum = i + 1;
@@ -2375,7 +3367,7 @@ LINE 16 28 16 31 Y`
               }
 
               const colorEnd = colorLine.toUpperCase();
-              if (colorEnd === 'ENDCOLORDEF' || colorEnd === 'COLOREND' || colorEnd === 'ENDCOLORS') break;
+              if (colorEnd === 'ENDCOLORDEF' || colorEnd === 'COLOREND' || colorEnd === 'ENDCOLORS') { foundColorEnd = true; break; }
 
               if (colorLine) {
                 const colorTokens = this.tokenize(colorLine);
@@ -2390,10 +3382,12 @@ LINE 16 28 16 31 Y`
               }
               i++;
             }
+            if (!foundColorEnd) this.errors.push({ line: lineNum, message: `${cmd} block is missing ENDCOLORDEF (or an accepted color-block terminator).` });
           } else if (cmd === 'DEF') {
             const macroName = tokens[1];
             const params = tokens.slice(2);
             const macroLines = [];
+            let foundDefEnd = false;
             i++;
             while (i < rawLines.length) {
               let innerLineNum = i + 1;
@@ -2403,11 +3397,12 @@ LINE 16 28 16 31 Y`
               } else {
                 mLine = mLine.replace(/\s+#(?=\s|$).*$/, '').trim();
               }
-              if (mLine.toUpperCase() === 'ENDDEF') break;
+              if (mLine.toUpperCase() === 'ENDDEF') { foundDefEnd = true; break; }
               if (mLine) macroLines.push({ line: mLine, lineNum: innerLineNum });
               i++;
             }
-            if (macroName) {
+            if (!foundDefEnd) this.errors.push({ line: lineNum, message: `DEF ${macroName || '(unnamed)'} is missing ENDDEF.` });
+            if (macroName && foundDefEnd) {
               this.macros[macroName] = { params, lines: macroLines };
             }
           } else {
@@ -2421,35 +3416,103 @@ LINE 16 28 16 31 Y`
       }
 
       executeBlock(lines, offsetX, offsetY, flipX, flipY, scopeVars, transform = null) {
+        if (this.executionDepth >= 64) {
+          if (!this.executionLimitHit) this.errors.push({ line: lines[0]?.lineNum || 1, message: 'Execution stopped safely: nesting depth limit exceeded (64). Reduce deeply nested loops or object calls.' });
+          this.executionLimitHit = true;
+          return;
+        }
+        this.executionDepth++;
         const previousTransform = this.transform;
         this.transform = transform;
         let i = 0;
         while (i < lines.length) {
+          if (this.executionLimitHit) break;
+          this.executionSteps++;
+          if (this.executionSteps > this.maxExecutionSteps) {
+            this.executionLimitHit = true;
+            this.errors.push({ line: lines[i]?.lineNum || 1, message: 'Execution stopped safely: command limit exceeded. Simplify the script or reduce nested loop ranges.' });
+            break;
+          }
           const { line, lineNum } = lines[i];
           
-          let processedLine = line;
-          for (const [key, val] of Object.entries(scopeVars)) {
-            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            processedLine = processedLine.replace(new RegExp(`\\$${escapedKey}\\b`, 'g'), val);
-            if (!/^\d+$/.test(key)) {
-              processedLine = processedLine.replace(new RegExp(`\\b${escapedKey}\\b`, 'g'), val);
-            }
-          }
-
+          const originalTokens = this.tokenize(line.trim());
+          const originalCommand = originalTokens[0]?.toUpperCase();
+          const preserveTokens = ['LET', 'ANCHOR'].includes(originalCommand) ? 2 : (originalCommand === 'BASE' && originalTokens[1]?.toUpperCase() === 'AT' ? 2 : 0);
+          const processedLine = this.substituteVariables(line, scopeVars, preserveTokens);
           const tokens = this.tokenize(processedLine.trim());
+
           const cmd = tokens[0].toUpperCase();
 
           try {
-            if (cmd === 'GRID') {
+            if (cmd === 'LET' || cmd === 'ANCHOR') {
+              const name = tokens[1];
+              let expression = processedLine.trim().split(/\s+/).slice(2).join(' ').replace(/^=\s*/, '');
+              const value = this.valueExpression(expression);
+              if (!name || (typeof value === 'number' && !Number.isFinite(value))) {
+                this.errors.push({ line: lineNum, message: `${cmd} syntax: ${cmd} name = expression` });
+              } else {
+                scopeVars[name] = String(value);
+              }
+            } else if (cmd === 'BASE' && tokens[1]?.toUpperCase() === 'AT') {
+              const expression = processedLine.trim().split(/\s+/).slice(2).join(' ');
+              const value = this.valueExpression(expression);
+              if (typeof value === 'number' && !Number.isFinite(value)) this.errors.push({ line: lineNum, message: 'BASE AT needs a valid coordinate name or numeric expression' });
+              else scopeVars.BASE = String(value);
+            } else if (cmd === 'IF') {
+              const condition = processedLine.trim().slice(2).trim();
+              let elseIndex = -1;
+              let endIndex = -1;
+              let nestedDepth = 0;
+              for (let j = i + 1; j < lines.length; j++) {
+                const scan = lines[j].line.trim().split(/\s+/)[0]?.toUpperCase();
+                if (scan === 'IF') nestedDepth++;
+                else if (scan === 'ENDIF') {
+                  if (nestedDepth === 0) { endIndex = j; break; }
+                  nestedDepth--;
+                } else if (scan === 'ELSE' && nestedDepth === 0) {
+                  if (elseIndex >= 0) this.errors.push({ line: lines[j].lineNum, message: 'An IF block can contain only one ELSE' });
+                  else elseIndex = j;
+                }
+              }
+              if (endIndex < 0) {
+                this.errors.push({ line: lineNum, message: 'IF block is missing ENDIF' });
+                break;
+              }
+              if (elseIndex > endIndex) elseIndex = -1;
+              const value = this.evaluateDslExpression(condition);
+              if (typeof value === 'string' || typeof value === 'number' && !Number.isFinite(value)) {
+                this.errors.push({ line: lineNum, message: `Invalid IF condition: ${condition}` });
+              } else {
+                const conditionTrue = typeof value === 'boolean' ? value : typeof value === 'number' ? value !== 0 : !!value;
+                const yesLines = lines.slice(i + 1, elseIndex >= 0 ? elseIndex : endIndex);
+                const noLines = elseIndex >= 0 ? lines.slice(elseIndex + 1, endIndex) : [];
+                this.executeBlock(conditionTrue ? yesLines : noLines, offsetX, offsetY, flipX, flipY, scopeVars, this.transform);
+              }
+              i = endIndex;
+            } else if (cmd === 'ELSE' || cmd === 'ENDIF') {
+              this.errors.push({ line: lineNum, message: `${cmd} without a matching IF` });
+            } else if (cmd === 'GRID') {
               const nextWidth = Math.max(1, Math.round(this.num(tokens[1], this.canvasWidth ?? 32)));
               const nextHeight = Math.max(1, Math.round(this.num(tokens[2], this.canvasHeight ?? 32)));
-              this.width = nextWidth;
-              this.height = nextHeight;
-              this.canvasWidth = nextWidth;
-              this.canvasHeight = nextHeight;
-              this.initGrid();
+              const maxDimension = 1024;
+              const maxCanvasPixels = 1048576;
+              if (nextWidth > maxDimension || nextHeight > maxDimension || nextWidth * nextHeight > maxCanvasPixels) {
+                this.errors.push({ line: lineNum, message: `GRID ${nextWidth} ${nextHeight} is too large. Maximum dimension is ${maxDimension}px and maximum canvas area is ${maxCanvasPixels} pixels.` });
+              } else {
+                this.width = nextWidth;
+                this.height = nextHeight;
+                this.canvasWidth = nextWidth;
+                this.canvasHeight = nextHeight;
+                this.initGrid();
+              }
             } else if (cmd === 'BG') {
-              this.bgColor = this.canonicalColor(tokens[1]) || '#00000000';
+              const bgToken = tokens[1];
+              // Resolve named palette colors explicitly. This also allows COLOR BG #111111 / BG BG,
+              // although the LLM guide advises avoiding BG as a palette name because it is reserved.
+              const bgValue = Object.prototype.hasOwnProperty.call(this.colors, bgToken)
+                ? this.colors[bgToken]
+                : bgToken;
+              this.bgColor = this.canonicalColor(bgValue) || '#00000000';
             } else if (cmd === 'COLOR') {
               const sym = tokens[1];
               const colorValue = tokens[2];
@@ -2462,17 +3525,25 @@ LINE 16 28 16 31 Y`
               const finalX = offsetX + (flipX ? -rx : rx);
               const finalY = offsetY + (flipY ? -ry : ry);
               this.setPixel(finalX, finalY, color);
-            } else if (cmd === 'RECT' || cmd === 'BOX') {
+            } else if (cmd === 'FILL') {
+              const rx = this.num(tokens[1]);
+              const ry = this.num(tokens[2]);
+              const color = this.resolveColor(tokens[3]);
+              const seedX = offsetX + (flipX ? -rx : rx);
+              const seedY = offsetY + (flipY ? -ry : ry);
+              this.floodFill(seedX, seedY, color);
+            } else if (cmd === 'RECT' || cmd === 'BOX' || cmd === 'BAR') {
               let rx = this.num(tokens[1]);
               let ry = this.num(tokens[2]);
               let w = Math.max(1, Math.round(this.num(tokens[3], 1)));
               let h = Math.max(1, Math.round(this.num(tokens[4], 1)));
               const color = this.resolveColor(tokens[5]);
+              if (cmd === 'BAR') ry = ry - h + 1;
 
               let finalX = offsetX + (flipX ? -(rx + w - 1) : rx);
               let finalY = offsetY + (flipY ? -(ry + h - 1) : ry);
 
-              if (cmd === 'RECT') {
+              if (cmd === 'RECT' || cmd === 'BAR') {
                 const canonical = this.canonicalColor(color);
                 const source = this.colorToRgba(canonical);
                 const integerAligned = Number.isInteger(finalX) && Number.isInteger(finalY);
@@ -2631,7 +3702,10 @@ LINE 16 28 16 31 Y`
               const canonicalB = this.canonicalColor(colorB);
               const sourceA = this.colorToRgba(canonicalA);
               const sourceB = this.colorToRgba(canonicalB);
-              const pattern = (tokens[7] || 'CHECKER').toUpperCase();
+              const pattern = (tokens[7] || 'CHECKER').toUpperCase().replace(/[-_ ]/g, '');
+              const coverageToken = tokens[8];
+              const coverage = coverageToken === undefined ? 0.5 : Math.max(0, Math.min(1, this.num(coverageToken, 0.5)));
+              const mask = this.ditherMask(w, h, pattern, coverage);
 
               let finalX = offsetX + (flipX ? -(rx + w - 1) : rx);
               let finalY = offsetY + (flipY ? -(ry + h - 1) : ry);
@@ -2640,89 +3714,110 @@ LINE 16 28 16 31 Y`
                 for (let dx = 0; dx < w; dx++) {
                   const patternX = flipX ? (w - 1 - dx) : dx;
                   const patternY = flipY ? (h - 1 - dy) : dy;
-                  const value = this.ditherValue(patternX, patternY, pattern);
-                  if (value < 0.5) {
-                    this.setPixelResolved(finalX + dx, finalY + dy, canonicalA, sourceA);
-                  } else {
+                  if (mask[patternY][patternX]) {
                     this.setPixelResolved(finalX + dx, finalY + dy, canonicalB, sourceB);
+                  } else {
+                    this.setPixelResolved(finalX + dx, finalY + dy, canonicalA, sourceA);
                   }
                 }
               }
             } else if (cmd === 'ROTATE' || cmd === 'ROTATE_TL') {
-              const x=this.num(tokens[1]);
-              const y=this.num(tokens[2]);
-              const angle=this.num(tokens[3]);
-              const objectName=tokens[4];
-              const args=tokens.slice(5);
-              const sourceObject=this.getObjectRaster(objectName,args);
-              if(sourceObject) {
-                const legacyTopLeft=cmd==='ROTATE_TL';
-                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
-                const transformed=this.transformRaster(object.pixels,angle,flipX,flipY);
-                const drawX=legacyTopLeft
-                  ? offsetX+x+transformed.offsetX
-                  : offsetX+x-(transformed.width-1)/2;
-                const drawY=legacyTopLeft
-                  ? offsetY+y+transformed.offsetY
-                  : offsetY+y-(transformed.height-1)/2;
-                this.compositeRaster(transformed.pixels,drawX,drawY,'over');
+              const x = this.num(tokens[1]);
+              const y = this.num(tokens[2]);
+              const angle = this.num(tokens[3]);
+              const objectName = tokens[4];
+              const placement = this.placementAnchor(tokens, 4, cmd.endsWith('_TL') ? 'tl' : 'center');
+              const sourceObject = this.getObjectRaster(objectName, placement.args);
+              if (sourceObject) {
+                const object = placement.anchor === 'tl' ? sourceObject : this.getPlacementRaster(sourceObject);
+                const transformed = this.transformRaster(object.pixels, angle, flipX, flipY);
+                const pos = this.anchoredPosition(x, y, transformed.width, transformed.height, placement.anchor);
+                const drawX = placement.anchor === 'tl' && cmd === 'ROTATE_TL'
+                  ? offsetX + x + transformed.offsetX
+                  : offsetX + pos.left;
+                const drawY = placement.anchor === 'tl' && cmd === 'ROTATE_TL'
+                  ? offsetY + y + transformed.offsetY
+                  : offsetY + pos.top;
+                this.compositeRaster(transformed.pixels, drawX, drawY, 'over');
               } else {
                 this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
               }
             } else if (['STAMP','STAMP_TL','MIRROR_H','MIRROR_H_TL','MIRROR_V','MIRROR_V_TL'].includes(cmd)) {
-              const x=this.num(tokens[1]);
-              const y=this.num(tokens[2]);
-              const objectName=tokens[3];
-              const args=tokens.slice(4);
-              const sourceObject=this.getObjectRaster(objectName,args);
-              if(sourceObject) {
-                const legacyTopLeft=cmd.endsWith('_TL');
-                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
-                const doFlipX=cmd==='MIRROR_H' || cmd==='MIRROR_H_TL';
-                const doFlipY=cmd==='MIRROR_V' || cmd==='MIRROR_V_TL';
-                const transformed=(doFlipX||doFlipY)
-                  ? this.transformRaster(object.pixels,0,doFlipX,doFlipY)
+              const x = this.num(tokens[1]);
+              const y = this.num(tokens[2]);
+              const objectName = tokens[3];
+              const placement = this.placementAnchor(tokens, 3, cmd.endsWith('_TL') ? 'tl' : 'center');
+              const sourceObject = this.getObjectRaster(objectName, placement.args);
+              if (sourceObject) {
+                const object = placement.anchor === 'tl' ? sourceObject : this.getPlacementRaster(sourceObject);
+                const doFlipX = cmd === 'MIRROR_H' || cmd === 'MIRROR_H_TL';
+                const doFlipY = cmd === 'MIRROR_V' || cmd === 'MIRROR_V_TL';
+                const transformed = (doFlipX || doFlipY)
+                  ? this.transformRaster(object.pixels, 0, doFlipX, doFlipY)
                   : object;
-                const drawX=legacyTopLeft ? x : x-(transformed.width-1)/2;
-                const drawY=legacyTopLeft ? y : y-(transformed.height-1)/2;
-                this.compositeRaster(transformed.pixels,offsetX+drawX,offsetY+drawY,'over');
+                const pos = this.anchoredPosition(x, y, transformed.width, transformed.height, placement.anchor);
+                this.compositeRaster(transformed.pixels, offsetX + pos.left, offsetY + pos.top, 'over');
               } else {
                 this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
               }
             } else if (cmd === 'MULTIPLY' || cmd === 'MULTIPLY_TL') {
-              const x=this.num(tokens[1]);
-              const y=this.num(tokens[2]);
-              const objectName=tokens[3];
-              const args=tokens.slice(4);
-              const sourceObject=this.getObjectRaster(objectName,args);
-              if(sourceObject) {
-                const legacyTopLeft=cmd==='MULTIPLY_TL';
-                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
-                const drawX=legacyTopLeft ? x : x-(object.width-1)/2;
-                const drawY=legacyTopLeft ? y : y-(object.height-1)/2;
-                this.compositeRaster(object.pixels,offsetX+drawX,offsetY+drawY,'multiply');
+              const x = this.num(tokens[1]);
+              const y = this.num(tokens[2]);
+              const objectName = tokens[3];
+              const placement = this.placementAnchor(tokens, 3, cmd.endsWith('_TL') ? 'tl' : 'center');
+              const sourceObject = this.getObjectRaster(objectName, placement.args);
+              if (sourceObject) {
+                const object = placement.anchor === 'tl' ? sourceObject : this.getPlacementRaster(sourceObject);
+                const pos = this.anchoredPosition(x, y, object.width, object.height, placement.anchor);
+                this.compositeRaster(object.pixels, offsetX + pos.left, offsetY + pos.top, 'multiply');
               } else {
                 this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
               }
             } else if (cmd === 'SYMMETRY_X' || cmd === 'SYMMETRY_X_TL') {
-              const x=this.num(tokens[1]);
-              const y=this.num(tokens[2]);
-              const centerX=this.num(tokens[3]);
-              const objectName=tokens[4];
-              const args=tokens.slice(5);
-              const sourceObject=this.getObjectRaster(objectName,args);
-              if(sourceObject) {
-                const legacyTopLeft=cmd==='SYMMETRY_X_TL';
-                const object=legacyTopLeft ? sourceObject : this.getPlacementRaster(sourceObject);
-                const drawX=legacyTopLeft ? x : x-(object.width-1)/2;
-                const drawY=legacyTopLeft ? y : y-(object.height-1)/2;
-                this.compositeRaster(object.pixels,offsetX+drawX,offsetY+drawY,'over');
-                const actualLeft=Math.round(drawX);
-                const mirroredX=legacyTopLeft
-                  ? Math.round(2*centerX-(drawX+object.width-1))
-                  : Math.round(2*centerX-(actualLeft+object.width-1));
-                const mirrored=this.transformRaster(object.pixels,0,true,false);
-                this.compositeRaster(mirrored.pixels,offsetX+mirroredX,offsetY+drawY,'over');
+              const x = this.num(tokens[1]);
+              const y = this.num(tokens[2]);
+              const centerX = this.num(tokens[3]);
+              const objectName = tokens[4];
+              const placement = this.placementAnchor(tokens, 4, cmd.endsWith('_TL') ? 'tl' : 'center');
+              const sourceObject = this.getObjectRaster(objectName, placement.args);
+              if (sourceObject) {
+                const object = placement.anchor === 'tl' ? sourceObject : this.getPlacementRaster(sourceObject);
+                const pos = this.anchoredPosition(x, y, object.width, object.height, placement.anchor);
+                this.compositeRaster(object.pixels, offsetX + pos.left, offsetY + pos.top, 'over');
+                const actualLeft = Math.round(pos.left);
+                const mirroredX = placement.anchor === 'tl'
+                  ? Math.round(2 * centerX - (pos.left + object.width - 1))
+                  : Math.round(2 * centerX - (actualLeft + object.width - 1));
+                const mirrored = this.transformRaster(object.pixels, 0, true, false);
+                this.compositeRaster(mirrored.pixels, offsetX + mirroredX, offsetY + pos.top, 'over');
+              } else {
+                this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
+              }
+            } else if (cmd === 'BBOX') {
+              const x = this.num(tokens[1]);
+              const y = this.num(tokens[2]);
+              const objectName = tokens[3];
+              const colorToken = tokens[tokens.length - 1];
+              const args = tokens.slice(4, -1);
+              if (tokens.length < 5) {
+                this.errors.push({ line: lineNum, message: 'BBOX syntax: BBOX x y NAME [args...] outlineColor' });
+                i++;
+                continue;
+              }
+              const sourceObject = this.getObjectRaster(objectName, args);
+              if (sourceObject) {
+                const object = this.getPlacementRaster(sourceObject);
+                const left = x - (object.width - 1) / 2;
+                const top = y - (object.height - 1) / 2;
+                const color = this.resolveColor(colorToken || '#FF00FF');
+                for (let dx = 0; dx < object.width; dx++) {
+                  this.setPixel(offsetX + left + dx, offsetY + top, color);
+                  this.setPixel(offsetX + left + dx, offsetY + top + object.height - 1, color);
+                }
+                for (let dy = 0; dy < object.height; dy++) {
+                  this.setPixel(offsetX + left, offsetY + top + dy, color);
+                  this.setPixel(offsetX + left + object.width - 1, offsetY + top + dy, color);
+                }
               } else {
                 this.errors.push({ line: lineNum, message: `Unknown object '${objectName}'` });
               }
@@ -2740,29 +3835,61 @@ LINE 16 28 16 31 Y`
               } else if(!this.createMaskObject(resultName,leftName,op,rightName)) {
                 this.errors.push({line:lineNum,message:`MASK needs existing objects '${leftName}' and '${rightName}'`});
               }
+            } else if (cmd === 'LOOPEND') {
+              this.errors.push({ line: lineNum, message: 'LOOPEND is not valid PixelDSL syntax; close each loop with ENDLOOP.' });
+            } else if (cmd === 'ENDLOOP') {
+              this.errors.push({ line: lineNum, message: 'ENDLOOP without a matching LOOP.' });
             } else if (cmd === 'LOOP') {
               const loopVar = tokens[1];
               const start = this.num(tokens[2]);
               const end = this.num(tokens[3]);
               const step = this.num(tokens[4], 1);
+              if (!loopVar || tokens.length < 4 || !Number.isFinite(start) || !Number.isFinite(end) || !Number.isFinite(step)) {
+                this.errors.push({ line: lineNum, message: 'LOOP syntax: LOOP variable start end [step]' });
+                i++;
+                continue;
+              }
               if (step === 0) {
                 this.errors.push({ line: lineNum, message: 'LOOP step cannot be zero' });
                 i++;
                 continue;
               }
 
+              // Match nested LOOP blocks by depth. Every LOOP needs its own ENDLOOP;
+              // a missing terminator is reported instead of swallowing the rest of the program.
               const loopLines = [];
-              i++;
-              while (i < lines.length) {
-                if (lines[i].line.trim().toUpperCase() === 'ENDLOOP') break;
-                loopLines.push(lines[i]);
-                i++;
+              let nestedLoopDepth = 0;
+              let foundEnd = false;
+              let j = i + 1;
+              for (; j < lines.length; j++) {
+                const nestedCommand = this.tokenize(lines[j].line.trim())[0]?.toUpperCase();
+                if (nestedCommand === 'LOOP') {
+                  nestedLoopDepth++;
+                } else if (nestedCommand === 'ENDLOOP') {
+                  if (nestedLoopDepth === 0) { foundEnd = true; break; }
+                  nestedLoopDepth--;
+                }
+                loopLines.push(lines[j]);
+              }
+              if (!foundEnd) {
+                this.errors.push({ line: lineNum, message: 'LOOP has no matching ENDLOOP. Each nested LOOP needs its own ENDLOOP.' });
+                this.executionLimitHit = true; // Do not execute a malformed block as if its body were top-level code.
+                break;
               }
 
+              const maxIterationsForThisLoop = Math.min(10000, this.maxLoopIterations);
+              let iterations = 0;
               for (let val = start; step > 0 ? val <= end : val >= end; val += step) {
+                if (iterations++ >= maxIterationsForThisLoop || this.loopIterations >= this.maxLoopIterations || this.executionLimitHit) {
+                  if (!this.executionLimitHit) this.errors.push({ line: lineNum, message: 'Execution stopped safely: loop iteration limit exceeded. Reduce the loop range or nesting.' });
+                  this.executionLimitHit = true;
+                  break;
+                }
+                this.loopIterations++;
                 const innerVars = { ...scopeVars, [loopVar]: val, [`$${loopVar}`]: val };
                 this.executeBlock(loopLines, offsetX, offsetY, flipX, flipY, innerVars, this.transform);
               }
+              i = j;
             }
           } catch (err) {
             this.errors.push({ line: lineNum, message: err.message });
@@ -2770,6 +3897,7 @@ LINE 16 28 16 31 Y`
           i++;
         }
         this.transform = previousTransform;
+        this.executionDepth--;
       }
     }
 
@@ -2830,6 +3958,7 @@ LINE 16 28 16 31 Y`
       const llmPromptModal = document.getElementById('llmPromptModal');
       const closeLlmModalBtn = document.getElementById('closeLlmModalBtn');
       const inspectColorEl = document.getElementById('inspectColor');
+      const inspectCoordsEl = document.getElementById('inspectCoords');
       const copyPromptTemplateBtn = document.getElementById('copyPromptTemplateBtn');
       const exportPngBtn = document.getElementById('exportPngBtn');
       const exportSvgBtn = document.getElementById('exportSvgBtn');
@@ -2929,7 +4058,17 @@ LINE 16 28 16 31 Y`
         const startTime = performance.now();
         const code = codeEditor.value;
 
-        const result = interpreter.parse(code);
+        let result;
+        try {
+          result = interpreter.parse(code);
+        } catch (err) {
+          errorBanner.classList.remove('hidden');
+          errorMessage.textContent = `Render stopped safely: ${err?.message || String(err)}`;
+          statusText.textContent = 'Render Error';
+          statusText.style.color = 'var(--rose)';
+          renderTimeMs.textContent = `${(performance.now() - startTime).toFixed(1)} ms`;
+          return; // Preserve the editor and previous canvas instead of taking down the UI.
+        }
         updateExportScaleOptions();
 
         const w = interpreter.width;
@@ -3047,6 +4186,7 @@ LINE 16 28 16 31 Y`
       codeEditor.addEventListener('input', () => {
         updateLineNumbers();
         syncScroll();
+        scheduleDraftAutosave();
 
         if (isMobileViewport()) {
           clearTimeout(renderTimeout);
@@ -3255,7 +4395,7 @@ LINE 16 28 16 31 Y`
       });
 
       // EXPORT ENGINES
-      exportPngBtn.addEventListener('click', () => {
+      exportPngBtn.addEventListener('click', async () => {
         const scale = parseInt(exportScaleSelect.value) || 8;
         const exportCanvas = document.createElement('canvas');
         exportCanvas.width = interpreter.width * scale;
@@ -3283,8 +4423,10 @@ LINE 16 28 16 31 Y`
 
         const link = document.createElement('a');
         link.download = `pixeldsl-${interpreter.width}x${interpreter.height}.png`;
-        link.href = exportCanvas.toDataURL('image/png');
+        const pngUrl = await embedPixelDslInPng(exportCanvas.toDataURL('image/png'), codeEditor.value);
+        link.href = pngUrl;
         link.click();
+        setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
       });
 
       exportSvgBtn.addEventListener('click', () => {
@@ -3346,11 +4488,16 @@ LINE 16 28 16 31 Y`
         if (PRESETS[key]) {
           codeEditor.value = PRESETS[key];
           setEditorFileName('script.pxd');
+          currentSavedProjectId = null;
+          presetSelect.value = key;
+          mobilePresetSelect.value = key;
           updateLineNumbers();
           codeEditor.scrollTop = 0;
           syncScroll();
+          scheduleDraftAutosave();
 
-          if (!isMobileViewport() && livePreviewEnabled) {
+          const mobilePreviewIsVisible = isMobileViewport() && document.body.classList.contains('mobile-preview-active');
+          if (mobilePreviewIsVisible || (!isMobileViewport() && livePreviewEnabled)) {
             renderScene();
           } else {
             markRenderPending();
@@ -3399,28 +4546,487 @@ LINE 16 28 16 31 Y`
         editorFileName.textContent = currentFileName;
       }
 
+      // Local project library and crash/close recovery. Thumbnails are tiny raster
+      // previews; full-size source art is never stored as an image.
+      const libraryToggleBtn = document.getElementById('libraryToggleBtn');
+      const savedLibraryDrawer = document.getElementById('savedLibraryDrawer');
+      const libraryBackdrop = document.getElementById('libraryBackdrop');
+      const closeLibraryBtn = document.getElementById('closeLibraryBtn');
+      const savedProjectsList = document.getElementById('savedProjectsList');
+      const libraryStatus = document.getElementById('libraryStatus');
+      const saveProjectBtn = document.getElementById('saveProjectBtn');
+      let currentSavedProjectId = null;
+      let libraryDbPromise = null;
+      let autosaveTimer = null;
+
+      function openLibraryDb() {
+        if (libraryDbPromise) return libraryDbPromise;
+        libraryDbPromise = new Promise((resolve, reject) => {
+          if (!('indexedDB' in window)) { reject(new Error('IndexedDB is unavailable in this browser context.')); return; }
+          const request = indexedDB.open('PixelDSLStudio', 1);
+          request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains('projects')) db.createObjectStore('projects', { keyPath: 'id', autoIncrement: true });
+            if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
+          };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error('Could not open the project database.'));
+          request.onblocked = () => reject(new Error('The project database is blocked by another open tab.'));
+        });
+        libraryDbPromise.catch(() => { libraryDbPromise = null; });
+        return libraryDbPromise;
+      }
+
+      async function dbRequest(storeName, mode, operation) {
+        const db = await openLibraryDb();
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction(storeName, mode);
+          const store = transaction.objectStore(storeName);
+          let request;
+          try { request = operation(store); }
+          catch (err) { reject(err); return; }
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error('Database operation failed.'));
+          transaction.onabort = () => reject(transaction.error || new Error('Database transaction aborted.'));
+        });
+      }
+
+      function makeProjectThumbnail() {
+        const side = 72;
+        const thumb = document.createElement('canvas');
+        thumb.width = side; thumb.height = side;
+        const tctx = thumb.getContext('2d');
+        tctx.fillStyle = '#111827';
+        tctx.fillRect(0, 0, side, side);
+        const w = Math.max(1, pixelCanvas.width), h = Math.max(1, pixelCanvas.height);
+        const scale = Math.min((side - 8) / w, (side - 8) / h);
+        const drawW = Math.max(1, Math.round(w * scale));
+        const drawH = Math.max(1, Math.round(h * scale));
+        tctx.imageSmoothingEnabled = false;
+        tctx.drawImage(pixelCanvas, Math.round((side - drawW) / 2), Math.round((side - drawH) / 2), drawW, drawH);
+        try { return thumb.toDataURL('image/png'); } catch { return ''; }
+      }
+
+      function scheduleDraftAutosave() {
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(() => {
+          persistCurrentDraft().catch(err => {
+            libraryStatus.textContent = `Autosave unavailable: ${err.message || err}`;
+          });
+        }, 450);
+      }
+
+      async function persistCurrentDraft() {
+        const draft = {
+          key: 'current-draft',
+          code: codeEditor.value,
+          filename: currentFileName,
+          savedProjectId: currentSavedProjectId,
+          preset: isMobileViewport() ? mobilePresetSelect.value : presetSelect.value,
+          updatedAt: Date.now()
+        };
+        try {
+          await dbRequest('settings', 'readwrite', store => store.put(draft));
+          try { localStorage.removeItem('pixeldsl-current-draft'); } catch {}
+          libraryStatus.textContent = `Draft autosaved at ${new Date(draft.updatedAt).toLocaleTimeString()}.`;
+        } catch (err) {
+          // A few browser/file-origin combinations restrict IndexedDB. Preserve the
+          // current draft in localStorage as a small fallback; the project library
+          // itself still uses IndexedDB when available.
+          try {
+            localStorage.setItem('pixeldsl-current-draft', JSON.stringify(draft));
+            libraryStatus.textContent = 'IndexedDB is unavailable; draft is being saved with browser fallback storage.';
+          } catch {
+            throw err;
+          }
+        }
+      }
+
+      async function loadCurrentDraft() {
+        try {
+          const stored = await dbRequest('settings', 'readonly', store => store.get('current-draft'));
+          if (stored) return stored;
+        } catch (err) {
+          libraryStatus.textContent = `IndexedDB unavailable; checking draft fallback: ${err.message || err}`;
+        }
+        try {
+          const fallback = localStorage.getItem('pixeldsl-current-draft');
+          return fallback ? JSON.parse(fallback) : undefined;
+        } catch {
+          return undefined;
+        }
+      }
+
+      function closeSavedLibrary() {
+        savedLibraryDrawer.classList.remove('open');
+        libraryBackdrop.classList.add('hidden');
+        savedLibraryDrawer.setAttribute('aria-hidden', 'true');
+        libraryBackdrop.setAttribute('aria-hidden', 'true');
+        libraryToggleBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      async function openSavedLibrary() {
+        savedLibraryDrawer.classList.add('open');
+        libraryBackdrop.classList.remove('hidden');
+        savedLibraryDrawer.setAttribute('aria-hidden', 'false');
+        libraryBackdrop.setAttribute('aria-hidden', 'false');
+        libraryToggleBtn.setAttribute('aria-expanded', 'true');
+        await refreshSavedProjects();
+      }
+
+      function prettySavedDate(timestamp) {
+        if (!timestamp) return 'Saved project';
+        try { return new Date(timestamp).toLocaleString(); } catch { return 'Saved project'; }
+      }
+
+      async function refreshSavedProjects() {
+        savedProjectsList.replaceChildren();
+        try {
+          const projects = await dbRequest('projects', 'readonly', store => store.getAll());
+          projects.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+          if (!projects.length) {
+            const empty = document.createElement('div');
+            empty.className = 'library-empty';
+            empty.textContent = 'No saved projects yet. Use Save beside Open to add the current artwork here.';
+            savedProjectsList.appendChild(empty);
+          }
+          for (const project of projects) {
+            const card = document.createElement('div');
+            card.className = 'saved-project-card';
+            if (project.thumbnail) {
+              const img = document.createElement('img');
+              img.className = 'saved-project-thumb';
+              img.alt = '';
+              img.loading = 'lazy';
+              img.src = project.thumbnail;
+              card.appendChild(img);
+            }
+            const meta = document.createElement('div');
+            meta.className = 'saved-project-meta';
+            const name = document.createElement('div');
+            name.className = 'saved-project-name';
+            name.textContent = project.name || project.filename || 'Untitled';
+            const date = document.createElement('div');
+            date.className = 'saved-project-date';
+            date.textContent = prettySavedDate(project.updatedAt);
+            const actions = document.createElement('div');
+            actions.className = 'saved-project-actions';
+            const loadBtn = document.createElement('button');
+            loadBtn.type = 'button'; loadBtn.className = 'btn btn-cyan'; loadBtn.textContent = 'Open';
+            loadBtn.addEventListener('click', () => loadSavedProject(project.id));
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button'; deleteBtn.className = 'btn btn-dark'; deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => deleteSavedProject(project.id, project.name || project.filename));
+            actions.append(loadBtn, deleteBtn);
+            meta.append(name, date, actions);
+            card.appendChild(meta);
+            savedProjectsList.appendChild(card);
+          }
+          libraryStatus.textContent = `${projects.length} saved project${projects.length === 1 ? '' : 's'} · current draft autosaves automatically.`;
+        } catch (err) {
+          const error = document.createElement('div');
+          error.className = 'library-empty';
+          error.textContent = `Saved projects could not be loaded: ${err.message || err}`;
+          savedProjectsList.appendChild(error);
+          libraryStatus.textContent = 'Project storage is unavailable.';
+        }
+      }
+
+      async function saveCurrentProject() {
+        renderScene();
+        let projects;
+        try {
+          projects = await dbRequest('projects', 'readonly', store => store.getAll());
+        } catch (err) {
+          libraryStatus.textContent = `Could not check saved project names: ${err.message || err}`;
+          return;
+        }
+
+        const current = currentSavedProjectId === null
+          ? null
+          : projects.find(item => item.id === currentSavedProjectId) || null;
+        if (currentSavedProjectId !== null && !current) currentSavedProjectId = null;
+        // The editable filename in the toolbar is the source of truth for Save.
+        // A changed filename creates a separate library project rather than
+        // silently overwriting whichever project happens to be open.
+        const filename = sanitizeCodeFileName(currentFileName);
+        const projectName = filename.replace(/\.[^.]+$/, '').trim() || 'Untitled';
+
+        const normalizeProjectName = value => String(value || '').trim().toLocaleLowerCase();
+        const normalizedName = normalizeProjectName(projectName);
+        const currentNameMatches = current && normalizeProjectName(current.name || current.filename) === normalizedName;
+        const duplicate = projects.find(item =>
+          item.id !== current?.id && normalizeProjectName(item.name || item.filename) === normalizedName
+        );
+        const overwriteTarget = duplicate || (currentNameMatches ? current : null);
+        if (overwriteTarget) {
+          const reason = overwriteTarget.id === current?.id
+            ? `Overwrite the saved project “${projectName}” with the current editor contents?`
+            : `A saved project named “${projectName}” already exists. Overwrite it? This cannot be undone.`;
+          if (!window.confirm(reason)) return;
+        }
+
+        const project = {
+          name: projectName,
+          filename,
+          code: codeEditor.value,
+          thumbnail: makeProjectThumbnail(),
+          updatedAt: Date.now()
+        };
+        try {
+          if (overwriteTarget) {
+            project.id = overwriteTarget.id;
+            await dbRequest('projects', 'readwrite', store => store.put(project));
+            currentSavedProjectId = overwriteTarget.id;
+          } else {
+            currentSavedProjectId = await dbRequest('projects', 'readwrite', store => store.add(project));
+          }
+          await persistCurrentDraft();
+          await refreshSavedProjects();
+          libraryStatus.textContent = `Saved “${projectName}”.`;
+          statusText.textContent = 'Project saved';
+          statusText.style.color = 'var(--emerald)';
+          saveProjectBtn.textContent = 'Saved!';
+          setTimeout(() => { saveProjectBtn.textContent = 'Save'; }, 1200);
+        } catch (err) {
+          libraryStatus.textContent = `Could not save project: ${err.message || err}`;
+          statusText.textContent = 'Save failed';
+          statusText.style.color = 'var(--rose)';
+        }
+      }
+
+      async function loadSavedProject(id) {
+        try {
+          const project = await dbRequest('projects', 'readonly', store => store.get(id));
+          if (!project) return;
+          codeEditor.value = project.code || '';
+          setEditorFileName(project.filename || `${project.name || 'project'}.pxd`);
+          currentSavedProjectId = project.id;
+          updateLineNumbers();
+          codeEditor.scrollTop = 0;
+          syncScroll();
+          renderScene();
+          scheduleDraftAutosave();
+          closeSavedLibrary();
+        } catch (err) {
+          libraryStatus.textContent = `Could not open project: ${err.message || err}`;
+        }
+      }
+
+      async function deleteSavedProject(id, name) {
+        if (!window.confirm(`Delete saved project “${name || 'Untitled'}”?`)) return;
+        try {
+          await dbRequest('projects', 'readwrite', store => store.delete(id));
+          if (currentSavedProjectId === id) currentSavedProjectId = null;
+          scheduleDraftAutosave();
+          await refreshSavedProjects();
+        } catch (err) {
+          libraryStatus.textContent = `Could not delete project: ${err.message || err}`;
+        }
+      }
+
+      libraryToggleBtn.addEventListener('click', () => {
+        if (savedLibraryDrawer.classList.contains('open')) closeSavedLibrary();
+        else openSavedLibrary();
+      });
+      closeLibraryBtn.addEventListener('click', closeSavedLibrary);
+      libraryBackdrop.addEventListener('click', closeSavedLibrary);
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closeSavedLibrary(); });
+      saveProjectBtn.addEventListener('click', saveCurrentProject);
+      window.addEventListener('pagehide', () => {
+        clearTimeout(autosaveTimer);
+        persistCurrentDraft().catch(() => {});
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          clearTimeout(autosaveTimer);
+          persistCurrentDraft().catch(() => {});
+        }
+      });
+
       editorFileName.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); editorFileName.blur(); }
         else if (e.key === 'Escape') { e.preventDefault(); editorFileName.textContent = currentFileName; editorFileName.blur(); }
       });
-      editorFileName.addEventListener('blur', () => setEditorFileName(editorFileName.textContent));
+      editorFileName.addEventListener('blur', () => {
+        setEditorFileName(editorFileName.textContent);
+        scheduleDraftAutosave();
+      });
       editorFileName.addEventListener('paste', (e) => {
         e.preventDefault();
         const text = (e.clipboardData || window.clipboardData).getData('text');
         document.execCommand('insertText', false, text.replace(/[\r\n]/g, ''));
       });
 
+      const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+      const PIXELDSL_TEXT_KEYS = ['Parameters', 'PixelDSL-Code'];
+      const PIXELDSL_TIMESTAMP_KEYS = ['PixelDSL-SavedAtUTC', 'SavedAtUTC'];
+
+      function pngCrc32(bytes) {
+        let crc = 0xffffffff;
+        for (let i = 0; i < bytes.length; i++) {
+          crc ^= bytes[i];
+          for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+        }
+        return (crc ^ 0xffffffff) >>> 0;
+      }
+
+      function readU32BE(bytes, offset) {
+        return (((bytes[offset] << 24) >>> 0) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3]) >>> 0;
+      }
+
+      function writeU32BE(bytes, offset, value) {
+        bytes[offset] = (value >>> 24) & 255;
+        bytes[offset + 1] = (value >>> 16) & 255;
+        bytes[offset + 2] = (value >>> 8) & 255;
+        bytes[offset + 3] = value & 255;
+      }
+
+      function makePngTextChunk(key, value) {
+        const encoder = new TextEncoder();
+        const keyBytes = encoder.encode(key);
+        const valueBytes = encoder.encode(value);
+        if (!keyBytes.length || keyBytes.length > 79 || keyBytes.includes(0)) throw new Error('Invalid PNG metadata key.');
+        const data = new Uint8Array(keyBytes.length + 1 + valueBytes.length);
+        data.set(keyBytes, 0);
+        data.set(valueBytes, keyBytes.length + 1);
+        const type = new TextEncoder().encode('tEXt');
+        const chunk = new Uint8Array(12 + data.length);
+        writeU32BE(chunk, 0, data.length);
+        chunk.set(type, 4);
+        chunk.set(data, 8);
+        const crcInput = new Uint8Array(4 + data.length);
+        crcInput.set(type, 0);
+        crcInput.set(data, 4);
+        writeU32BE(chunk, 8 + data.length, pngCrc32(crcInput));
+        return chunk;
+      }
+
+      async function embedPixelDslInPng(dataUrl, source) {
+        const response = await fetch(dataUrl);
+        const input = new Uint8Array(await response.arrayBuffer());
+        if (input.length < 20 || !PNG_SIGNATURE.every((v, i) => input[i] === v)) throw new Error('Canvas did not produce a valid PNG.');
+        const sourceText = String(source ?? '');
+        if (!sourceText.trim()) throw new Error('Cannot export PNG metadata: PixelDSL source is empty.');
+        const metadata = makePngTextChunk('Parameters', sourceText);
+        const timestamp = makePngTextChunk('PixelDSL-SavedAtUTC', new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'));
+        const metadataChunks = [metadata, timestamp];
+        let offset = 8;
+        let insertAt = -1;
+        const chunks = [];
+        while (offset + 12 <= input.length) {
+          const length = readU32BE(input, offset);
+          const end = offset + 12 + length;
+          if (end > input.length) throw new Error('Malformed PNG chunk while embedding PixelDSL metadata.');
+          const type = String.fromCharCode(input[offset + 4], input[offset + 5], input[offset + 6], input[offset + 7]);
+          if (type === 'tEXt' || type === 'zTXt' || type === 'iTXt') {
+            const dataStart = offset + 8;
+            const zero = input.indexOf(0, dataStart);
+            const key = zero >= dataStart && zero < offset + 8 + length ? new TextDecoder('latin1').decode(input.subarray(dataStart, zero)) : '';
+            if (PIXELDSL_TEXT_KEYS.includes(key) || PIXELDSL_TIMESTAMP_KEYS.includes(key)) {
+              offset = end;
+              continue;
+            }
+          }
+          if (type === 'IDAT' && insertAt < 0) insertAt = chunks.length;
+          chunks.push(input.slice(offset, end));
+          offset = end;
+          if (type === 'IEND') break;
+        }
+        if (offset !== input.length) {
+          // PNG files may not contain trailing bytes; reject rather than silently corrupt them.
+          throw new Error('Malformed PNG: unexpected trailing bytes.');
+        }
+        if (insertAt < 0) throw new Error('Malformed PNG: missing image data.');
+        chunks.splice(insertAt, 0, ...metadataChunks);
+        const total = 8 + chunks.reduce((n, chunk) => n + chunk.length, 0);
+        const output = new Uint8Array(total);
+        output.set(PNG_SIGNATURE, 0);
+        let outOffset = 8;
+        for (const chunk of chunks) { output.set(chunk, outOffset); outOffset += chunk.length; }
+        return URL.createObjectURL(new Blob([output], { type: 'image/png' }));
+      }
+
+      async function extractPixelDslFromPng(file) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        if (bytes.length < 20 || !PNG_SIGNATURE.every((v, i) => bytes[i] === v)) throw new Error('Invalid PNG signature.');
+        let offset = 8;
+        let found = null;
+        let savedAt = null;
+        let sawIend = false;
+        const decodeUtf8 = (data, label) => {
+          try { return new TextDecoder('utf-8', { fatal: true }).decode(data); }
+          catch { throw new Error(`${label} metadata is not valid UTF-8.`); }
+        };
+        while (offset + 12 <= bytes.length) {
+          const length = readU32BE(bytes, offset);
+          const dataStart = offset + 8;
+          const crcOffset = dataStart + length;
+          const end = crcOffset + 4;
+          if (end > bytes.length) throw new Error('Malformed PNG: truncated chunk.');
+          const type = String.fromCharCode(bytes[offset + 4], bytes[offset + 5], bytes[offset + 6], bytes[offset + 7]);
+          if (type === 'tEXt' || type === 'iTXt') {
+            const data = bytes.subarray(dataStart, crcOffset);
+            const zero = data.indexOf(0);
+            if (zero > 0 && pngCrc32(bytes.subarray(offset + 4, crcOffset)) === readU32BE(bytes, crcOffset)) {
+              const key = new TextDecoder('latin1').decode(data.subarray(0, zero));
+              let valueBytes = null;
+              if (type === 'tEXt') {
+                valueBytes = data.subarray(zero + 1);
+              } else {
+                // iTXt: keyword NUL, compression flag, method, language NUL, translated keyword NUL, text.
+                let pos = zero + 1;
+                if (pos + 2 <= data.length && data[pos] === 0 && data[pos + 1] === 0) {
+                  pos += 2;
+                  const languageEnd = data.indexOf(0, pos);
+                  if (languageEnd >= 0) {
+                    pos = languageEnd + 1;
+                    const translatedEnd = data.indexOf(0, pos);
+                    if (translatedEnd >= 0) valueBytes = data.subarray(translatedEnd + 1);
+                  }
+                }
+              }
+              if (valueBytes) {
+                if (PIXELDSL_TEXT_KEYS.includes(key)) found = decodeUtf8(valueBytes, 'PixelDSL source');
+                else if (PIXELDSL_TIMESTAMP_KEYS.includes(key)) savedAt = decodeUtf8(valueBytes, 'PixelDSL timestamp');
+              }
+            }
+          }
+          offset = end;
+          if (type === 'IEND') { sawIend = true; break; }
+        }
+        if (!sawIend) throw new Error('Malformed PNG: missing IEND chunk.');
+        if (offset !== bytes.length) throw new Error('Malformed PNG: unexpected trailing bytes.');
+        // Preserve the timestamp for diagnostics/UI without treating it as source code.
+        extractPixelDslFromPng.lastSavedAt = savedAt;
+        return found;
+      }
+
       async function loadCodeFile(file) {
         if (!file) return;
         try {
-          const code = await file.text();
+          let code;
+          const header = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+          const isPng = header.length === 8 && header[0] === 137 && header[1] === 80 && header[2] === 78 && header[3] === 71 && header[4] === 13 && header[5] === 10 && header[6] === 26 && header[7] === 10;
+          if (isPng || /\.png$/i.test(file.name || '')) {
+            if (!isPng) throw new Error('The file has a .png extension but is not a valid PNG.');
+            code = await extractPixelDslFromPng(file);
+            if (code === null) throw new Error('This PNG has no valid PixelDSL source metadata (expected a Parameters or PixelDSL-Code tEXt/iTXt chunk).');
+            setEditorFileName((file.name || 'script.png').replace(/\.png$/i, '.pxd'));
+          } else {
+            code = await file.text();
+            setEditorFileName(file.name || 'script.pxd');
+          }
           codeEditor.value = code;
-          setEditorFileName(file.name || 'script.pxd');
           updateLineNumbers();
           codeEditor.scrollTop = 0;
           syncScroll();
+          currentSavedProjectId = null;
+          scheduleDraftAutosave();
 
           if (!isMobileViewport() && livePreviewEnabled) {
+            renderScene();
+          } else if (isMobileViewport() && document.body.classList.contains('mobile-preview-active')) {
             renderScene();
           } else {
             markRenderPending();
@@ -3497,13 +5103,18 @@ LINE 16 28 16 31 Y`
       });
 
       clearCodeBtn.addEventListener('click', () => {
+        if (!window.confirm('Replace the current editor contents with the starter script? Your current saved projects will remain in the library.')) return;
         codeEditor.value = 'GRID 32 32\nBG #0f172a\n\nCOLOR R #ef4444\nPIXEL 16 16 R';
         setEditorFileName('script.pxd');
+        currentSavedProjectId = null;
         updateLineNumbers();
         codeEditor.scrollTop = 0;
         syncScroll();
+        scheduleDraftAutosave();
 
         if (!isMobileViewport() && livePreviewEnabled) {
+          renderScene();
+        } else if (isMobileViewport() && document.body.classList.contains('mobile-preview-active')) {
           renderScene();
         } else {
           markRenderPending();
@@ -3528,6 +5139,24 @@ LINE 16 28 16 31 Y`
           inspectColorEl.textContent = 'Copied!';
           setTimeout(() => {
             inspectColorEl.textContent = originalText;
+          }, 1500);
+        }
+      });
+
+      inspectCoordsEl.addEventListener('click', async () => {
+        const rawText = inspectCoordsEl.innerText.trim();
+        if (!rawText) return;
+
+        const numbers = rawText.match(/\d+/g);
+        const coordText = numbers ? numbers.join(' ') : rawText;
+
+        const copied = await copyTextSafe(coordText);
+        
+        if (copied) {
+          const originalText = inspectCoordsEl.textContent;
+          inspectCoordsEl.textContent = 'Copied!';
+          setTimeout(() => {
+            inspectCoordsEl.textContent = originalText;
           }, 1500);
         }
       });
@@ -3560,8 +5189,31 @@ LINE 16 28 16 31 Y`
         });
       });
 
-      // Initial Launch
-      loadPreset('example1');
+      // Restore the last working draft before loading the default preset.
+      (async function restoreWorkspace() {
+        try {
+          const draft = await loadCurrentDraft();
+          if (draft && typeof draft.code === 'string') {
+            codeEditor.value = draft.code;
+            setEditorFileName(draft.filename || 'script.pxd');
+            currentSavedProjectId = draft.savedProjectId ?? null;
+            if (draft.preset && PRESETS[draft.preset]) {
+              presetSelect.value = draft.preset;
+              mobilePresetSelect.value = draft.preset;
+            }
+            updateLineNumbers();
+            syncScroll();
+            renderScene();
+            libraryStatus.textContent = `Recovered draft from ${prettySavedDate(draft.updatedAt)}.`;
+            refreshSavedProjects().catch(() => {});
+          } else {
+            loadPreset('example1');
+          }
+        } catch (err) {
+          libraryStatus.textContent = `Autosave unavailable: ${err.message || err}`;
+          loadPreset('example1');
+        }
+      })();
     });
   </script>
 </body>
