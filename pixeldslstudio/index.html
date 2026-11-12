@@ -1266,10 +1266,28 @@ draw car(red) at (45, 216)</code>
   </div>
   <div class="cheat-card">
     <strong>Small object and function forms</strong>
-    <p style="color:var(--text-muted); font-size:0.82rem;">Use => for a one-line body. Semicolons separate multiple statements in a one-line obj. A fn returns its final expression; an explicit return expression is also accepted.</p>
-    <code>obj car(c) => rect(0,0,30,11,c); circle(8,13,3,K)
-fn height(i) => 20 + rand(i, 5) * 40
-fn grass_color() => #3b7a57</code>
+    <p style="color:var(--text-muted); font-size:0.82rem;">A fn always produces a value. Use explicit <code>return expression</code> in every branch, or implicit branch expressions. An implicit conditional may include an <code>else</code>, or omit it when a later final expression supplies the fallback for unmatched conditions. Branches may also assign a shared result variable, initialized beforehand when it needs a default, then read that variable as the final expression.</p>
+    <code>fn height(i) => 20 + rand(i, 5) * 40
+fn grass_color() => #3b7a57
+
+fn explicitColor(n) {
+  if n >= 10 { return IN }
+  elif n >= 9 { return C1 }
+  else { return C9 }
+}
+
+fn implicitColor(n) {
+  if n >= 10 { IN }
+  else if n >= 9 { C1 }
+  C9
+}
+
+fn assignedColor(n) {
+  result = C9
+  if n >= 10 { result = IN }
+  elif n >= 9 { result = C1 }
+  result
+}</code>
   </div>
   <div class="cheat-card">
     <strong>Drawing, canvas anchors, and source anchors</strong>
@@ -1281,7 +1299,7 @@ draw car at local</code>
   </div>
   <div class="cheat-card">
     <strong>Attaching objects and offsets</strong>
-    <p style="color:var(--text-muted); font-size:0.82rem;">Save a draw result to create a handle, then target one of its anchors to attach another object. The target anchor's offsets move the target point; the modifier after the new object selects its source anchor and offsets that source point. The two points are aligned. Offsets are pixels; negative y means up. Anchors use the complete visible raster bounds after transforms, not the exact silhouette. Primitive calls can also be assigned to handles; their <code>.x</code>/<code>.y</code> values are the primitive's logical reference coordinate, while <code>.c</code>, <code>.tl</code>, and the other anchors use its raster bounds. Pixel and fill handles are single-point handles.</p>
+    <p style="color:var(--text-muted); font-size:0.82rem;">Save a draw result to create a handle, then target one of its anchors to attach another object. The target anchor's offsets move the target point; the modifier after the new object selects its source anchor and offsets that source point. The two points are aligned. Offsets are pixels; negative y means up. By default, anchors use the complete visible raster bounds after transforms, not the exact silhouette. Inside an <code>obj</code>, <code>frame(handle)</code> optionally chooses a previously created child handle as the containing object's alignment frame. It changes the containing object's anchors, not its rendered bounds or pixels. Primitive calls can also be assigned to handles; their <code>.x</code>/<code>.y</code> values are the primitive's logical reference coordinate, while <code>.c</code>, <code>.tl</code>, and the other anchors use its raster bounds. Pixel and fill handles are single-point handles.</p>
     <code>h = draw head at (64, 56)
 draw beard.top() at h.bottom(0, -8)
 draw beard.top(0, -1) at h.bottom(0, -8)
@@ -1291,7 +1309,7 @@ py = h.c().y
 rect(px - 1, py - 1, 3, 2, GOLD)
 ci = rect(8, 4, 12, 8, WHITE)
 rect(ci.c.x - 1, ci.c.y - 1, 3, 2, GOLD)</code>
-    <p style="color:var(--text-muted); font-size:0.82rem;">An anchor is a coordinate point. Pass it where an (x, y) pair is expected, or read one scalar component with <code>handle.c.x</code>, <code>handle.c.y</code>, <code>handle.tl.x</code>, and so on. Both <code>handle.c.x</code> and <code>handle.c().x</code> are accepted; <code>handle.x</code>/<code>handle.y</code> remain the handle's logical reference coordinate. Empty anchor offsets may omit parentheses: <code>grid.b</code>, <code>grid.bottom</code>, <code>handle.bottom</code>, or <code>handle.bottom()</code>.</p>
+    <p style="color:var(--text-muted); font-size:0.82rem;">An anchor is a coordinate point. Pass it where an (x, y) pair is expected, or read one scalar component with <code>handle.c.x</code>, <code>handle.c.y</code>, <code>handle.tl.x</code>, and so on. Both <code>handle.c.x</code> and <code>handle.c().x</code> are accepted. For point-valued anchors, bare and call forms are equivalent: <code>grid.center</code>, <code>grid.center()</code>, <code>handle.top</code>, and <code>handle.top()</code>. Optional offsets use the call form, for example <code>handle.top(2,-1)</code>; a single offset means dx. <code>handle.x</code>/<code>handle.y</code> remain the handle's logical reference coordinate. On circles, <code>.r</code> is radius; use <code>.right</code> for the right anchor.</p>
     <p style="color:var(--text-muted); font-size:0.82rem; margin-top:8px;"><strong>Four related but separate uses:</strong> <code>draw car at p anchor bottom</code> chooses the new car's source point; <code>p.bottom()</code> reads a point from an existing handle; <code>anchor(ground, x, y)</code> defines a reusable named coordinate; and <code>place(x, y, h, tl)</code> chooses which point of an existing handle is moved to the requested position.</p>
     <p style="color:var(--text-muted); font-size:0.82rem; margin-top:8px;"><code>place(point, handle[, anchor])</code> or <code>place(x, y, handle[, anchor])</code> creates a virtual handle without drawing pixels. It preserves the original handle's size, anchors, and drawable raster (when it has one), moving the chosen anchor (default <code>center</code>) to the requested coordinate. Use <code>place</code> to reposition an existing handle; use <code>instance</code> to create a drawable object handle without drawing it first.</p>
     <code>p = place(10, 0, h, tl)
@@ -1309,6 +1327,36 @@ draw mirror with trans flip x
 saved = draw car(BLUE) at (20, 25)
 draw saved with trans rot 15
 draw car(GOLD) at carRef.top anchor bottom</code>
+  </div>
+  <div class="cheat-card">
+    <strong>Editable instance parts</strong>
+    <p style="color:var(--text-muted); font-size:0.82rem;">Named assignments inside an <code>obj</code> become addressable after creating an instance. Edit nested primitive properties through the part path. Replacing a part with a primitive or nested object draw discards its previous subtree; later reads and draws rebuild the instance. <code>fill</code> and helper operations are not editable parts.</p>
+    <code>obj wheel(c) {
+  tire = circleout(8, 13, 5, DARK)
+  hub = circle(8, 13, 3, c)
+}
+obj car(c) {
+  body = rect(2, 4, 30, 11, c)
+  front = draw wheel(c) at (8, 13)
+}
+a = ins car(RED) at local
+a.body.color = BLUE
+a.front.hub.r = 4
+a.front.hub.xy = (10, 14)
+a.front.hub.color = WHITE
+draw a</code>
+    <p style="color:var(--text-muted); font-size:0.82rem;">Primitives expose <code>.xy</code>, <code>.x</code>, <code>.y</code>, <code>.color</code>, and read-only <code>.kind</code>; shape-specific properties include <code>.w/.h</code>, <code>.r</code>, <code>.rx/.ry</code>, <code>.p1</code>… and <code>.x1</code>…<code>.yN</code>. Gradient and dither <code>.color</code> aliases <code>.color1</code>. For circles, use <code>.right</code> for the right anchor because <code>.r</code> is radius.</p>
+  </div>
+  <div class="cheat-card">
+    <strong>Object alignment frame</strong>
+    <p style="color:var(--text-muted); font-size:0.82rem;"><code>frame(handle)</code> is an optional statement inside an <code>obj</code>. It selects the bounds of an earlier primitive, draw, or instance handle as the containing object's anchor frame. Geometry outside that frame still renders and still contributes to the object's visible raster bounds. If omitted, anchors keep using the full visible bounds as before. A nested handle's own frame is inherited when selected.</p>
+    <code>obj carWithLamp(c) {
+  carRef = ins car(c) at local
+  triangle(carRef.left(-13,7), carRef.left(-13,-4), carRef.left(2,1), GLOW)
+  draw carRef
+  frame(carRef)
+}
+draw carWithLamp(RED) at (64,32)</code>
   </div>
   <div class="cheat-card">
     <strong>Transforms</strong>
@@ -1445,7 +1493,12 @@ CANVAS AND COLORS
 Start with grid(width, height), then declare the palette, then set the background: grid(...), colors { ... }, bg(color). In a multiline colors block, write one `NAME #hex` (or `NAME = #hex`) entry per line. In a compact one-line colors block, use semicolon-separated assignments such as `colors { RED = #f00; BLUE = #00f }`; do not put several bare `NAME #hex` entries on one line. Do not call bg() with a named color before that color has been declared. Every named color must be declared before its first use anywhere, including bg(), primitives, object arguments, and sprite cells. Color names are case-sensitive and are never created automatically. Never invent a color name or assume a letter such as C, W, G, R, or B has a built-in meaning: each must be explicitly defined first. Ordinary variables must also be assigned before they are read; never use a variable or color name speculatively and declare it later. Do not rely on forward references for values. Coordinates start at the top-left; +y points down. Pixels outside the canvas are clipped. Supported color values: #RGB, #RGBA, #RRGGBB, #RRGGBBAA, rgb(), rgba(), transparent. Floating-point coordinates, radii, widths, and heights passed to primitives are rounded to the nearest integer before rasterization (half values round toward positive infinity). Sprite cells must be exactly . or a named palette color. Do not use BG as a color name or put arithmetic inside color literals.
 
 OBJECTS AND FUNCTIONS
-Define drawable geometry with obj name(params) { statements }. Primitive coordinates are local to the object. To draw another object inside an object, use `draw other(args...) at (localX,localY)`; its pixels become part of the parent at those local coordinates, contribute to its bounds, and transform with it. Never call an object as a bare expression (`other(...)` does not draw), and never write `draw rect(...)`: call primitives such as `rect(...)` directly. A new object draw always needs `at` placement. For a zero-parameter object, both `draw tree at (x,y)` and `draw tree() at (x,y)` are valid and equivalent. If an object has parameters, pass them in parentheses: `draw tree(size, color) at (x,y)`. Parentheses after an object name contain its parameters, NEVER its placement coordinates; `draw tree(40,180)` is not a placement. To create the same object without drawing it, assign an instance: `treeRef = instance tree(args...) at (x,y)`; `ins` is an exact alias for `instance`. Instances are drawable handles, not drawing commands. Replay one with `draw treeRef` or `draw treeRef with trans flip x`; replaying does not change the saved instance. `draw` without `at` is only for an existing instance or a saved object draw result, never for an object name. A saved draw result is written `treeRef = draw tree(args...) at (x,y)`. Do not define the same obj or fn name twice: duplicate definitions are errors. Definitions may appear in any order relative to other definitions; they do not draw anything. Only drawing commands determine visual layer, in source order. Compact form is `obj name(params) => statement; statement;`. Define value functions with `fn name(params) { assignments; final_expression }` or `fn name(params) => expression`. The last expression is returned; `return expression` is also accepted. Functions may use `if`/`else if`/`else` to choose a value; every branch must produce a value or assign the same result variable, which can then be the final expression. Functions compute values; use obj for drawable geometry. Assignments need no let: `x = expression`. Every obj or fn name must have exactly one definition.
+Define drawable geometry with obj name(params) { statements }. Primitive coordinates are local to the object. To draw another object inside an object, use `draw other(args...) at (localX,localY)`; its pixels become part of the parent at those local coordinates, contribute to its bounds, and transform with it. Never call an object as a bare expression (`other(...)` does not draw), and never write `draw rect(...)`: call primitives such as `rect(...)` directly. A new object draw always needs `at` placement. For a zero-parameter object, both `draw tree at (x,y)` and `draw tree() at (x,y)` are valid and equivalent. If an object has parameters, pass them in parentheses: `draw tree(size, color) at (x,y)`. Parentheses after an object name contain its parameters, NEVER its placement coordinates; `draw tree(40,180)` is not a placement. To create the same object without drawing it, assign an instance: `treeRef = instance tree(args...) at (x,y)`; `ins` is an exact alias for `instance`. Instances are drawable handles, not drawing commands. Replay one with `draw treeRef` or `draw treeRef with trans flip x`; replaying does not change the saved instance. Inside an `obj`, `frame(handle)` optionally selects a previously created primitive, draw, or instance handle as that containing object's alignment frame. Put it after the handle has been created. It changes the containing object's default center/top/bottom/left/right anchors, but does not crop, move, or hide geometry; everything still renders and still contributes to visible raster bounds. A selected nested handle's own alignment frame is inherited. Without `frame(...)`, the existing full-visible-bounds anchor behavior is unchanged. `draw` without `at` is only for an existing instance or a saved object draw result, never for an object name. A saved draw result is written `treeRef = draw tree(args...) at (x,y)`. Do not define the same obj or fn name twice: duplicate definitions are errors. Definitions may appear in any order relative to other definitions; they do not draw anything. Only drawing commands determine visual layer, in source order. Compact form is `obj name(params) => statement; statement;`. Define value functions with `fn name(params) { assignments; final_expression }` or `fn name(params) => expression`. The last expression is returned; `return expression` is also accepted. Functions may use `if`/`else if`/`else` to choose a value; every branch must produce a value or assign the same result variable, which can then be the final expression. Functions compute values; use obj for drawable geometry. Assignments need no let: `x = expression`. A value-producing conditional may use implicit branch expressions with an else branch, or omit else when a later final expression supplies the fallback for unmatched conditions: `fn color(n) { if n >= 10 { IN } else if n >= 9 { C1 } C9 }` returns IN at n >= 10, C1 at n >= 9, and C9 otherwise. For assignment branches, initialize a shared result variable before the conditional when it needs a default, assign it in branches, then use it as the final expression. Keep explicit-return and implicit-value styles separate within a conditional chain. Every obj or fn name must have exactly one definition.
+
+EDITABLE INSTANCE PARTS
+Inside an obj, a named assignment creates an addressable part. Unassigned drawing commands remain ordinary geometry. Create an instance with `carA = ins car(RED) at local`, then edit named paths such as `carA.body.color = BLUE`, `carA.front.hub.r = 4`, and `carA.front.hub.xy = (10,14)`. Read them back with expressions such as `p = carA.front.hub.xy` or `r = carA.front.hub.r`. Rebuild happens before a later draw or bounds-dependent read; edits do not retroactively change pixels already drawn.
+All primitive parts expose `.xy`, `.x`, `.y`, `.color`, and read-only `.kind`. Rectangular forms (`rect`, `box`, `bar`, `gradrect`, `ditherrect`) expose `.w` and `.h` as applicable. `gradrect` also exposes `.color1`, `.color2`, `.direction`; `ditherrect` exposes `.color1`, `.color2`, `.pattern`, `.coverage`. Circles expose `.r`; ellipses expose `.rx` and `.ry`; lines expose `.p1`, `.p2`, `.x1`…`.y2`; triangles expose `.p1`…`.p3` and coordinate components; polygons expose `.p1`…`.pN` and coordinate components. `.color` on gradients/dither aliases `.color1`. Drawable parts expose read-only bounds anchors such as `.center`, `.left`, `.right`, `.top`, `.bottom`, `.tl`, `.tr`, `.bl`, `.br`. On circles `.r` means radius, so use `.right` for the right anchor.
+A part may be replaced with a primitive call or a nested `draw` statement; replacement discards the previous nested subtree. Both replacement directions are supported (primitive-to-object and object-to-primitive). A later property edit may target the replacement's new child parts. Invalidated children and unsupported shape properties must produce errors. `fill`, raw sprite blocks, and helper operations such as `stamp`, `rotate`, `mirror_*`, `multiply`, and `symmetry_x` are not addressable parts. Repeated creation of the same named part in one object execution is an error; dynamic part arrays are not supported.
 
 SPRITES
 Use the exact call form sprite(x, y, scaleX, scaleY) [ on its own line, then one row per line, then ] on its own line; a one-row sprite may put its row and closing ] on the same line. The parentheses and all four arguments are required. Separate cells with commas. Each cell must be either . (transparent) or the exact name of a color already defined in the palette. Sprite letters are NOT colors by themselves: if a sprite uses C, W, and G, define C, W, and G first. Do not use undefined symbols as shorthand for guessed colors. The number of columns and rows defines sprite dimensions; scaleX and scaleY are the size of each map cell in pixels, not row/column counts. Sprites work at top level and inside obj bodies, using the same local coordinates and composition rules as other primitives. Example:
@@ -1478,7 +1531,7 @@ The trailing `anchor name` clause selects the new object's source anchor. Use th
 
 For ordinary placement, draw object(args...) at (x,y) aligns the object's visible-bounds center to the target point unless a source anchor is specified. Supported source anchors: center/c, top/t, bottom/b, left/l, right/r, tl, tr, bl, br, top_left, top_right, bottom_left, bottom_right.
 
-Canvas anchors are placement targets and coordinate points, using pixel coordinates: grid.top(), grid.bottom(), grid.left(), grid.right(), grid.tl(), grid.tr(), grid.bl(), grid.br(), and grid.center(). They may take offsets, e.g. draw car at grid.bottom(0,-4) anchor top. Canvas anchor coordinates refer to pixels 0..WIDTH-1 and 0..HEIGHT-1, so offsets can intentionally place pixels off-canvas. Target offsets move the target point. Source-modifier offsets, e.g. object.top(dx,dy), offset the chosen source point relative to the object's visible bounds; the renderer aligns that offset source point to the target. Offsets are in pixels; negative y means up.
+Canvas anchors are placement targets and coordinate points, using pixel coordinates: grid.top, grid.bottom, grid.left, grid.right, grid.tl, grid.tr, grid.bl, grid.br, and grid.center. Both the bare form (`grid.center`) and call form (`grid.center()`) resolve to the same point; call form accepts optional pixel offsets (`grid.center(dx,dy)`). Handle anchors work the same way: `h.top`, `h.top()`, and `h.top(dx,dy)` are valid. One offset means dx with dy defaulting to zero. This shorthand applies when reading an anchor point; it does not replace the trailing `anchor bottom` clause, which chooses the source anchor of the newly drawn object. Canvas anchor coordinates refer to pixels 0..WIDTH-1 and 0..HEIGHT-1, so offsets can intentionally place pixels off-canvas. Target offsets move the target point. Source-modifier offsets, e.g. `h.top(dx,dy)`, offset the chosen point relative to the handle's bounds; the renderer aligns that point to the target. Offsets are in pixels; negative y means up. For circles, `.r` is the radius; use `.right` for the right-side anchor.
 Coordinate anchors are also point values anywhere a primitive or coordinate-taking helper expects an (x,y) pair. Examples: `pixel(grid.top(), WHITE)`, `circle(grid.bottom(0,-2), 3, GOLD)`, `ggg = draw diamond at (140,35)` followed by `circle(ggg.bottom(),2,WHITE)`. You may store a point in a variable (`p = grid.center()`) and pass it as the first coordinate argument (`pixel(p, WHITE)`, `circle(p, 3, GOLD)`). Anchor offsets are optional; `grid.b`, `grid.bottom`, `ggg.bottom`, and `ggg.bottom()` all mean zero offsets. Use the same point syntax for line endpoints and polygon vertices. A point is a pair of coordinates, not a color or scalar.
 
 Point values are ordinary two-coordinate values. They can be stored, passed to `fn` and `obj` parameters, returned from functions, and used wherever a coordinate pair is accepted. Examples:
@@ -1491,7 +1544,7 @@ Point values are ordinary two-coordinate values. They can be stored, passed to `
 `draw marker((3,4)) at local`
 A point passed into an object parameter is interpreted in that object's local coordinate space. A point does not retain a world/local transform; it is just an `(x,y)` pair. Use `grid.anchor` or `handle.anchor` directly inside an object when you need that anchor resolved in the object's current drawing context.
 
-An assignment captures a placed drawable handle: `h = draw head at (64,56)`. To capture without drawing, use `h = instance head at (64,56)` (or `h = ins head at (64,56)`). An instance stores its raster, visible bounds, and anchors but does not composite pixels. Use `draw h` to composite it later at its stored position; `draw h with trans flip x` draws a transformed copy without modifying h. An assigned object draw result can also be replayed with `draw h`; assigned primitive handles are geometry-only and cannot be replayed. Attach another object by targeting an anchor on an already-created handle: `draw beard at h.bottom(0,-8) anchor top`. Here `anchor top` chooses the new beard's source point, while `h.bottom(0,-8)` chooses the target point eight pixels above the head's bottom anchor. Define or instance the parent before referencing its handle. Anchors use complete visible raster bounds after transforms, including nested objects and protruding details; they do not describe the exact contour. When placing objects resting on the same surface, align their bottom anchors to the same ground baseline. Never assume an object's local origin is its visible center or bottom.
+An assignment captures a placed drawable handle: `h = draw head at (64,56)`. To capture without drawing, use `h = instance head at (64,56)` (or `h = ins head at (64,56)`). An instance stores its raster, visible bounds, and anchors but does not composite pixels. Use `draw h` to composite it later at its stored position; `draw h with trans flip x` draws a transformed copy without modifying h. An assigned object draw result can also be replayed with `draw h`; assigned primitive handles are geometry-only and cannot be replayed. Attach another object by targeting an anchor on an already-created handle: `draw beard at h.bottom(0,-8) anchor top`. Here `anchor top` chooses the new beard's source point, while `h.bottom(0,-8)` chooses the target point eight pixels above the head's bottom anchor. Define or instance the parent before referencing its handle. Anchors use complete visible raster bounds after transforms by default, including nested objects and protruding details; an obj can opt into a child handle's bounds with frame(handle). Anchors do not describe the exact contour. When placing objects resting on the same surface, align their bottom anchors to the same ground baseline. Never assume an object's local origin is its visible center or bottom.
 Keep the four anchor forms distinct: the trailing `anchor top` clause chooses the source point of the object being drawn; `h.bottom()` reads a coordinate from an existing handle; `anchor(ground, x, y)` declares a reusable named coordinate; and the optional fourth argument of `place(x,y,h,tl)` chooses which source point of h is repositioned. They are related concepts, not interchangeable syntax.
 Primitive calls can also be assigned to variables and return drawing handles: `ci = circle(10,10,6,RED)`. The primitive is drawn immediately. `ci.x` and `ci.y` expose its logical reference coordinate (circle center, rectangle origin, line's first endpoint, etc.); `ci.c`, `ci.tl`, and other anchors refer to the primitive's visible raster bounds. Read an anchor component as a scalar with `h.c.x`, `h.c.y`, `h.tl.x`, and so on. Both `h.c.x` and `h.c().x` are accepted. `h.x` and `h.y` are not aliases for center coordinates. `pixel` and flood-fill `fill` handles are point handles anchored at their seed coordinate.
 
@@ -1513,7 +1566,9 @@ draw sigil_intersection at (32, 32)
 The same draw arguments are forwarded to both source shapes, so their parameter lists should be compatible. A mask preserves source objects' local coordinates and does not draw until placed. MINUS cuts B's alpha out of A (a transparent hole); AND keeps only overlap using A's color; PLUS unions both and A wins overlap; OVER composites B on top of A, so B's color appears in overlap. PLUS and OVER are not equivalent. For testing, give A and B visibly different colors and use a transparent background to distinguish a hole from a colored overlap. Never omit the parentheses.
 
 CONTROL FLOW AND EXPRESSIONS
-Blocks use balanced braces and may be multiline or compact on one line. Examples: `if cond { pixel(x,y,C) }`, `if cond { ... } else { ... }`, and `if a { ... } else if b { ... } elif c { ... } else { ... }`. The `else` branch is optional; `else if` and `elif` are equivalent, and any number of branches may be chained. `for i in 0..10 { ... }` uses an exclusive end; use `..=` for an inclusive end. Optional step: `for i in 0..20 step 2 { ... }`. `while condition { ... }` repeats while its condition is true; update a variable inside the body so it eventually becomes false. Both loop types have safety limits. Steps may be positive or negative, but must be non-zero and move toward the range end (e.g. `for i in 10..0 step -1 { ... }`). Object bodies may contain `if`/`else`, `for`, `while`, and local assignments. Function bodies may use local assignments and value-producing `if`/`else if`/`else` branches; each branch must either use `return expression` (with no trailing result expression) or assign the same result variable, followed by that variable as the final expression. Nest braces correctly; separate multiple statements with semicolons when they share a line. Arithmetic: + - * / %. Comparisons: == != < <= > >=. Boolean: && || ! and and/or/not. Ternary: condition ? valueA : valueB. Use parentheses around compound expressions when needed. `WIDTH` and `HEIGHT` are numeric canvas dimensions. Constants: `PI` and `E` (case-insensitive). Math functions: `abs(x)`, `floor(x)`, `ceil(x)`, `trunc(x)`, `round(x)` (half values round toward positive infinity), `sign(x)`, `sqrt(x)`, `pow(x,y)`, `exp(x)`, `log(x)`/`log10(x)` (base 10), `ln(x)` (natural logarithm), `log2(x)`, `sin(x)`, `cos(x)`, `tan(x)`, `asin(x)`, `acos(x)`, `atan(x)`, `atan2(y,x)`, `min(a,...)`, `max(a,...)`, `hypot(a,...)`, `clamp(x,lo,hi)`, `lerp(a,b,t)`, `fract(x)`, `deg(x)` (radians to degrees), and `rad(x)` (degrees to radians). Trigonometric inputs and outputs use radians. `rand(index,seed)` is deterministic in [0,1); `pick(random,value1,weight1,...)` selects by positive weights, while `pick(random,value1,value2,...)` selects uniformly when the alternatives are nonnumeric values such as colors. `anchor(name,value)` stores a reusable scalar or point, and `anchor(name,x,y)` creates a point explicitly. `base_at(value)` sets BASE; `base_at(x,y)` stores a point whose components are `BASE.x` and `BASE.y`. Use a scalar BASE for `bar`, which uses an inclusive bottom-row coordinate.
+Blocks use balanced braces and may be multiline or compact on one line. Examples: `if cond { pixel(x,y,C) }`, `if cond { ... } else { ... }`, and `if a { ... } else if b { ... } elif c { ... } else { ... }`. The first true branch runs; later branches are skipped. `else` is optional for ordinary statement conditionals. `else if` and `elif` mean the same thing, and any number of branches may be chained. `for i in 0..10 { ... }` uses an exclusive end; use `..=` for an inclusive end. Optional step: `for i in 0..20 step 2 { ... }`. `while condition { ... }` repeats while its condition is true; update a variable inside the body so it eventually becomes false. Both loop types have safety limits. Steps may be positive or negative, but must be non-zero and move toward the range end (e.g. `for i in 10..0 step -1 { ... }`). Object bodies may contain `if`/`else`, `for`, `while`, and local assignments.
+
+A `fn` must produce one value. It may return explicitly with `return expression`; this immediately exits the function, so put a return in every branch that should produce a value and do not add a trailing result expression. Or use an implicit final expression: assign the same result variable in the conditional branches, include an `else` so every path assigns it, then put that variable as the final expression after the conditional. These are two alternative styles; both are supported. A simple function may also consist of assignments followed by one final expression, or use the one-line `fn name(args) => expression` form. Nest braces correctly; separate multiple statements with semicolons when they share a line. Arithmetic: + - * / %. Comparisons: == != < <= > >=. Boolean: && || ! and and/or/not. Ternary: condition ? valueA : valueB. Use parentheses around compound expressions when needed. `WIDTH` and `HEIGHT` are numeric canvas dimensions. Constants: `PI` and `E` (case-insensitive). Math functions: `abs(x)`, `floor(x)`, `ceil(x)`, `trunc(x)`, `round(x)` (half values round toward positive infinity), `sign(x)`, `sqrt(x)`, `pow(x,y)`, `exp(x)`, `log(x)`/`log10(x)` (base 10), `ln(x)` (natural logarithm), `log2(x)`, `sin(x)`, `cos(x)`, `tan(x)`, `asin(x)`, `acos(x)`, `atan(x)`, `atan2(y,x)`, `min(a,...)`, `max(a,...)`, `hypot(a,...)`, `clamp(x,lo,hi)`, `lerp(a,b,t)`, `fract(x)`, `deg(x)` (radians to degrees), and `rad(x)` (degrees to radians). Trigonometric inputs and outputs use radians. `rand(index,seed)` is deterministic in [0,1); `pick(random,value1,weight1,...)` selects by positive weights, while `pick(random,value1,value2,...)` selects uniformly when the alternatives are nonnumeric values such as colors. `anchor(name,value)` stores a reusable scalar or point, and `anchor(name,x,y)` creates a point explicitly. `base_at(value)` sets BASE; `base_at(x,y)` stores a point whose components are `BASE.x` and `BASE.y`. Use a scalar BASE for `bar`, which uses an inclusive bottom-row coordinate.
 
 DITHERING AND COLOR
 Dither patterns: CHECKER, BAYER2, BAYER4, BAYER8, CLUSTER, DIAGONAL, HORIZONTAL, VERTICAL, ATKINSON, FLOYD (alias FLOYDSTEINBERG), JARVIS, STUCKI, SIERRA, SIERRALITE. Coverage ranges 0..1 and controls the approximate share of color2. At 0.5 several patterns render as checkerboards; try 0.3–0.4 or 0.6–0.7 for other textures. Alpha colors composite in draw order using source-over. `transparent` is alpha zero, so drawing it does not erase existing pixels; use masks when you need transparent cutouts. FILL is order-dependent: draw boundaries first; it fills the 4-connected matching region on the current raster.
@@ -1522,7 +1577,7 @@ ARTWORK RULES
 Compose back-to-front: background, distant shapes, midground, foreground, details, highlights. Use a limited coherent palette, clear silhouettes, meaningful large shapes, and reusable objects. Prefer shapes and loops over many individual pixels. Keep the sky open unless the scene calls for clouds or structures. Do not place filler rectangles or cover finished foreground with later background bands. Use triangles for roofs, mountains, fins, shards, and other pointed silhouettes. Use deterministic randomness. Keep repeated structures aligned to intentional baselines. Remove debug bbox calls from final art.
 
 FINAL CHECK
-Output only the code block. Ensure every name exists, calls have correct argument order/count, all braces close, mask dependencies resolve without cycles (forward declarations are allowed), handle attachments reference earlier draws, and every command is supported.</pre>
+Output only the code block. Ensure every name exists, calls have correct argument order/count, all braces close, mask dependencies resolve without cycles (forward declarations are allowed), handle attachments and `frame(handle)` reference earlier handles, and every command is supported.</pre>
         </div>
       </div>
     </div>
@@ -1756,6 +1811,7 @@ obj carwlamp(c) {
   carr = ins car(c) at local
   triangle(carr.left(-13, 7), carr.left(-13, -4), carr.left(2, 1),GLOW1)
   draw carr
+  frame(carr)
 }
 
 obj person(umb, coat) {
@@ -2142,6 +2198,10 @@ line(112, 66, 112, 76, GLOW_Y)
         this.drawnPixelsCount = 0;
         this.errors = [];
         this.renderingMacros = [];
+        this.renderingMacroScopes = [];
+        this.activeInstanceData = null;
+        this.activePartPath = '';
+        this.activeScene = null;
         this.rgbaCache = new Map();
         this.canonicalCache = new Map();
         // Hard limits keep malformed/generated scripts from locking up the UI.
@@ -2410,7 +2470,9 @@ line(112, 66, 112, 76, GLOW_Y)
         if (minX===0 && minY===0 && maxX===object.width-1 && maxY===object.height-1) return object;
         const pixels=Array.from({length:maxY-minY+1},(_,dy)=>
             object.pixels[minY+dy].slice(minX,maxX+1));
-        return { ...object, pixels, width:maxX-minX+1, height:maxY-minY+1,
+        const anchorFrame = object.anchorFrame ? { ...object.anchorFrame,
+            x: object.anchorFrame.x - minX, y: object.anchorFrame.y - minY } : null;
+        return { ...object, pixels, width:maxX-minX+1, height:maxY-minY+1, anchorFrame,
             originX:(object.originX ?? 0)+minX, originY:(object.originY ?? 0)+minY };
         }
 
@@ -2609,7 +2671,7 @@ line(112, 66, 112, 76, GLOW_Y)
             if (this.renderingMacros.includes(name)) return null;
             this.renderingMacros.push(name);
             try {
-                return this.renderModernMacroRaster(this.macros[name], args);
+                return this.renderModernMacroRaster(this.macros[name], args, this.activeInstanceData, this.activePartPath);
             } finally {
                 this.renderingMacros.pop();
             }
@@ -3630,7 +3692,7 @@ line(112, 66, 112, 76, GLOW_Y)
         compileModernFunctionBody(source, replacements = Object.create(null)) {
         let text = String(source ?? '').replace(/\r/g, '').trim();
         const strip = value => value.split('\n').map(line => this.stripDslComment(line).trim()).filter(Boolean).join(';');
-        text = strip(text).replace(/}\s*;\s*(?=else\b)/gi, '} ');
+        text = strip(text).replace(/}\s*;\s*(?=(?:else|elif)\b)/gi, '} ');
         if (!text) throw new Error('Function body must produce a value.');
         const extractBlock = (value, open) => {
             let depth = 0, quote = '', escaped = false;
@@ -3702,11 +3764,21 @@ line(112, 66, 112, 76, GLOW_Y)
                 const fallbackName = fallback === null ? null : fallback.trim().replace(/^[;\s]+|[;\s]+$/g, '').match(/^(?:let\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/i)?.[1] || null;
                 const branchNames = [...resultNames, ...(fallbackName ? [fallbackName] : [])].filter(Boolean);
                 const resultName = branchNames.length && branchNames.every(name => name === branchNames[0]) ? branchNames[0] : null;
+                const initialResultValue = resultName && Object.prototype.hasOwnProperty.call(replacements, resultName)
+                    ? replacements[resultName] : undefined;
                 const values = branches.map(branch => compileBranchValue(branch.body));
                 const assignments = values.map(value => value === null ? null : value);
                 if (assignments.some(value => value === null)) throw new Error('Every value-producing function branch must end with a value or assign a result variable.');
                 let expression = fallback !== null ? compileBranchValue(fallback) : null;
                 if (fallback !== null && expression === null) throw new Error('Function else branch must produce a value.');
+                if (fallback === null && tail) {
+                    if (resultName && initialResultValue !== undefined) {
+                        expression = initialResultValue;
+                    } else {
+                        expression = compileBranchValue(tail);
+                        tail = '';
+                    }
+                }
                 for (let i = branches.length - 1; i >= 0; i--) {
                     if (expression === null) throw new Error('Function conditional needs an else branch or a value after the conditional.');
                     expression = `((${branches[i].condition}) ? (${assignments[i]}) : (${expression}))`;
@@ -3884,6 +3956,22 @@ line(112, 66, 112, 76, GLOW_Y)
         return points[normalized] || points.center;
         }
 
+        anchorPointForRaster(raster, anchor) {
+            if (!raster?.anchorFrame) return this.anchorPoint(raster?.width || 1, raster?.height || 1, anchor);
+            const frame = raster.anchorFrame;
+            const aliases = {c:'center',t:'top',b:'bottom',l:'left',r:'right',top_left:'tl',top_right:'tr',bottom_left:'bl',bottom_right:'br'};
+            const side = aliases[String(anchor || 'center').toLowerCase().replace(/-/g,'_')] || String(anchor || 'center').toLowerCase();
+            const left=frame.x, top=frame.y, right=left+frame.width-1, bottom=top+frame.height-1;
+            const cx=(left+right)/2, cy=(top+bottom)/2;
+            const points={center:[cx,cy],top:[cx,top],bottom:[cx,bottom],left:[left,cy],right:[right,cy],tl:[left,top],tr:[right,top],bl:[left,bottom],br:[right,bottom]};
+            return points[side] || points.center;
+        }
+
+        anchorPointForHandle(handle, anchor) {
+            const [x,y] = this.anchorPointForRaster(handle?.raster || handle, anchor);
+            return [x,y];
+        }
+
         scaleRaster(raster, sx = 1, sy = sx) {
         const srcH = raster.length, srcW = srcH ? raster[0].length : 0;
         if (!srcW || !srcH) return { pixels: [], width: 0, height: 0 };
@@ -3915,7 +4003,30 @@ line(112, 66, 112, 76, GLOW_Y)
         if (Math.abs(sx) === 1 && Math.abs(sy) === 1 && normalizedAngle === 0 && !effectiveFlipX && !effectiveFlipY) return object;
         const scaled = this.scaleRaster(object.pixels, Math.abs(sx), Math.abs(sy));
         const transformed = this.transformRaster(scaled.pixels, normalizedAngle, effectiveFlipX, effectiveFlipY);
-        return { ...transformed,
+        let anchorFrame = null;
+        if (object.anchorFrame) {
+            const sourceWidth=object.width, sourceHeight=object.height;
+            const scaleX=scaled.width/sourceWidth, scaleY=scaled.height/sourceHeight;
+            const corners=[
+                [object.anchorFrame.x,object.anchorFrame.y],
+                [object.anchorFrame.x+object.anchorFrame.width-1,object.anchorFrame.y],
+                [object.anchorFrame.x,object.anchorFrame.y+object.anchorFrame.height-1],
+                [object.anchorFrame.x+object.anchorFrame.width-1,object.anchorFrame.y+object.anchorFrame.height-1]
+            ];
+            const rad=normalizedAngle*Math.PI/180, cos=Math.cos(rad), sin=Math.sin(rad);
+            const srcCx=(scaled.width-1)/2, srcCy=(scaled.height-1)/2;
+            const dstCx=(transformed.width-1)/2, dstCy=(transformed.height-1)/2;
+            const mapped=corners.map(([x,y])=>{
+                x=(x+0.5)*scaleX-0.5; y=(y+0.5)*scaleY-0.5;
+                if(effectiveFlipX) x=scaled.width-1-x;
+                if(effectiveFlipY) y=scaled.height-1-y;
+                return [dstCx+(x-srcCx)*cos-(y-srcCy)*sin,dstCy+(x-srcCx)*sin+(y-srcCy)*cos];
+            });
+            const xs=mapped.map(p=>p[0]),ys=mapped.map(p=>p[1]);
+            const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+            anchorFrame={x:minX,y:minY,width:maxX-minX+1,height:maxY-minY+1};
+        }
+        return { ...transformed, anchorFrame,
             originX: (object.originX ?? 0) + (transformed.offsetX || 0),
             originY: (object.originY ?? 0) + (transformed.offsetY || 0) };
         }
@@ -4098,6 +4209,12 @@ line(112, 66, 112, 76, GLOW_Y)
                 const call = this.parseCall(text);
                 if (call && !call.rest) {
                     const rawName = call.name.toLowerCase();
+                    if (rawName === 'frame') {
+                        if (call.args.length !== 1 || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(call.args[0].trim())) {
+                            blockError(lineNum, 'frame(handle) expects the name of one previously created drawing handle.');
+                        }
+                        return { type: 'anchorFrame', handleExpression: call.args[0].trim(), lineNum };
+                    }
                     const aliases = { orect:'box', ocircle:'circleout', otriangle:'triangleout', opoly:'polyout' };
                     const name = aliases[rawName] || rawName;
                     if (name === 'grid') return { type: 'grid', args: call.args, lineNum };
@@ -4139,6 +4256,9 @@ line(112, 66, 112, 76, GLOW_Y)
                         return { type: 'shapeOp', operation: name, pointPrefix, prefix: call.args.slice(0, shapeIndex), shape, lineNum };
                     }
                 }
+
+                const memberAssignment = text.match(/^(let\s+)?([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+)\s*=\s*(.+)$/i);
+                if (memberAssignment) return { type: 'memberAssign', path: memberAssignment[2], expression: memberAssignment[3].trim(), declared: !!memberAssignment[1], lineNum };
 
                 const colorAssignment = text.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(#[0-9a-fA-F]{3,8}|transparent|rgba?\s*\(.+\))$/i);
                 if (colorAssignment) return { type: 'color', name: colorAssignment[1], value: colorAssignment[2], lineNum };
@@ -4636,9 +4756,298 @@ line(112, 66, 112, 76, GLOW_Y)
             return parsed.nodes;
         }
 
+        partPathJoin(prefix, name) {
+            return prefix ? `${prefix}.${name}` : name;
+        }
+
+        refreshModernInstance(instanceData) {
+            if (!instanceData || !instanceData.dirty) return;
+            const oldData = this.activeInstanceData;
+            const oldPath = this.activePartPath;
+            this.activeInstanceData = instanceData;
+            this.activePartPath = '';
+            try {
+                const raw = this.getObjectRaster(instanceData.objectName, instanceData.args);
+                if (!raw) throw new Error(`Cannot rebuild instance object '${instanceData.objectName}'.`);
+                let raster = this.getPlacementRaster(raw);
+                if (instanceData.applyTransform) {
+                    const pose = instanceData.transform || { angle: 0, sx: 1, sy: 1, flipX: false, flipY: false };
+                    raster = this.transformForDraw(raster, pose.angle, pose.sx, pose.sy, pose.flipX, pose.flipY);
+                }
+                instanceData.scene = raw.scene || instanceData.scene;
+                instanceData.rawRaster = raw;
+                instanceData.raster = raster;
+                const anchor = instanceData.anchor || 'center';
+                let left, top;
+                if (anchor === 'local') {
+                    left = instanceData.originX + (raster.originX ?? raw.originX ?? 0);
+                    top = instanceData.originY + (raster.originY ?? raw.originY ?? 0);
+                } else {
+                    const [ax, ay] = this.anchorPointForRaster(raster, anchor);
+                    left = instanceData.originX - ax - (instanceData.anchorDx || 0);
+                    top = instanceData.originY - ay - (instanceData.anchorDy || 0);
+                }
+                const handle = instanceData.handle;
+                if (handle) {
+                    handle.left = left;
+                    handle.top = top;
+                    handle.width = raster.width;
+                    handle.height = raster.height;
+                    handle.originX = instanceData.originX;
+                    handle.originY = instanceData.originY;
+                    handle.raster = raster;
+                    handle.part = instanceData.scene;
+                }
+                if (instanceData.scene) {
+                    Object.assign(instanceData.scene, {
+                        left, top, width: raster.width, height: raster.height,
+                        originX: instanceData.originX, originY: instanceData.originY,
+                        placement: { x: instanceData.originX, y: instanceData.originY },
+                        hasPlacement: true
+                    });
+                }
+                instanceData.dirty = false;
+            } finally {
+                this.activeInstanceData = oldData;
+                this.activePartPath = oldPath;
+            }
+        }
+
+        readModernPartProperty(part, member, instanceData = null) {
+            const name = String(member).toLowerCase();
+            if (!part) return undefined;
+            if (name === 'kind') return part.kind === 'primitive' ? part.primitiveName : part.kind;
+            if (name === 'xy') {
+                if (part === instanceData?.scene) return { __pixelDslPoint: true, x: instanceData.originX, y: instanceData.originY };
+                if (part.kind === 'object') {
+                    const point = part.placement || { x: part.originX || 0, y: part.originY || 0 };
+                    return { __pixelDslPoint: true, x: point.x, y: point.y };
+                }
+                return { __pixelDslPoint: true, x: Number(part.args?.[0]) || 0, y: Number(part.args?.[1]) || 0 };
+            }
+            if (name === 'x' || name === 'y') {
+                const point = this.readModernPartProperty(part, 'xy', instanceData);
+                return point?.[name];
+            }
+            if (name === 'w') return part.kind === 'primitive' && ['rect','box','bar','gradrect','ditherrect'].includes(part.primitiveName) ? part.args[2] : part.width;
+            if (name === 'h') return part.kind === 'primitive' && ['rect','box','bar','gradrect','ditherrect'].includes(part.primitiveName) ? part.args[3] : part.height;
+            if (part.kind === 'object') {
+                const child = part.children?.[member];
+                if (child) return { __pixelDslHandle: true, left: child.left, top: child.top, width: child.width, height: child.height,
+                    originX: child.originX, originY: child.originY, part: child, instanceData };
+                const anchors = new Set(['center','c','top','t','bottom','b','left','l','right','r','tl','tr','bl','br','top_left','top_right','bottom_left','bottom_right']);
+                if (anchors.has(name)) {
+                    const [ax, ay] = this.anchorPoint(part.width || 1, part.height || 1, name === 'r' ? 'right' : name);
+                    return { __pixelDslPoint: true, x: (part.left || 0) + ax, y: (part.top || 0) + ay };
+                }
+                throw new Error(`Object part has no child or property '.${member}'.`);
+            }
+            if (part.kind !== 'primitive') throw new Error(`Unsupported instance part kind '${part.kind}'.`);
+            const shape = part.primitiveName;
+            const args = part.args || [];
+            if (name === 'r' && ['circle','circleout'].includes(shape)) return args[2];
+            if (name === 'rx' && ['ellipse','ellipseout'].includes(shape)) return args[2];
+            if (name === 'ry' && ['ellipse','ellipseout'].includes(shape)) return args[3];
+            if (name === 'color') {
+                const index = ({ pixel:2, rect:4, box:4, bar:4, line:4, circle:3, circleout:3,
+                    ellipse:4, ellipseout:4, triangle:6, triangleout:6, gradrect:4, ditherrect:4 })[shape];
+                if (index !== undefined) return args[index];
+                if (shape === 'poly' || shape === 'polyout') return args[args.length - 1];
+            }
+            if (['color1','color2','direction','pattern','coverage'].includes(name) && ['gradrect','ditherrect'].includes(shape)) {
+                const index = ({ color1:4, color2:5, direction:6, pattern:6, coverage:7 })[name];
+                if (index < args.length) return args[index];
+            }
+            if (/^p\d+$/.test(name)) {
+                const index = (Number(name.slice(1)) - 1) * 2;
+                if (index >= 0 && index + 1 < args.length - 1) return { __pixelDslPoint: true, x: args[index], y: args[index + 1] };
+            }
+            const coordinateMatch=name.match(/^([xy])(\d+)$/);
+            if (coordinateMatch && ['line','triangle','triangleout','poly','polyout'].includes(shape)) {
+                const index=(Number(coordinateMatch[2])-1)*2+(coordinateMatch[1]==='y'?1:0);
+                if (index >= 0 && index < args.length-1) return args[index];
+            }
+            if (name === 'center' || name === 'c' || name === 'top' || name === 't' || name === 'bottom' || name === 'b' ||
+                name === 'left' || name === 'l' || name === 'right' || name === 'r' || name === 'tl' || name === 'tr' ||
+                name === 'bl' || name === 'br' || name === 'top_left' || name === 'top_right' || name === 'bottom_left' || name === 'bottom_right') {
+                const isCircle = ['circle','circleout'].includes(shape);
+                if (!(name === 'r' && isCircle)) {
+                    const [ax, ay] = this.anchorPoint(part.width || 1, part.height || 1, name === 'r' ? 'right' : name);
+                    return { __pixelDslPoint: true, x: part.left + ax, y: part.top + ay };
+                }
+            }
+            throw new Error(`Primitive '${shape}' has no property '.${member}'.`);
+        }
+
+        resolveModernMemberPath(expression, scope = {}) {
+            const parts = String(expression ?? '').trim().split('.');
+            if (parts.length < 2 || parts.some(part => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(part))) return undefined;
+            let current = scope?.[parts[0]] || this.instances?.[parts[0]];
+            if (!current?.__pixelDslHandle || !current.part) return undefined;
+            const instanceData = current.instanceData || null;
+            if (instanceData) this.refreshModernInstance(instanceData);
+            current = { __pixelDslHandle: true, part: current.part, instanceData };
+            for (let index = 1; index < parts.length; index++) {
+                const member = parts[index];
+                if (current?.__pixelDslPoint) {
+                    if (member === 'x' || member === 'y') current = current[member];
+                    else return undefined;
+                    continue;
+                }
+                if (current?.__pixelDslHandle && current.part) {
+                    const child = current.part.children?.[member];
+                    if (child) {
+                        current = { __pixelDslHandle: true, part: child, instanceData };
+                        continue;
+                    }
+                    current = this.readModernPartProperty(current.part, member, instanceData);
+                    if (current === undefined) return undefined;
+                    continue;
+                }
+                return undefined;
+            }
+            return current;
+        }
+
+        assignModernInstanceMember(node, scope = {}) {
+            const path = node.path.split('.');
+            const root = scope?.[path[0]] || this.instances?.[path[0]];
+            if (!root?.instanceData || !root.part) throw new Error(`Member assignment root '${path[0]}' must be an ins/instance handle.`);
+            const data = root.instanceData;
+            this.refreshModernInstance(data);
+            const final = path[path.length - 1];
+            let parent = data.scene;
+            let partPath = '';
+            for (let index = 1; index < path.length - 1; index++) {
+                if (!parent || parent.kind !== 'object') throw new Error(`Cannot access '${path[index]}' on a primitive part.`);
+                const child = parent.children?.[path[index]];
+                if (!child) throw new Error(`Unknown instance part '${path[index]}' in '${node.path}'.`);
+                parent = child;
+                partPath = this.partPathJoin(partPath, path[index]);
+            }
+            if (!parent) throw new Error(`Unknown instance part in '${node.path}'.`);
+            const raw = node.expression.trim();
+            const call = this.parseCall(raw);
+            const aliases = { orect:'box', ocircle:'circleout', otriangle:'triangleout', opoly:'polyout' };
+            const primitiveName = call && !call.rest ? (aliases[call.name.toLowerCase()] || call.name.toLowerCase()) : '';
+            const primitives = ['pixel','rect','box','bar','line','circle','circleout','ellipse','ellipseout','triangle','triangleout','poly','polyout','gradrect','ditherrect'];
+            const child = parent.kind === 'object' ? parent.children?.[final] : null;
+            const targetPath = this.partPathJoin(partPath, final);
+            if (child && primitiveName === 'fill') throw new Error('fill is not an editable instance part and cannot be used as a replacement.');
+            if (child && primitives.includes(primitiveName)) {
+                data.overrides[targetPath] = { replacement: { kind:'primitive', name: primitiveName, args: call.args.slice() }, properties: Object.create(null) };
+                for (const key of Object.keys(data.overrides)) if (key.startsWith(targetPath + '.')) delete data.overrides[key];
+                data.dirty = true;
+                return;
+            }
+            if (child && /^draw\s+/i.test(raw)) {
+                const replacementNodes=this.parseModernProgram(raw);
+                const replacementNode=replacementNodes.find(item=>item.type==='draw');
+                if (!replacementNode) throw new Error(`Expected a valid nested object draw for '${node.path}'.`);
+                const encodeValue=value=>{
+                    if (value?.__pixelDslPoint) return `(${value.x}, ${value.y})`;
+                    if (typeof value==='number' && Number.isFinite(value)) return String(value);
+                    if (typeof value==='string') return JSON.stringify(value);
+                    if (typeof value==='boolean') return value?'1':'0';
+                    return String(value);
+                };
+                const encodedArgs=replacementNode.shape.args.map(expression=>{
+                    const point=this.modernCoordinatePoint(expression,scope,this.instances,0,0);
+                    if (point) return encodeValue({__pixelDslPoint:true,...point});
+                    const value=this.modernEval(expression,scope);
+                    if (typeof value==='number' && Number.isFinite(value)) return String(value);
+                    try { return JSON.stringify(this.modernColor(expression,scope)); } catch {}
+                    if (typeof value==='string' && value!==expression) return JSON.stringify(value);
+                    return expression;
+                });
+                const replacementShape={...replacementNode.shape,args:encodedArgs};
+                let replacementTarget=replacementNode.target;
+                if (replacementTarget?.kind==='point') {
+                    const x=this.modernNumber(replacementTarget.x,scope), y=this.modernNumber(replacementTarget.y,scope);
+                    if (![x,y].every(Number.isFinite)) throw new Error('Nested replacement coordinates must be finite numbers.');
+                    replacementTarget={kind:'point',x:String(x),y:String(y)};
+                }
+                data.overrides[targetPath]={replacement:{kind:'object',shape:replacementShape,target:replacementTarget,anchor:replacementNode.anchor,
+                    anchorExplicit:replacementNode.anchorExplicit,transform:replacementNode.transform,applyTransform:replacementNode.applyTransform},properties:Object.create(null)};
+                for (const key of Object.keys(data.overrides)) if (key.startsWith(targetPath + '.')) delete data.overrides[key];
+                data.dirty=true;
+                return;
+            }
+            let value;
+            if (this.modernCoordinatePoint(raw, scope, this.instances, 0, 0)) {
+                const point = this.modernCoordinatePoint(raw, scope, this.instances, 0, 0);
+                value = { __pixelDslPoint: true, x: point.x, y: point.y };
+            } else {
+                value = this.modernEval(raw, scope);
+            }
+            if (parent === data.scene && final === 'xy') {
+                if (!value?.__pixelDslPoint) throw new Error('Instance .xy expects a point value.');
+                data.originX = value.x; data.originY = value.y; data.dirty = true; return;
+            }
+            if (parent.kind === 'object' && final === 'xy') {
+                if (!value?.__pixelDslPoint) throw new Error('Nested object .xy expects a point value.');
+                const override = data.overrides[partPath] || { properties: Object.create(null) };
+                override.properties.xy = value;
+                data.overrides[partPath] = override;
+                parent.placement = { x: value.x, y: value.y };
+                parent.hasPlacement = true;
+                data.dirty = true;
+                return;
+            }
+            if (parent.kind !== 'primitive') throw new Error(`Property assignment requires a primitive part or object placement, got '${final}'.`);
+            const shape = parent.primitiveName;
+            if (final === 'color') value = this.modernColor(raw, scope);
+            const override = data.overrides[partPath] || { properties: Object.create(null) };
+            override.properties[final] = value;
+            data.overrides[partPath] = override;
+            this.applyModernPrimitiveProperty(parent, final, value);
+            data.dirty = true;
+        }
+
+        applyModernPrimitiveProperty(part, property, value) {
+            const args = part.args;
+            const set = (index, next) => {
+                if (index < 0 || index >= args.length) throw new Error(`Property '.${property}' is not available on ${part.primitiveName}.`);
+                args[index] = next;
+            };
+            if (property === 'xy') {
+                if (!value?.__pixelDslPoint) throw new Error("Property '.xy' expects a point value.");
+                set(0, value.x); set(1, value.y); return;
+            }
+            if (property === 'x') { set(0, value); return; }
+            if (property === 'y') { set(1, value); return; }
+            const shape = part.primitiveName;
+            const indexes = {
+                w: ['rect','box','bar','gradrect','ditherrect'].includes(shape) ? 2 : -1,
+                h: ['rect','box','bar','gradrect','ditherrect'].includes(shape) ? 3 : -1,
+                r: ['circle','circleout'].includes(shape) ? 2 : -1,
+                rx: ['ellipse','ellipseout'].includes(shape) ? 2 : -1,
+                ry: ['ellipse','ellipseout'].includes(shape) ? 3 : -1,
+                color: ({pixel:2,rect:4,box:4,bar:4,line:4,circle:3,circleout:3,ellipse:4,ellipseout:4,triangle:6,triangleout:6,gradrect:4,ditherrect:4})[shape] ?? (['poly','polyout'].includes(shape) ? args.length - 1 : -1),
+                color1: ['gradrect','ditherrect'].includes(shape) ? 4 : -1,
+                color2: ['gradrect','ditherrect'].includes(shape) ? 5 : -1,
+                direction: shape === 'gradrect' ? 6 : -1,
+                pattern: shape === 'ditherrect' ? 6 : -1,
+                coverage: shape === 'ditherrect' ? 7 : -1
+            };
+            if (indexes[property] !== undefined && indexes[property] >= 0) { set(indexes[property], value); return; }
+            if (/^p\d+$/.test(property) && value?.__pixelDslPoint) {
+                const index = (Number(property.slice(1)) - 1) * 2;
+                set(index, value.x); set(index + 1, value.y); return;
+            }
+            const coordinateMatch=property.match(/^([xy])(\d+)$/);
+            if (coordinateMatch && ['line','triangle','triangleout','poly','polyout'].includes(shape)) {
+                const index=(Number(coordinateMatch[2])-1)*2+(coordinateMatch[1]==='y'?1:0);
+                if (index >= 0 && index < args.length-1) { set(index,value); return; }
+            }
+            throw new Error(`Primitive '${shape}' has no writable property '.${property}'.`);
+        }
+
         modernEval(expression, scope = {}) {
             const raw = String(expression ?? '').trim();
             if (!raw) return NaN;
+            const directMember = this.resolveModernMemberPath(raw, scope);
+            if (directMember !== undefined) return directMember;
 
             const call = this.parseCall(raw);
             if (call && !call.rest && call.name.toLowerCase() === 'place') {
@@ -4694,10 +5103,17 @@ line(112, 66, 112, 76, GLOW_Y)
                 };
             }
 
+            let memberExpanded = raw.replace(/\b[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+\b/g, (match, offset, whole) => {
+                const after = whole.slice(offset + match.length).trimStart();
+                if (after.startsWith('(')) return match;
+                const value = this.resolveModernMemberPath(match, scope);
+                if (value === undefined || value?.__pixelDslPoint || value?.__pixelDslHandle) return match;
+                return typeof value === 'string' ? JSON.stringify(value) : String(value);
+            });
             let properties = '';
             let quote = '', escaped = false;
-            for (let i = 0; i < raw.length;) {
-                const ch = raw[i];
+            for (let i = 0; i < memberExpanded.length;) {
+                const ch = memberExpanded[i];
                 if (quote) {
                     properties += ch;
                     if (escaped) escaped = false;
@@ -4709,20 +5125,20 @@ line(112, 66, 112, 76, GLOW_Y)
                 if (ch === '\'' || ch === '"') { quote = ch; properties += ch; i++; continue; }
                 if (/[A-Za-z_$]/.test(ch)) {
                     let end = i + 1;
-                    while (end < raw.length && /[A-Za-z0-9_$]/.test(raw[end])) end++;
-                    const owner = raw.slice(i, end);
+                    while (end < memberExpanded.length && /[A-Za-z0-9_$]/.test(memberExpanded[end])) end++;
+                    const owner = memberExpanded.slice(i, end);
 
                     // Resolve handle.anchor.x/y and handle.anchor().x/y as scalar coordinates.
-                    if (raw[end] === '.') {
+                    if (memberExpanded[end] === '.') {
                         let anchorEnd = end + 1;
-                        while (anchorEnd < raw.length && /[A-Za-z0-9_$]/.test(raw[anchorEnd])) anchorEnd++;
+                        while (anchorEnd < memberExpanded.length && /[A-Za-z0-9_$]/.test(raw[anchorEnd])) anchorEnd++;
                         if (anchorEnd > end + 1) {
                             let pointEnd = anchorEnd;
-                            while (/\s/.test(raw[pointEnd] || '')) pointEnd++;
-                            if (raw[pointEnd] === '(') {
+                            while (/\s/.test(memberExpanded[pointEnd] || '')) pointEnd++;
+                            if (memberExpanded[pointEnd] === '(') {
                                 let depth = 0, quote = '', escaped = false;
-                                for (; pointEnd < raw.length; pointEnd++) {
-                                    const current = raw[pointEnd];
+                                for (; pointEnd < memberExpanded.length; pointEnd++) {
+                                    const current = memberExpanded[pointEnd];
                                     if (quote) {
                                         if (escaped) escaped = false;
                                         else if (current === '\\') escaped = true;
@@ -4734,14 +5150,14 @@ line(112, 66, 112, 76, GLOW_Y)
                                     else if (current === ')' && --depth === 0) { pointEnd++; break; }
                                 }
                             }
-                            while (/\s/.test(raw[pointEnd] || '')) pointEnd++;
-                            if (raw[pointEnd] === '.') {
-                                const axisMatch = raw.slice(pointEnd + 1).match(/^(x|y)\b/i);
+                            while (/\s/.test(memberExpanded[pointEnd] || '')) pointEnd++;
+                            if (memberExpanded[pointEnd] === '.') {
+                                const axisMatch = memberExpanded.slice(pointEnd + 1).match(/^(x|y)\b/i);
                                 if (axisMatch) {
                                     const axis = axisMatch[1].toLowerCase();
-                                    const point = this.modernCoordinatePoint(raw.slice(i, pointEnd), scope);
+                                    const point = this.modernCoordinatePoint(memberExpanded.slice(i, pointEnd), scope);
                                     if (point) properties += String(point[axis]);
-                                    else properties += raw.slice(i, pointEnd + 1 + axisMatch[0].length);
+                                    else properties += memberExpanded.slice(i, pointEnd + 1 + axisMatch[0].length);
                                     i = pointEnd + 1 + axisMatch[0].length;
                                     continue;
                                 }
@@ -4749,14 +5165,14 @@ line(112, 66, 112, 76, GLOW_Y)
                         }
                     }
 
-                    if (raw[end] === '.' && (raw.slice(end + 1).match(/^(x|y)\b/i))) {
+                    if (memberExpanded[end] === '.' && (memberExpanded.slice(end + 1).match(/^(x|y)\b/i))) {
                         const axis = raw[end + 1].toLowerCase();
                         const value = scope[owner] || this.instances?.[owner];
                         if (value?.__pixelDslPoint === true) properties += String(value[axis]);
                         else if (value?.__pixelDslHandle === true || (value && Number.isFinite(value.left) && Number.isFinite(value.top) && Number.isFinite(value.width) && Number.isFinite(value.height))) {
                             const coordinate = axis === 'x' ? value.originX : value.originY;
                             properties += String(Number.isFinite(coordinate) ? coordinate : (axis === 'x' ? value.left : value.top));
-                        } else properties += raw.slice(i, end + 2);
+                        } else properties += memberExpanded.slice(i, end + 2);
                         i = end + 2;
                         continue;
                     }
@@ -4785,6 +5201,9 @@ line(112, 66, 112, 76, GLOW_Y)
         modernCoordinatePoint(expression, scope = {}, handles = this.instances, offsetX = 0, offsetY = 0, depth = 0) {
             const text = String(expression ?? '').trim();
             if (!text || depth > 16) return null;
+            const memberValue = this.resolveModernMemberPath(text, scope);
+            if (memberValue?.__pixelDslPoint === true && Number.isFinite(memberValue.x) && Number.isFinite(memberValue.y))
+                return { x: memberValue.x, y: memberValue.y };
 
             // Named point values can be passed through assignments and function parameters.
             if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(text)) {
@@ -4835,7 +5254,7 @@ line(112, 66, 112, 76, GLOW_Y)
                 ? scopedHandle : handles?.[owner];
             if (!handle) return null;
 
-            const [ax, ay] = this.anchorPoint(handle.width, handle.height, side);
+            const [ax, ay] = this.anchorPointForHandle(handle, side);
             const localOffsetX = handle.__pixelDslVirtualHandle ? 0 : offsetX;
             const localOffsetY = handle.__pixelDslVirtualHandle ? 0 : offsetY;
             return { x: handle.left + ax + dx - localOffsetX, y: handle.top + ay + dy - localOffsetY };
@@ -4936,8 +5355,8 @@ line(112, 66, 112, 76, GLOW_Y)
                 const handle = handles[target.handle] || scope[target.handle];
                 if (!handle) return { error: `Unknown drawing handle '${target.handle}'. Draw it first and assign it to a variable.` };
                 const dx = this.modernNumber(target.dx, scope), dy = this.modernNumber(target.dy, scope);
-                const [tx, ty] = this.anchorPoint(handle.width, handle.height, target.side);
-                const [sx, sy] = this.anchorPoint(transformed.width, transformed.height, sourceAnchor);
+                const [tx, ty] = this.anchorPointForHandle(handle, target.side);
+                const [sx, sy] = this.anchorPointForRaster(transformed, sourceAnchor);
                 if (![dx, dy].every(Number.isFinite)) return { error: 'Attachment offsets must resolve to finite numbers.' };
                 const localOffsetX = handle.__pixelDslVirtualHandle ? 0 : offsetX;
                 const localOffsetY = handle.__pixelDslVirtualHandle ? 0 : offsetY;
@@ -4955,8 +5374,8 @@ line(112, 66, 112, 76, GLOW_Y)
                     const side = target.side;
                     const xBySide = {center:(this.canvasWidth-1)/2,c:(this.canvasWidth-1)/2,top:(this.canvasWidth-1)/2,t:(this.canvasWidth-1)/2,bottom:(this.canvasWidth-1)/2,b:(this.canvasWidth-1)/2,left:0,l:0,right:this.canvasWidth-1,r:this.canvasWidth-1,tl:0,top_left:0,bl:0,bottom_left:0,tr:this.canvasWidth-1,top_right:this.canvasWidth-1,br:this.canvasWidth-1,bottom_right:this.canvasWidth-1};
                     const yBySide = {center:(this.canvasHeight-1)/2,c:(this.canvasHeight-1)/2,left:(this.canvasHeight-1)/2,l:(this.canvasHeight-1)/2,right:(this.canvasHeight-1)/2,r:(this.canvasHeight-1)/2,top:0,t:0,tl:0,top_left:0,tr:0,top_right:0,bottom:this.canvasHeight-1,b:this.canvasHeight-1,bl:this.canvasHeight-1,bottom_left:this.canvasHeight-1,br:this.canvasHeight-1,bottom_right:this.canvasHeight-1};
-                    x = xBySide[side] + this.modernNumber(target.dx, scope);
-                    y = yBySide[side] + this.modernNumber(target.dy, scope);
+                    x = xBySide[side] + this.modernNumber(target.dx, scope) - offsetX;
+                    y = yBySide[side] + this.modernNumber(target.dy, scope) - offsetY;
                 } else {
                     x = this.modernNumber(target.x, scope);
                     y = this.modernNumber(target.y, scope);
@@ -4969,8 +5388,8 @@ line(112, 66, 112, 76, GLOW_Y)
                 } else {
                     // The shape modifier selects the source point; its offsets move that
                     // point before it is matched to the coordinate/grid target.
-                    const pos = this.anchoredPosition(x - sourceDx, y - sourceDy, transformed.width, transformed.height, sourceAnchor);
-                    left = pos.left; top = pos.top;
+                    const [sx,sy] = this.anchorPointForRaster(transformed, sourceAnchor);
+                    left = x - sourceDx - sx; top = y - sourceDy - sy;
                 }
             }
             if (![left, top].every(Number.isFinite) || Math.abs(left) > this.maxCoordinateMagnitude || Math.abs(top) > this.maxCoordinateMagnitude) {
@@ -4981,6 +5400,7 @@ line(112, 66, 112, 76, GLOW_Y)
 
         modernDrawHandlePlacement(node, scope = {}, handles = this.instances) {
             const source = scope && node.source in scope ? scope[node.source] : handles?.[node.source];
+            if (source?.instanceData) this.refreshModernInstance(source.instanceData);
             if (!source?.raster?.pixels || !Number.isFinite(source.width) || !Number.isFinite(source.height)) {
                 return { error: `draw ${node.source} needs an instance or a saved drawable object handle.` };
             }
@@ -5040,7 +5460,32 @@ line(112, 66, 112, 76, GLOW_Y)
             const include=(x1,y1,x2,y2)=>{ if (![x1,y1,x2,y2].every(Number.isFinite)) return; minX=Math.min(minX,x1,x2); minY=Math.min(minY,y1,y2); maxX=Math.max(maxX,x1,x2); maxY=Math.max(maxY,y1,y2); };
             const rootScope = Object.create(null);
             macro.params.forEach((param,index)=>{ rootScope[param]=args[index] ?? ''; rootScope[String(index+1)]=args[index] ?? ''; });
-            const walk=(nodes,scope,handles,depth=0)=>{
+            const encode = value => {
+                if (value?.__pixelDslPoint) return `(${value.x}, ${value.y})`;
+                if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+                if (typeof value === 'boolean') return value ? '1' : '0';
+                return String(value);
+            };
+            const overriddenDraw = (node, partPath, scope, handles) => {
+                let effective = node;
+                const override = partPath ? this.activeInstanceData?.overrides?.[partPath] : null;
+                if (override?.replacement?.kind === 'primitive')
+                    return { ...this.renderModernPrimitiveReplacement(override.replacement,scope,partPath), primitiveReplacement:true };
+                if (override?.replacement?.kind === 'object') {
+                    const replacement = override.replacement;
+                    effective = {...node, shape:replacement.shape, target:replacement.target, anchor:replacement.anchor,
+                        anchorExplicit:replacement.anchorExplicit, transform:replacement.transform, applyTransform:replacement.applyTransform};
+                }
+                if (override?.properties?.xy) {
+                    const point = override.properties.xy;
+                    effective = {...effective, target:{kind:'point',x:String(point.x),y:String(point.y)}};
+                }
+                const oldPath=this.activePartPath;
+                this.activePartPath=partPath;
+                try { return this.modernDrawPlacement(effective,scope,handles); }
+                finally { this.activePartPath=oldPath; }
+            };
+            const walk=(nodes,scope,handles,depth=0,ownerPath='')=>{
                 if (depth>48 || visited>60000) return;
                 for (const node of nodes) {
                     if (visited++ > 60000) break;
@@ -5048,9 +5493,36 @@ line(112, 66, 112, 76, GLOW_Y)
                         const call=this.parseCall(node.expression.trim());
                         const primitiveAliases={orect:'box',ocircle:'circleout',otriangle:'triangleout',opoly:'polyout'};
                         const primitiveName=call&&!call.rest?(primitiveAliases[call.name.toLowerCase()]||call.name.toLowerCase()):'';
-                        if (['pixel','fill','rect','box','bar','line','circle','circleout','ellipse','ellipseout','triangle','triangleout','poly','polyout','gradrect','ditherrect'].includes(primitiveName)) {
-                            const handle=this.modernPrimitiveBounds({name:primitiveName,args:call.args},scope,include,handles);
-                            scope[node.name]=handle;
+                        const primitiveNames=['pixel','fill','rect','box','bar','line','circle','circleout','ellipse','ellipseout','triangle','triangleout','poly','polyout','gradrect','ditherrect'];
+                        if (primitiveNames.includes(primitiveName)) {
+                            const partPath=primitiveName==='fill'?'':this.partPathJoin(ownerPath,node.name);
+                            const override=partPath?this.activeInstanceData?.overrides?.[partPath]:null;
+                            if (override?.replacement?.kind==='object') {
+                                const replacement=override.replacement;
+                                const fake={type:'draw',handle:node.name,shape:replacement.shape,target:replacement.target,anchor:replacement.anchor,
+                                    anchorExplicit:replacement.anchorExplicit,transform:replacement.transform,applyTransform:replacement.applyTransform};
+                                const placement=overriddenDraw(fake,partPath,scope,handles);
+                                if (!placement.error) {
+                                    include(placement.left,placement.top,placement.left+placement.width-1,placement.top+placement.height-1);
+                                    const handle={__pixelDslHandle:true,left:placement.left,top:placement.top,width:placement.width,height:placement.height,
+                                        originX:placement.referenceX,originY:placement.referenceY,raster:placement.transformed};
+                                    handles[node.name]=handle; scope[node.name]=handle;
+                                }
+                            } else {
+                                let boundsNode={name:primitiveName,args:call.args};
+                                if (override?.replacement?.kind==='primitive') boundsNode={name:override.replacement.name,args:override.replacement.args};
+                                else if (override?.properties) {
+                                    const colorIndexes={pixel:[2],rect:[4],box:[4],bar:[4],line:[4],circle:[3],circleout:[3],ellipse:[4],ellipseout:[4],triangle:[6],triangleout:[6],poly:[call.args.length-1],polyout:[call.args.length-1],gradrect:[4,5],ditherrect:[4,5]};
+                                    const stringIndexes=['gradrect','ditherrect'].includes(primitiveName)?[6]:[];
+                                    const values=call.args.map((arg,index)=>colorIndexes[primitiveName]?.includes(index)?this.modernColor(arg,scope):stringIndexes.includes(index)?String(arg).trim().replace(/^(?:['"])(.*)(?:['"])$/,'$1'):this.modernNumber(arg,scope));
+                                    const editable={primitiveName,args:values};
+                                    for (const [property,value] of Object.entries(override.properties)) this.applyModernPrimitiveProperty(editable,property,value);
+                                    boundsNode={name:primitiveName,args:values.map((value,index)=>colorIndexes[primitiveName]?.includes(index)?JSON.stringify(value):stringIndexes.includes(index)?String(value):String(value))};
+                                }
+                                const handle=this.modernPrimitiveBounds(boundsNode,scope,include,handles);
+                                scope[node.name]=handle;
+                                if (handle && partPath) handle.partPath=partPath;
+                            }
                         } else {
                             const point=this.modernCoordinatePoint(node.expression,scope,handles,0,0);
                             scope[node.name]=point?{__pixelDslPoint:true,...point}:this.modernEval(node.expression,scope);
@@ -5059,57 +5531,52 @@ line(112, 66, 112, 76, GLOW_Y)
                     }
                     if (node.type==='color' || node.type==='colors' || node.type==='grid' || node.type==='bg' || node.type==='transform' || node.type==='object' || node.type==='mask') continue;
                     if (node.type==='anchor') { if (node.args.length>=2) { const expr=node.args.slice(1).join(','); const point=this.modernCoordinatePoint(expr,scope,handles,0,0); scope[String(node.args[0]).trim()]=point?{__pixelDslPoint:true,...point}:this.modernEval(expr,scope); } continue; }
+                    if (node.type==='anchorFrame') continue;
                     if (node.type==='baseAt') { scope.BASE=this.modernEval(node.args.join(','),scope); continue; }
                     if (node.type==='if') {
                         const condition=this.modernEval(node.condition,scope);
                         const truth=typeof condition==='boolean'?condition:typeof condition==='number'?condition!==0:!!condition;
-                        walk(truth?node.yes:node.no,scope,handles,depth+1); continue;
+                        walk(truth?node.yes:node.no,scope,handles,depth+1,ownerPath); continue;
                     }
                     if (node.type==='while') {
-                        for (let iteration = 0; iteration < 10000; iteration++) {
-                            const condition = this.modernEval(node.condition, scope);
-                            const truth = typeof condition === 'boolean' ? condition : typeof condition === 'number' ? Number.isFinite(condition) && condition !== 0 : !!condition;
-                            if (!truth) break;
-                            walk(node.body, scope, handles, depth + 1);
+                        for (let iteration=0; iteration<10000; iteration++) {
+                            const condition=this.modernEval(node.condition,scope);
+                            const truth=typeof condition==='boolean'?condition:typeof condition==='number'?Number.isFinite(condition)&&condition!==0:!!condition;
+                            if(!truth) break;
+                            walk(node.body,scope,handles,depth+1,ownerPath);
                         }
                         continue;
                     }
                     if (node.type==='for') {
                         const start=this.modernNumber(node.start,scope), end=this.modernNumber(node.end,scope), step=this.modernNumber(node.step,scope);
-                        if (![start,end,step].every(Number.isFinite) || step===0) continue;
-                        for(let iteration=0; iteration<10000; iteration++) {
+                        if (![start,end,step].every(Number.isFinite)||step===0) continue;
+                        for(let iteration=0;iteration<10000;iteration++) {
                             const value=start+iteration*step;
                             const tolerance=Number.EPSILON*Math.max(1,Math.abs(start),Math.abs(end),Math.abs(value))*4;
-                            const inRange=step>0
-                                ? (node.inclusive ? value<=end+tolerance : value<end)
-                                : (node.inclusive ? value>=end-tolerance : value>end);
+                            const inRange=step>0?(node.inclusive?value<=end+tolerance:value<end):(node.inclusive?value>=end-tolerance:value>end);
                             if(!Number.isFinite(value)||!inRange) break;
-                            walk(node.body,{...scope,[node.variable]:value},handles,depth+1);
+                            walk(node.body,{...scope,[node.variable]:value},handles,depth+1,ownerPath);
                         }
                         continue;
                     }
                     if (node.type==='primitive') { this.modernPrimitiveBounds(node,scope,include,handles); continue; }
-                    if (node.type==='instance') {
-                        const placement=this.modernDrawPlacement(node,scope,handles);
+                    if (node.type==='instance' || node.type==='draw') {
+                        const partPath=node.handle?this.partPathJoin(ownerPath,node.handle):'';
+                        const placement=node.type==='draw'
+                            ? overriddenDraw(node,partPath,scope,handles)
+                            : overriddenDraw(node,partPath,scope,handles);
                         if (placement.error) continue;
-                        const handle={__pixelDslHandle:true,left:placement.left,top:placement.top,width:placement.width,height:placement.height,
-                            originX:placement.referenceX,originY:placement.referenceY,raster:placement.transformed};
-                        handles[node.handle]=handle; scope[node.handle]=handle;
-                        continue;
-                    }
-                    if (node.type==='drawHandle') {
-                        const placement=this.modernDrawHandlePlacement(node,scope,handles);
-                        if (placement.error) continue;
-                        include(placement.left,placement.top,placement.left+placement.width-1,placement.top+placement.height-1);
+                        if (node.type==='draw') include(placement.left,placement.top,placement.left+placement.width-1,placement.top+placement.height-1);
                         if (node.handle) {
                             const handle={__pixelDslHandle:true,left:placement.left,top:placement.top,width:placement.width,height:placement.height,
-                                originX:placement.referenceX,originY:placement.referenceY,raster:placement.transformed};
+                                originX:placement.referenceX,originY:placement.referenceY,raster:placement.transformed || {pixels:placement.pixels,width:placement.width,height:placement.height},
+                                part:placement.part || null};
                             handles[node.handle]=handle; scope[node.handle]=handle;
                         }
                         continue;
                     }
-                    if (node.type==='draw') {
-                        const placement=this.modernDrawPlacement(node,scope,handles);
+                    if (node.type==='drawHandle') {
+                        const placement=this.modernDrawHandlePlacement(node,scope,handles);
                         if (placement.error) continue;
                         include(placement.left,placement.top,placement.left+placement.width-1,placement.top+placement.height-1);
                         if (node.handle) {
@@ -5131,28 +5598,24 @@ line(112, 66, 112, 76, GLOW_Y)
                         let object=this.getPlacementRaster(source);
                         const point=node.pointPrefix?this.modernCoordinatePoint(node.prefix[0],scope,handles,0,0):null;
                         const prefix=point?[String(point.x),String(point.y),...node.prefix.slice(1)]:node.prefix;
-                        let x=this.modernNumber(prefix[0],scope), y=this.modernNumber(prefix[1],scope);
+                        const x=this.modernNumber(prefix[0],scope), y=this.modernNumber(prefix[1],scope);
                         if (node.operation==='rotate') object=this.transformRaster(object.pixels,this.modernNumber(prefix[2],scope),false,false);
                         else if (node.operation==='mirror_h') object=this.transformRaster(object.pixels,0,true,false);
                         else if (node.operation==='mirror_v') object=this.transformRaster(object.pixels,0,false,true);
-                        else if (node.operation==='multiply') { /* bounds are unchanged */ }
-                        let width=object.width ?? object.pixels?.[0]?.length ?? 1, height=object.height ?? object.pixels?.length ?? 1;
-                        const pos=this.anchoredPosition(x,y,width,height,'center'); include(pos.left,pos.top,pos.left+width-1,pos.top+height-1);
-                        if (node.operation==='symmetry_x') { const cx=this.modernNumber(prefix[2],scope); const lx=Math.round(2*cx-(pos.left+width-1)); include(lx,pos.top,lx+width-1,pos.top+height-1); }
+                        const width=object.width??object.pixels?.[0]?.length??1,height=object.height??object.pixels?.length??1;
+                        const pos=this.anchoredPosition(x,y,width,height,'center');
+                        include(pos.left,pos.top,pos.left+width-1,pos.top+height-1);
+                        if(node.operation==='symmetry_x') { const cx=this.modernNumber(prefix[2],scope); const lx=Math.round(2*cx-(pos.left+width-1)); include(lx,pos.top,lx+width-1,pos.top+height-1); }
                     }
                 }
             };
-            walk(macro.body,rootScope,Object.create(null));
+            walk(macro.body,rootScope,Object.create(null),0,this.activePartPath||'');
             if (![minX,minY,maxX,maxY].every(Number.isFinite)) minX=minY=maxX=maxY=0;
             const width=Math.max(1,Math.ceil(maxX-minX+1)), height=Math.max(1,Math.ceil(maxY-minY+1));
             if (width>4096 || height>4096 || width*height>this.maxPrimitivePixels) throw new Error(`Object '${macro.name}' exceeds raster work limits (${width}x${height}).`);
-            // Raster dimensions and offsets must be integral. Primitive coordinates can be fractional
-            // (e.g. cloud radii multiplied by 1.3); passing fractional offsets through to
-            // executeModernPrimitive makes grid row indices fractional and Array.fill undefined.
-            minX = Math.floor(minX); minY = Math.floor(minY);
-            maxX = Math.ceil(maxX); maxY = Math.ceil(maxY);
-            const rasterWidth = Math.max(1, maxX - minX + 1), rasterHeight = Math.max(1, maxY - minY + 1);
-            if (rasterWidth > 4096 || rasterHeight > 4096 || rasterWidth * rasterHeight > this.maxPrimitivePixels) throw new Error(`Object '${macro.name}' exceeds raster work limits (${rasterWidth}x${rasterHeight}).`);
+            minX=Math.floor(minX); minY=Math.floor(minY); maxX=Math.ceil(maxX); maxY=Math.ceil(maxY);
+            const rasterWidth=Math.max(1,maxX-minX+1), rasterHeight=Math.max(1,maxY-minY+1);
+            if (rasterWidth>4096 || rasterHeight>4096 || rasterWidth*rasterHeight>this.maxPrimitivePixels) throw new Error(`Object '${macro.name}' exceeds raster work limits (${rasterWidth}x${rasterHeight}).`);
             return {minX,minY,width:rasterWidth,height:rasterHeight};
         }
 
@@ -5161,18 +5624,26 @@ line(112, 66, 112, 76, GLOW_Y)
             const old={
                 grid:this.grid, width:this.width, height:this.height,
                 instances:this.instances, canvasWidth:this.canvasWidth, canvasHeight:this.canvasHeight,
-                bgColor:this.bgColor, colors:Object.assign(Object.create(null), this.colors)
+                bgColor:this.bgColor, colors:Object.assign(Object.create(null), this.colors),
+                activeScene:this.activeScene, activePartPath:this.activePartPath
             };
+            const scene={kind:'object',objectName:macro.name,children:Object.create(null),left:0,top:0,width:bounds.width,height:bounds.height,
+                originX:0,originY:0,placement:{x:0,y:0},hasPlacement:true};
             this.width=bounds.width; this.height=bounds.height; this.grid=this.makeRaster(this.width,this.height); this.instances=Object.create(null);
+            this.activeScene=scene;
             const scope=Object.create(null);
             macro.params.forEach((param,index)=>{ scope[param]=args[index] ?? ''; scope[String(index+1)]=args[index] ?? ''; });
+            this.renderingMacroScopes.push(scope);
             try {
                 this.executeModernBlock(macro.body,-bounds.minX,-bounds.minY,scope,0);
-                return {pixels:this.grid,width:bounds.width,height:bounds.height,originX:bounds.minX,originY:bounds.minY};
+                return {pixels:this.grid,width:bounds.width,height:bounds.height,originX:bounds.minX,originY:bounds.minY,scene,
+                    anchorFrame:scope.__pixelDslAnchorFrame ? { ...scope.__pixelDslAnchorFrame } : null};
             } finally {
+                this.renderingMacroScopes.pop();
                 this.grid=old.grid; this.width=old.width; this.height=old.height;
                 this.instances=old.instances; this.canvasWidth=old.canvasWidth; this.canvasHeight=old.canvasHeight;
                 this.bgColor=old.bgColor; this.colors=old.colors;
+                this.activeScene=old.activeScene; this.activePartPath=old.activePartPath;
             }
         }
 
@@ -5226,6 +5697,10 @@ line(112, 66, 112, 76, GLOW_Y)
         }
 
         executeModernPrimitive(node, offsetX, offsetY, scope) {
+            const partOverride=this.activeInstanceData && this.activePartPath
+                ? this.activeInstanceData.overrides?.[this.activePartPath] : null;
+            if (partOverride?.replacement?.kind === 'primitive')
+                node={...node,name:partOverride.replacement.name,args:partOverride.replacement.args.slice()};
             const name=node.name, args=this.modernExpandCoordinateArgs(node.name, node.args, scope, this.instances, offsetX, offsetY);
             const expectedCounts = { pixel:3, fill:3, rect:5, box:5, bar:5, line:5, circle:4, circleout:4, ellipse:5, ellipseout:5, triangle:7, triangleout:7, gradrect:7 };
             if (Object.prototype.hasOwnProperty.call(expectedCounts, name) && args.length !== expectedCounts[name]) {
@@ -5236,6 +5711,10 @@ line(112, 66, 112, 76, GLOW_Y)
             const colorIndexes={pixel:[2],fill:[2],rect:[4],box:[4],bar:[4],line:[4],circle:[3],circleout:[3],ellipse:[4],ellipseout:[4],triangle:[6],triangleout:[6],poly:[args.length-1],polyout:[args.length-1],gradrect:[4,5],ditherrect:[4,5]};
             const stringIndexes=name==='gradrect'||name==='ditherrect'?[6]:[];
             const values=args.map((arg,index)=> colorIndexes[name]?.includes(index) ? this.modernColor(arg,scope) : stringIndexes.includes(index) ? String(arg).trim().replace(/^(?:['"])(.*)(?:['"])$/,'$1') : this.modernNumber(arg,scope));
+            if ((!partOverride?.replacement || partOverride.replacement.kind === 'primitive') && partOverride?.properties) {
+                const editablePart={primitiveName:name,args:values};
+                for (const [property,value] of Object.entries(partOverride.properties)) this.applyModernPrimitiveProperty(editablePart,property,value);
+            }
             const numericIndexes = values.map((_, index) => index).filter(index => !colorIndexes[name]?.includes(index) && !stringIndexes.includes(index));
             for (const index of numericIndexes) {
                 if (!Number.isFinite(values[index])) throw new Error(`${name} argument ${index + 1} must resolve to a finite number.`);
@@ -5317,26 +5796,125 @@ line(112, 66, 112, 76, GLOW_Y)
             } else if (name==='poly'||name==='polyout') {
                 const xs=[],ys=[]; for(let i=0;i<values.length-1;i+=2){xs.push(ix(i));ys.push(iy(i+1));} left=Math.min(...xs);right=Math.max(...xs);top=Math.min(...ys);bottom=Math.max(...ys);
             }
-            return {__pixelDslHandle:true,left,top,width:Math.max(1,right-left+1),height:Math.max(1,bottom-top+1),originX:Math.round(values[0]),originY:Math.round(values[1])};
+            return {__pixelDslHandle:true,left,top,width:Math.max(1,right-left+1),height:Math.max(1,bottom-top+1),originX:Math.round(values[0]),originY:Math.round(values[1]),
+                primitiveName:name,args:values.slice(),editable:name!=='fill'};
+        }
+
+        renderModernPrimitiveReplacement(replacement, scope = {}, partPath = '', offsetX = 0, offsetY = 0) {
+            const name = String(replacement?.name || '').toLowerCase();
+            if (!name || name === 'fill') throw new Error('fill is not an editable instance part and cannot be used as a replacement.');
+            const rawArgs = Array.isArray(replacement.args) ? replacement.args.slice() : [];
+            const expanded = this.modernExpandCoordinateArgs(name, rawArgs, scope, this.instances, 0, 0);
+            const colorIndexes = {pixel:[2],rect:[4],box:[4],bar:[4],line:[4],circle:[3],circleout:[3],ellipse:[4],ellipseout:[4],triangle:[6],triangleout:[6],poly:[expanded.length-1],polyout:[expanded.length-1],gradrect:[4,5],ditherrect:[4,5]};
+            const stringIndexes = ['gradrect','ditherrect'].includes(name) ? [6] : [];
+            const values = expanded.map((arg,index) => colorIndexes[name]?.includes(index)
+                ? this.modernColor(arg,scope)
+                : stringIndexes.includes(index) ? String(arg).trim().replace(/^(?:['"])(.*)(?:['"])$/,'$1')
+                : this.modernNumber(arg,scope));
+            const editable = {primitiveName:name,args:values};
+            const override = partPath ? this.activeInstanceData?.overrides?.[partPath] : null;
+            if (override?.properties) for (const [property,value] of Object.entries(override.properties)) this.applyModernPrimitiveProperty(editable,property,value);
+            const args = values.map((value,index) => colorIndexes[name]?.includes(index) || stringIndexes.includes(index)
+                ? JSON.stringify(value) : String(value));
+            const include=()=>{};
+            const bounds=this.modernPrimitiveBounds({name,args},scope,include,this.instances);
+            if (!bounds) throw new Error(`Could not resolve bounds for replacement primitive '${name}'.`);
+            const old={grid:this.grid,width:this.width,height:this.height,activeScene:this.activeScene,activePartPath:this.activePartPath};
+            try {
+                this.width=bounds.width; this.height=bounds.height; this.grid=this.makeRaster(this.width,this.height);
+                this.activePartPath=partPath;
+                const handle=this.executeModernPrimitive({name,args},-bounds.left,-bounds.top,scope);
+                const pixels=this.grid;
+                const part={kind:'primitive',primitiveName:name,args:handle.args.slice(),left:bounds.left,top:bounds.top,
+                    width:bounds.width,height:bounds.height,originX:handle.originX,originY:handle.originY};
+                return {pixels,width:bounds.width,height:bounds.height,left:bounds.left,top:bounds.top,
+                    referenceX:handle.originX,referenceY:handle.originY,part,handle};
+            } finally {
+                this.grid=old.grid; this.width=old.width; this.height=old.height;
+                this.activeScene=old.activeScene; this.activePartPath=old.activePartPath;
+            }
+        }
+
+        makeModernObjectPart(name, raster, placement, offsetX=0, offsetY=0) {
+            const scene=raster?.scene || {kind:'object',objectName:name,children:Object.create(null)};
+            scene.left=placement.left; scene.top=placement.top;
+            scene.width=placement.width; scene.height=placement.height;
+            scene.originX=placement.referenceX; scene.originY=placement.referenceY;
+            scene.placement={x:placement.referenceX,y:placement.referenceY}; scene.hasPlacement=true;
+            return scene;
         }
 
         executeModernInstance(node, offsetX, offsetY, scope) {
-            const placement=this.modernDrawPlacement(node,scope,this.instances,offsetX,offsetY);
+            const parentPath=this.activePartPath;
+            const partPath=node.handle ? this.partPathJoin(parentPath,node.handle) : '';
+            const oldPath=this.activePartPath;
+            this.activePartPath=partPath;
+            let placement;
+            try { placement=this.modernDrawPlacement(node,scope,this.instances,offsetX,offsetY); }
+            finally { this.activePartPath=oldPath; }
             if(placement.error) throw new Error(placement.error);
+            const sourceAnchor=node.anchorExplicit?node.anchor:(node.shape.sourceAnchor||'center');
+            const scene=this.makeModernObjectPart(node.shape.name,placement.original,placement,offsetX,offsetY);
             const handle={__pixelDslHandle:true,left:offsetX+placement.left,top:offsetY+placement.top,
                 width:placement.width,height:placement.height,originX:placement.referenceX,originY:placement.referenceY,
-                objectName:node.shape.name,raster:placement.transformed};
+                objectName:node.shape.name,raster:placement.transformed,part:scene};
+            if (!this.activeInstanceData) {
+                const pose=this.modernTransformValues(node.transform,scope);
+                const instanceData={objectName:node.shape.name,args:this.modernArgs(node.shape,scope),originX:placement.referenceX,originY:placement.referenceY,
+                    anchor:sourceAnchor,anchorDx:this.modernNumber(node.shape.sourceDx??'0',scope),anchorDy:this.modernNumber(node.shape.sourceDy??'0',scope),
+                    transform:pose,applyTransform:!!node.applyTransform,overrides:Object.create(null),dirty:false,scene,rawRaster:placement.original,raster:placement.transformed,handle};
+                handle.instanceData=instanceData;
+                this.refreshModernInstance(instanceData);
+            }
+            if (this.activeScene && node.handle) {
+                if (Object.prototype.hasOwnProperty.call(this.activeScene.children,node.handle))
+                    throw new Error(`Duplicate named part '${node.handle}' in object '${this.activeScene.objectName}'.`);
+                this.activeScene.children[node.handle]=scene;
+            }
             this.instances[node.handle]=handle;
             scope[node.handle]=handle;
         }
 
         executeModernDraw(node, offsetX, offsetY, scope) {
-            const placement=this.modernDrawPlacement(node,scope,this.instances,offsetX,offsetY);
+            const parentPath=this.activePartPath;
+            const partPath=node.handle ? this.partPathJoin(parentPath,node.handle) : '';
+            const oldPath=this.activePartPath;
+            this.activePartPath=partPath;
+            let placement;
+            let primitiveReplacement=null;
+            try {
+                const objectOverride=this.activeInstanceData?.overrides?.[partPath];
+                if (objectOverride?.replacement?.kind==='primitive') {
+                    primitiveReplacement=this.renderModernPrimitiveReplacement(objectOverride.replacement,scope,partPath,offsetX,offsetY);
+                    placement={left:primitiveReplacement.left,top:primitiveReplacement.top,width:primitiveReplacement.width,height:primitiveReplacement.height,
+                        referenceX:primitiveReplacement.referenceX,referenceY:primitiveReplacement.referenceY};
+                } else {
+                    if (objectOverride?.replacement?.kind==='object') {
+                        const replacement=objectOverride.replacement;
+                        node={...node,shape:replacement.shape,target:replacement.target,anchor:replacement.anchor,
+                            anchorExplicit:replacement.anchorExplicit,transform:replacement.transform,applyTransform:replacement.applyTransform};
+                    }
+                    if (objectOverride?.properties?.xy) {
+                        const point=objectOverride.properties.xy;
+                        node={...node,target:{kind:'point',x:String(point.x),y:String(point.y)}};
+                    }
+                    placement=this.modernDrawPlacement(node,scope,this.instances,offsetX,offsetY);
+                }
+            } finally { this.activePartPath=oldPath; }
             if(placement.error) throw new Error(placement.error);
-            this.compositeRaster(placement.transformed.pixels,offsetX+placement.left,offsetY+placement.top,'over');
+            if (primitiveReplacement) this.compositeRaster(primitiveReplacement.pixels,offsetX+placement.left,offsetY+placement.top,'over');
+            else this.compositeRaster(placement.transformed.pixels,offsetX+placement.left,offsetY+placement.top,'over');
             if(node.handle) {
                 const handle={__pixelDslHandle:true,left:offsetX+placement.left,top:offsetY+placement.top,width:placement.width,height:placement.height,
-                    originX:placement.referenceX,originY:placement.referenceY,objectName:node.shape.name,raster:placement.transformed};
+                    originX:placement.referenceX,originY:placement.referenceY,objectName:primitiveReplacement?undefined:node.shape.name,
+                    raster:primitiveReplacement?{pixels:primitiveReplacement.pixels,width:primitiveReplacement.width,height:primitiveReplacement.height}:placement.transformed};
+                const scene=primitiveReplacement?primitiveReplacement.part:this.makeModernObjectPart(node.shape.name,placement.original,placement,offsetX,offsetY);
+                scene.instanceData=this.activeInstanceData||null;
+                handle.part=scene; handle.instanceData=this.activeInstanceData||null;
+                if (this.activeScene) {
+                    if (Object.prototype.hasOwnProperty.call(this.activeScene.children,node.handle)) throw new Error(`Duplicate named part '${node.handle}' in object '${this.activeScene.objectName}'.`);
+                    this.activeScene.children[node.handle]=scene;
+                }
                 this.instances[node.handle]=handle;
                 scope[node.handle]=handle;
             }
@@ -5400,19 +5978,61 @@ line(112, 66, 112, 76, GLOW_Y)
                         case 'bg': if(node.args.length!==1) throw new Error('bg(color) expects one argument.'); this.bgColor=this.canonicalColor(this.modernColor(node.args[0],scope))||'#00000000';break;
                         case 'colors': for(const entry of node.entries){this.currentDslLine=entry.lineNum;this.colors[entry.name]=this.canonicalColor(this.modernColor(entry.value,scope))||String(entry.value);} break;
                         case 'color': if(!node.name||node.value===undefined) throw new Error('color(name, value) needs a name and a color.'); this.colors[node.name]=this.canonicalColor(this.modernColor(node.value,scope))||String(node.value);break;
+                        case 'memberAssign': {
+                            this.assignModernInstanceMember(node, scope);
+                            break;
+                        }
                         case 'assign': {
                             const raw=node.expression.trim();
                             const call=this.parseCall(raw);
                             const primitiveAliases={orect:'box',ocircle:'circleout',otriangle:'triangleout',opoly:'polyout'};
                             const primitiveName=call&&!call.rest?(primitiveAliases[call.name.toLowerCase()]||call.name.toLowerCase()):'';
                             if (['pixel','fill','rect','box','bar','line','circle','circleout','ellipse','ellipseout','triangle','triangleout','poly','polyout','gradrect','ditherrect'].includes(primitiveName)) {
-                                scope[node.name]=this.executeModernPrimitive({name:primitiveName,args:call.args},offsetX,offsetY,scope);
+                                const previousPath=this.activePartPath;
+                                const partPath=this.partPathJoin(previousPath,node.name);
+                                const partOverride=this.activeInstanceData?.overrides?.[partPath];
+                                if (partOverride?.replacement?.kind==='object') {
+                                    const replacement=partOverride.replacement;
+                                    this.executeModernDraw({type:'draw',handle:node.name,shape:replacement.shape,target:replacement.target,
+                                        anchor:replacement.anchor,anchorExplicit:replacement.anchorExplicit,transform:replacement.transform,
+                                        applyTransform:replacement.applyTransform},offsetX,offsetY,scope);
+                                    break;
+                                }
+                                this.activePartPath=partPath;
+                                try {
+                                    const handle=this.executeModernPrimitive({name:primitiveName,args:call.args},offsetX,offsetY,scope);
+                                    scope[node.name]=handle;
+                                    if (handle?.primitiveName && handle.editable && this.activeScene) {
+                                        if (Object.prototype.hasOwnProperty.call(this.activeScene.children,node.name)) throw new Error(`Duplicate named part '${node.name}' in object '${this.activeScene.objectName}'.`);
+                                        this.activeScene.children[node.name]={kind:'primitive',name:node.name,primitiveName:handle.primitiveName,args:handle.args.slice(),
+                                            left:handle.left-offsetX,top:handle.top-offsetY,width:handle.width,height:handle.height};
+                                        handle.part=this.activeScene.children[node.name];
+                                        handle.instanceData=this.activeInstanceData||null;
+                                    }
+                                } finally { this.activePartPath=previousPath; }
                                 break;
                             }
                             const point=this.modernCoordinatePoint(raw,scope,this.instances,offsetX,offsetY);
                             if(point) { scope[node.name]={__pixelDslPoint:true,x:point.x,y:point.y}; break; }
                             if(!node.declared && /^(?:#[0-9a-f]{3,8}|transparent|rgba?\s*\(.+\))$/i.test(raw)) this.colors[node.name]=this.canonicalColor(this.modernColor(raw,scope))||raw;
                             else scope[node.name]=this.modernEval(raw,scope);
+                            break;
+                        }
+                        case 'anchorFrame': {
+                            if (!this.renderingMacros.length) throw new Error('frame(handle) is only valid inside an obj body.');
+                            const handleName=node.handleExpression.trim();
+                            const handle=/^[A-Za-z_][A-Za-z0-9_]*$/.test(handleName)
+                                ? (scope[handleName] || this.instances?.[handleName]) : null;
+                            if (!handle || handle.__pixelDslHandle !== true ||
+                                !Number.isFinite(handle.left) || !Number.isFinite(handle.top) ||
+                                !Number.isFinite(handle.width) || !Number.isFinite(handle.height)) {
+                                throw new Error('frame() expects the name of a previously created primitive, draw, or instance handle.');
+                            }
+                            const inner=handle.raster?.anchorFrame;
+                            const frameScope=this.renderingMacroScopes[this.renderingMacroScopes.length-1] || scope;
+                            frameScope.__pixelDslAnchorFrame=inner
+                                ? {x:handle.left+inner.x,y:handle.top+inner.y,width:inner.width,height:inner.height}
+                                : {x:handle.left,y:handle.top,width:handle.width,height:handle.height};
                             break;
                         }
                         case 'anchor': {
